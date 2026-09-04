@@ -1,17 +1,701 @@
 @import "tailwindcss";
-@import "katex/dist/katex.min.css";
+
+/* ==========================================================================
+   بستار دفاع ارشد BCOA
+   سیستم طراحی: پس‌زمینه گرم و آرام، متن با کنتراست بالا، بدون هرگونه
+   وابستگی به فونت یا سرویس خارجی. همه قلم‌ها از درون برنامه بارگذاری می‌شوند.
+   ========================================================================== */
 
 @theme {
-  --font-sans: 'Vazirmatn', 'Inter', ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  /* پالت گرم و آرام */
+  --color-paper: #f4f0e6;        /* پس‌زمینه اصلی: کرم ملایم */
+  --color-paper-deep: #ece6d6;   /* پس‌زمینه تیره‌تر */
+  --color-surface: #fcfaf3;      /* سطح کارت */
+  --color-surface-2: #f7f3e8;    /* سطح درون کارت */
+  --color-ink: #2b251c;          /* متن اصلی: قهوه‌ای سرمه‌ای گرم */
+  --color-ink-soft: #554d3e;     /* متن فرعی */
+  --color-muted: #7d7563;        /* برچسب‌های کم‌رنگ */
+  --color-line: #e2dac8;         /* خطوط جداکننده */
+  --color-line-strong: #cfc5ab;
+  --color-pine: #1e5a49;         /* سبز کاج: رنگ اصلی و آرام */
+  --color-pine-deep: #163f35;
+  --color-pine-soft: #e6efe8;
+  --color-pine-wash: #eef4ed;
+  --color-ochre: #9a7126;        /* طلایی ملایم برای برجسته‌سازی */
+  --color-ochre-soft: #f2e7cc;
+  --color-clay: #a04a2c;         /* قرمز خاکی برای هشدارهای نرم */
+  --color-clay-soft: #f6e3d9;
+  --color-slate-warm: #ece7db;
+
+  --font-sans: "Vazirmatn", "Segoe UI", Tahoma, ui-sans-serif, system-ui, sans-serif;
+
+  --shadow-soft: 0 1px 2px rgba(43, 37, 28, 0.04), 0 8px 24px rgba(43, 37, 28, 0.05);
+  --shadow-lift: 0 2px 4px rgba(43, 37, 28, 0.05), 0 16px 40px rgba(43, 37, 28, 0.08);
 }
 
-@layer base {
-  html, body {
-    font-family: 'Vazirmatn', 'Inter', system-ui, sans-serif !important;
-    background-color: #FDFBF7; /* Luxurious warm off-white / cream */
-    scroll-behavior: smooth;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    color: #1e293b;
+/* ---------- توکن‌های حرکت: نرم، کوتاه و آرام ---------- */
+
+:root {
+  --ease-soft: cubic-bezier(0.25, 0.62, 0.22, 1);
+  --ease-out: cubic-bezier(0.16, 0.75, 0.24, 1);
+  --t-fast: 200ms;
+  --t-med: 320ms;
+  --t-slow: 560ms;
+}
+
+/* ---------- پایه ---------- */
+
+html {
+  background-color: var(--color-paper);
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  line-height: 1.9;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  overflow-wrap: break-word;
+  font-feature-settings: "ss01";
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: rgba(158, 113, 38, 0.24);
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 2px solid rgba(30, 90, 73, 0.55);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+  color: inherit;
+}
+
+h1, h2, h3, h4, h5 {
+  font-weight: 700;
+  color: var(--color-ink);
+  line-height: 1.55;
+}
+
+p {
+  margin: 0;
+}
+
+/* ==========================================================================
+   ابزارهای اختصاصی (بدون وابستگی به کلاس‌های ابزاری سنگین)
+   ========================================================================== */
+
+/* کارت پایه */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 20px;
+  box-shadow: var(--shadow-soft);
+}
+
+/* سطح درون‌کارتی */
+.panel {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-line);
+  border-radius: 14px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--color-pine);
+  background: var(--color-pine-wash);
+  border: 1px solid rgba(30, 90, 73, 0.18);
+  border-radius: 999px;
+  padding: 0.3rem 0.85rem;
+  line-height: 1.7;
+}
+
+/* چپ‌به‌راست‌شده‌های امن برای متن فنی */
+.ltr {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* متن خواندنی: سطر بلند و فاصله‌گذاری قابل تنظیم کاربر */
+.reading {
+  line-height: var(--reading-lh, 2);
+  font-size: 1.0625rem;
+}
+
+/* ---------- تایپوگرافی ارقام و زمان ---------- */
+
+/* همه‌جا، مخصوصاً تایمرها: قلم فارسی برنامه + ارقام فارسی */
+.timer-num {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  direction: ltr;
+  unicode-bidi: isolate;
+  display: inline-block;
+}
+
+.labelled-value {
+  font-family: var(--font-sans);
+  font-weight: 700;
+}
+
+/* ---------- فرمول‌ها ---------- */
+
+/*
+  ظرف فرمول همیشه چپ‌به‌راست است و هرگز از قاب بیرون نمی‌زند.
+  اگر در صفحه‌های بسیار باریک جا نشد، داخل خود ظرف اسکرول می‌شود
+  و هیچ اسکرول افقی سراسری ایجاد نمی‌کند.
+*/
+.tex-frame {
+  direction: ltr;
+  unicode-bidi: isolate;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 1rem 0.5rem;
+  scrollbar-width: thin;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tex-frame > .katex-display,
+.tex-frame > .katex {
+  margin: 0 auto;
+}
+
+.tex-frame .katex-display {
+  margin: 0;
+}
+
+.tex-standalone {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.katex {
+  font-size: 1.18em;
+}
+
+.katex-display > .katex {
+  white-space: normal;
+}
+
+/* فرمول داخل جمله فارسی: جداگانه و ایزوله */
+.tex-inline {
+  direction: ltr;
+  unicode-bidi: isolate;
+  display: inline-block;
+  padding: 0 0.15em;
+  white-space: nowrap;
+}
+
+/* ---------- دکمه‌ها ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  padding: 0.55rem 1.05rem;
+  line-height: 1.7;
+  border: 1px solid transparent;
+  transition:
+    background-color var(--t-med) var(--ease-soft),
+    border-color var(--t-med) var(--ease-soft),
+    color var(--t-med) var(--ease-soft),
+    box-shadow var(--t-slow) var(--ease-soft),
+    transform var(--t-fast) var(--ease-soft);
+  user-select: none;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background: var(--color-pine);
+  color: #fdfbf4;
+  box-shadow: 0 1px 2px rgba(22, 63, 53, 0.25), 0 6px 16px rgba(30, 90, 73, 0.18);
+}
+.btn-primary:hover {
+  background: var(--color-pine-deep);
+}
+
+.btn-soft {
+  background: var(--color-pine-soft);
+  color: var(--color-pine-deep);
+  border-color: rgba(30, 90, 73, 0.2);
+}
+.btn-soft:hover {
+  background: var(--color-pine-wash);
+  border-color: rgba(30, 90, 73, 0.34);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-ink-soft);
+  border-color: var(--color-line-strong);
+}
+.btn-ghost:hover {
+  background: var(--color-surface-2);
+  color: var(--color-ink);
+}
+
+.btn-quiet {
+  background: transparent;
+  color: var(--color-ink-soft);
+}
+.btn-quiet:hover {
+  background: var(--color-surface-2);
+  color: var(--color-ink);
+}
+
+.btn-sm {
+  font-size: 0.8125rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 10px;
+  gap: 0.35rem;
+}
+
+/* دکمه گرد کوچک برای نوار ابزار */
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: 12px;
+  color: var(--color-ink-soft);
+  border: 1px solid transparent;
+  background: transparent;
+  transition:
+    background-color var(--t-med) var(--ease-soft),
+    color var(--t-med) var(--ease-soft),
+    border-color var(--t-med) var(--ease-soft),
+    transform var(--t-med) var(--ease-soft);
+}
+.icon-btn:hover {
+  background: var(--color-surface-2);
+  border-color: var(--color-line);
+  color: var(--color-ink);
+  transform: translateY(-1px);
+}
+
+/* ---------- حالت تمرکز ---------- */
+
+.focus-active .site-header,
+.focus-active .site-footer {
+  display: none;
+}
+
+.focus-exit {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 70;
+  background: rgba(252, 250, 243, 0.92);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--color-line);
+  color: var(--color-ink-soft);
+  border-radius: 999px;
+  box-shadow: var(--shadow-lift);
+}
+
+/* ---------- پیمایش آرام: محو نرم، ورود پله‌ای ملایم، بی‌انیمیشن سنگین ---------- */
+
+@keyframes soft-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.pulse-soft {
+  animation: soft-pulse 2s ease-in-out infinite;
+}
+
+/* محو و بالا آمدن بسیار ملایم برای ورود هر بلوک */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+.fade-up {
+  animation: fade-up var(--t-slow) var(--ease-out) both;
+}
+
+/* ورود پله‌ای آرام بخش‌های هر صفحه: یکی پس از دیگری، بدون عجله */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+.stagger > * {
+  animation: rise-in 680ms var(--ease-out) both;
+}
+.stagger > *:nth-child(1) { animation-delay: 40ms; }
+.stagger > *:nth-child(2) { animation-delay: 110ms; }
+.stagger > *:nth-child(3) { animation-delay: 180ms; }
+.stagger > *:nth-child(4) { animation-delay: 250ms; }
+.stagger > *:nth-child(5) { animation-delay: 320ms; }
+.stagger > *:nth-child(6) { animation-delay: 390ms; }
+.stagger > *:nth-child(7) { animation-delay: 460ms; }
+.stagger > *:nth-child(8) { animation-delay: 530ms; }
+
+/* پنل و پنجره: محو همراه با بزرگ‌شدن نرم */
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+
+.pop-in {
+  animation: pop-in 420ms var(--ease-out) both;
+  transform-origin: top left;
+}
+
+/* پس‌زمینه پنجره */
+@keyframes overlay-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.overlay {
+  animation: overlay-fade var(--t-med) ease both;
+}
+
+/* تغییر محتوای اسلاید: محو ملایم به بالا */
+@keyframes slide-swap {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.slide-enter {
+  animation: slide-swap 460ms var(--ease-out) both;
+}
+
+/* جابه‌جایی وضعیت هشدار: نرم و یک‌نواخت */
+@keyframes swap-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.swap-fade {
+  animation: swap-fade 420ms ease both;
+}
+
+/* کارت‌هایی که نشانه‌ای از تعامل دارند */
+.hover-card {
+  transition:
+    transform 380ms var(--ease-out),
+    box-shadow 380ms var(--ease-out),
+    border-color 380ms var(--ease-out);
+}
+.hover-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lift);
+  border-color: var(--color-line-strong);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-soft,
+  .fade-up,
+  .stagger > *,
+  .pop-in,
+  .overlay,
+  .slide-enter,
+  .swap-fade {
+    animation: none;
+    animation-delay: 0s;
   }
+  .btn:hover,
+  .icon-btn:hover,
+  .hover-card:hover {
+    transform: none;
+  }
+  * {
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- عناصر کوچک ---------- */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.6;
+  border-radius: 999px;
+  padding: 0.22rem 0.7rem;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  transition:
+    background-color var(--t-med) var(--ease-soft),
+    color var(--t-med) var(--ease-soft),
+    border-color var(--t-med) var(--ease-soft),
+    transform var(--t-fast) var(--ease-soft);
+}
+.chip:hover {
+  transform: translateY(-1px);
+}
+
+.chip-pine { background: var(--color-pine-wash); color: var(--color-pine-deep); border-color: rgba(30, 90, 73, 0.16); }
+.chip-ochre { background: var(--color-ochre-soft); color: #6f5117; border-color: rgba(154, 113, 38, 0.25); }
+.chip-clay { background: var(--color-clay-soft); color: var(--color-clay); border-color: rgba(160, 74, 44, 0.2); }
+.chip-mute { background: var(--color-surface-2); color: var(--color-muted); border-color: var(--color-line); }
+
+/* برجسته‌سازی نرم نکته‌های مهم */
+.hl-mark {
+  background: linear-gradient(180deg, transparent 8%, rgba(220, 183, 94, 0.34) 8%, rgba(220, 183, 94, 0.34) 88%, transparent 88%);
+  border-radius: 3px 0 0 3px;
+}
+
+/* هایلایت نرم نکته‌ها */
+.note-marker {
+  color: var(--color-muted);
+  cursor: pointer;
+  transition:
+    color var(--t-med) var(--ease-soft),
+    transform var(--t-med) var(--ease-soft);
+}
+.note-marker:hover {
+  color: var(--color-ink);
+  transform: translateY(-1px) scale(1.06);
+}
+
+/* ---------- نوار پیشرفت ---------- */
+.progress-track {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(30, 90, 73, 0.12);
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--color-pine);
+  transition: width 600ms var(--ease-out);
+}
+
+/* ---------- دسترس‌پذیری: پنهان‌کردن فقط برای صفحه، در دسترس برای نقاله صفحه ---------- */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* پنهان‌کردن نوار اسکرول افقی داخلی در جاهای تمیز */
+.no-hbar::-webkit-scrollbar { display: none; }
+.no-hbar { scrollbar-width: none; }
+
+/* ---------- چاپ: برگه تقلب کاغذی ---------- */
+
+/* محتوای چاپی همیشه به‌صورت جداگانه در DOM سوار می‌شود و روی صفحه دیده نمی‌شود */
+.print-root {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 11mm 12mm;
+  }
+
+  html, body {
+    background: #ffffff !important;
+    overflow: visible !important;
+  }
+
+  body.printing .app-shell {
+    display: none !important;
+  }
+
+  body.printing .print-root {
+    display: block !important;
+  }
+
+  .print-sheet {
+    color: #1f1a12;
+    font-size: 10.5px;
+    line-height: 1.6;
+    direction: rtl;
+  }
+  .print-sheet h2 { font-size: 15px; margin: 0 0 2mm; }
+  .print-sheet h3 { font-size: 12px; margin: 3mm 0 1mm; }
+  .print-sheet .ps-grid { display: grid; grid-template-columns: 1fr; gap: 0; }
+  .print-sheet table { border-collapse: collapse; width: 100%; margin: 1.5mm 0; }
+  .print-sheet td, .print-sheet th {
+    border: 1px solid #c9c2b2;
+    padding: 1.2mm 2mm;
+    text-align: right;
+    vertical-align: top;
+    font-size: 9.5px;
+  }
+  .print-sheet .ps-formula {
+    direction: ltr;
+    text-align: center;
+    padding: 1.5mm;
+    font-size: 13px;
+  }
+  .print-sheet .ps-kv { display: grid; grid-template-columns: 1fr 2fr; gap: 0.6mm 3mm; }
+  .print-sheet .kv b { color: #1e5a49; }
+  .print-sheet .page-break { break-before: page; }
+  .print-sheet .katex { font-size: 1.12em; }
+  .print-sheet .tex-frame { overflow: visible; padding: 0; }
+}
+
+
+
+/* ---------- حالت تمرکز: پنهان‌کردن عناصر فرعی ---------- */
+.focus-active .focus-hidden {
+  display: none !important;
+}
+
+/* ---------- کلیدها و راهنما ---------- */
+kbd {
+  display: inline-block;
+  min-width: 1.6em;
+  text-align: center;
+  font-family: inherit;
+  font-size: 0.75em;
+  font-weight: 700;
+  line-height: 1.9;
+  padding: 0 0.45em;
+  border-radius: 8px;
+  border: 1px solid var(--color-line-strong);
+  border-bottom-width: 2px;
+  background: var(--color-surface-2);
+  color: var(--color-ink-soft);
+  box-shadow: none;
+}
+
+.key-hint {
+  font-size: 0.78rem;
+  color: var(--color-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* ---------- اسلایدشمار ---------- */
+.slide-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.2rem;
+  height: 2.2rem;
+  padding: 0 0.4rem;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--color-ink-soft);
+  border: 1px solid var(--color-line);
+  background: var(--color-surface);
+  transition:
+    background-color var(--t-med) var(--ease-soft),
+    border-color var(--t-med) var(--ease-soft),
+    color var(--t-med) var(--ease-soft),
+    transform var(--t-fast) var(--ease-soft);
+}
+.slide-dot:hover {
+  border-color: var(--color-line-strong);
+  color: var(--color-ink);
+  transform: translateY(-1px);
+}
+.slide-dot.active {
+  background: var(--color-pine);
+  border-color: var(--color-pine);
+  color: #fdfbf4;
+  transform: none;
+}
+.slide-dot.optional {
+  border-style: dashed;
+}
+.slide-dot.done {
+  background: var(--color-pine-soft);
+  border-color: rgba(30, 90, 73, 0.25);
+  color: var(--color-pine-deep);
+}
+
+/* ---------- فهرست ساده و بی‌نقطه ---------- */
+.dot-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.dot-list li {
+  position: relative;
+  padding-right: 1.3em;
+  margin: 0.35em 0;
+}
+.dot-list li::before {
+  content: "";
+  position: absolute;
+  right: 0.1em;
+  top: 0.75em;
+  width: 0.42em;
+  height: 0.42em;
+  border-radius: 50%;
+  background: rgba(30, 90, 73, 0.45);
+}
+
+/* ---------- جدول ساده ---------- */
+.mini-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.mini-table th,
+.mini-table td {
+  border: 1px solid var(--color-line);
+  padding: 0.45rem 0.75rem;
+  text-align: right;
+  vertical-align: top;
+}
+.mini-table th {
+  background: var(--color-surface-2);
+  font-weight: 700;
+  color: var(--color-ink-soft);
+}
+.mini-table tr:last-child td {
+  border-bottom: none;
 }
