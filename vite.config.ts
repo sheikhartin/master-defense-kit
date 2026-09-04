@@ -14,7 +14,14 @@ export default defineConfig(() => {
       tailwindcss(),
       VitePWA({
         registerType: 'autoUpdate',
-        includeAssets: ['icon.svg', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
+        includeAssets: [
+          'icon.svg',
+          'favicon.ico',
+          'apple-touch-icon.png',
+          'pwa-192x192.png',
+          'pwa-512x512.png',
+          'pwa-maskable-512.png',
+        ],
         manifest: {
           name: 'بستار دفاع ارشد BCOA',
           short_name: 'بستار دفاع',
@@ -24,11 +31,14 @@ export default defineConfig(() => {
           dir: 'rtl',
           display: 'standalone',
           orientation: 'portrait',
-          theme_color: '#1e5a49',
+          /* هم‌خوان با theme-color در index.html تا نوار مرورگر و سربرگ یکی باشند */
+          theme_color: '#fcfaf3',
           background_color: '#f4f0e6',
           icons: [
-            { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
-            { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+            { src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+            { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+            { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+            { src: 'pwa-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
           ],
         },
         workbox: {

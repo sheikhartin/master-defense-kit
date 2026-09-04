@@ -6,6 +6,9 @@
 import { useEffect, type ComponentType } from 'react';
 import { Eye } from 'lucide-react';
 import { AppProvider, readingStyle, useApp } from './lib/app-context';
+import { useGlobalShortcuts } from './lib/use-global-shortcuts';
+import ShortcutGuide from './components/ShortcutGuide';
+import BrandMark from './components/BrandMark';
 import Header from './components/Header';
 import HomeLab from './labs/HomeLab';
 import PracticeLab from './labs/PracticeLab';
@@ -30,6 +33,7 @@ function warmFormulaCache() {
 
 function Shell() {
   const app = useApp();
+  useGlobalShortcuts();
 
   /* چاپ */
   useEffect(() => {
@@ -67,7 +71,24 @@ function Shell() {
             <Lab />
           </div>
         </main>
+
+        {/* پابرگ: نشانه برند و دسترسی سریع به راهنمای کلیدها */}
+        <footer className="site-footer border-t border-line bg-surface/70">
+          <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4 md:px-6">
+            <p className="flex items-center gap-2 text-xs font-bold text-muted">
+              <BrandMark className="h-5 w-5" />
+              بستار دفاع ارشد BCOA · کاملاً آفلاین و خصوصی
+            </p>
+            <button type="button" className="key-hint" onClick={() => app.setGuideOpen(true)}>
+              راهنمای کلیدها
+              <kbd>H</kbd>
+            </button>
+          </div>
+        </footer>
       </div>
+
+      {/* راهنمای سراسری کلیدها */}
+      {app.guideOpen && <ShortcutGuide />}
 
       {/* خروج از حالت تمرکز */}
       {app.focus && (

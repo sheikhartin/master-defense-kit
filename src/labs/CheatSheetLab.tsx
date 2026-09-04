@@ -28,7 +28,7 @@ export default function CheatSheetLab() {
             <h2 className="mt-3 text-2xl font-black leading-10 text-ink md:text-3xl">
               برگه تقلب و فرمول‌های کلیدی
             </h2>
-            <p className="mt-2 max-w-2xl text-[1rem] leading-8 text-ink-soft">
+            <p className="mt-2 max-w-2xl text-[1em] leading-[var(--reading-lh)] text-ink-soft">
               همه روابط دقیقاً مطابق پایان‌نامه و مقاله BCOA نوشته شده‌اند؛ زیر هر فرمول،
               توضیح فارسی نمادها و راهنمای گفتن آن بدون روخوانی آمده است.
             </p>
@@ -201,7 +201,7 @@ function EquationCard({ eq, n }: { eq: Equation; n: number }) {
 
         {/* مفهوم و راهنمای گفتن */}
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          <p className="rounded-2xl bg-pine-wash px-5 py-4 text-[0.95rem] leading-8 text-pine-deep">
+          <p className="rounded-2xl bg-pine-wash px-5 py-4 text-[0.98em] leading-[var(--reading-lh)] text-pine-deep">
             <b className="mb-1 block text-sm font-extrabold">معنی رابطه</b>
             {eq.meaning}
           </p>
@@ -210,7 +210,7 @@ function EquationCard({ eq, n }: { eq: Equation; n: number }) {
               <BookOpen className="h-4 w-4" />
               چطور به فارسی بگوییم
             </p>
-            <p className="text-[0.95rem] leading-8 text-ink-soft">{eq.verbal}</p>
+            <p className="text-[0.98em] leading-[var(--reading-lh)] text-ink-soft">{eq.verbal}</p>
           </div>
         </div>
 

@@ -15,7 +15,6 @@ import {
   BookOpen,
   ChevronLeft,
   ChevronRight,
-  CircleHelp,
   Flag,
   Keyboard,
   Lightbulb,
@@ -33,6 +32,13 @@ import {
 import { chapters } from '../data/deck';
 import { planSlides, practiceWindow, totalSession, totalTalk } from '../lib/session';
 import { useApp, rememberSession } from '../lib/app-context';
+import {
+  digitFromCode,
+  isEditableTarget,
+  isInteractiveTarget,
+  snapshot,
+} from '../lib/keys';
+import { overlaysOpen } from '../lib/ui-bus';
 import { readStore, removeStore, useStoredState } from '../lib/storage';
 import { formatClock, toPersianDigits } from '../lib/persian';
 import { TeX } from '../lib/tex';
@@ -86,7 +92,6 @@ export default function PracticeLab() {
 
   const [current, setCurrent] = useState(0);
   const [running, setRunning] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(false);
   const prevRem = useRef<number | null>(null);
 
   /* شروع از اسلاید درخواستی (از نقشه راه) */
@@ -95,7 +100,7 @@ export default function PracticeLab() {
     const raw = Math.max(0, Math.min(app.pendingStart.slide, plan.length - 1));
     const idx = includeOptional ? toExtended(raw) : raw;
     app.consumeStart();
-    timer.current = { total: Math.max(0, plan[Math.min(idx, plan.length - 1)]?.start ?? 0) * 1000, slide: 0 };
+    timer.current = { total: Math.max(0, plan[Math.min(idx, plan.length - 1)]?.start ?? 0), slide: 0 };
     setCurrent(Math.min(idx, plan.length - 1));
     setRunning(false);
     if (raw === 0) removeStore('session:last');
@@ -168,17 +173,17 @@ export default function PracticeLab() {
   };
 
   const slide = plan[current];
-  const totalMs = timer.current.total;
-  const slideMs = timer.current.slide;
-  const remaining = Math.max(0, slide.duration - slideMs);
-  const overrun = slideMs > slide.duration ? slideMs - slide.duration : 0;
+  const totalSec = timer.current.total;
+  const slideSec = timer.current.slide;
+  const remaining = Math.max(0, slide.duration - slideSec);
+  const overrun = slideSec > slide.duration ? slideSec - slide.duration : 0;
 
   const stage: 'ok' | 'warn' | 'end' =
-    slideMs >= slide.duration ? 'end' : remaining <= 20 ? 'warn' : 'ok';
+    slideSec >= slide.duration ? 'end' : remaining <= 20 ? 'warn' : 'ok';
 
   const startFrom = (i: number) => {
     if (running) setRunning(false);
-    timer.current = { total: plan[i].start * 1000, slide: 0 };
+    timer.current = { total: plan[i].start, slide: 0 };
     setCurrent(i);
     saveMarker();
     bump();
@@ -187,7 +192,7 @@ export default function PracticeLab() {
 
   const resetSession = () => {
     if (running) setRunning(false);
-    timer.current = { total: plan[0].start * 1000, slide: 0 };
+    timer.current = { total: plan[0].start, slide: 0 };
     setCurrent(0);
     removeStore('session:last');
     bump();
@@ -211,38 +216,74 @@ export default function PracticeLab() {
     startFrom(target);
   };
 
-  /* صفحه‌کلید کامل */
+  /* پرش به اسلاید بر اساس شماره (۱ تا ۲۰) */
+  const jumpTo = (n: number) => {
+    const target = plan.findIndex((p) => p.num === n && !p.optional);
+    if (target >= 0) startFrom(target);
+  };
+
+  /* آخرین نسخه اکشن‌ها تا شنونده تنها یک‌بار سوار شود و هرگز کهنه نماند */
+  const act = useRef({
+    next: (d: 1 | -1) => go(d),
+    prev: (d: 1 | -1) => go(d),
+    first: () => startFrom(0),
+    last: () => startFrom(plan.length - 1),
+    toggleRun,
+    resetSlide: resetSlideTimer,
+    resetAll: resetSession,
+    toggleOptional: (v: boolean) => setIncludeOptional(v),
+    jump: jumpTo,
+    enabled: app.shortcutsOn,
+    optional: includeOptional,
+  });
+  useEffect(() => {
+    act.current = {
+      next: (d: 1 | -1) => go(d),
+      prev: (d: 1 | -1) => go(d),
+      first: () => startFrom(0),
+      last: () => startFrom(plan.length - 1),
+      toggleRun,
+      resetSlide: resetSlideTimer,
+      resetAll: resetSession,
+      toggleOptional: (v: boolean) => setIncludeOptional(v),
+      jump: jumpTo,
+      enabled: app.shortcutsOn,
+      optional: includeOptional,
+    };
+  });
+
+  /* صفحه‌کلید دقیق جلسه تمرینی */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      const t = e.target as HTMLElement;
-      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
-      const k = e.key;
+      if (overlaysOpen() || isEditableTarget(e)) return;
+      const a = act.current;
+      const k = snapshot(e);
+      if (k.ctrl || k.meta || k.alt) return; // مادیفایر = میان‌بر مرورگر/سراسری
 
-      if (k === 'ArrowLeft') { e.preventDefault(); go(1); return; }
-      if (k === 'ArrowRight') { e.preventDefault(); go(-1); return; }
-      if (k === 'PageDown') { e.preventDefault(); go(1); return; }
-      if (k === 'PageUp') { e.preventDefault(); go(-1); return; }
-      if (k === 'Home') { e.preventDefault(); startFrom(0); return; }
-      if (k === 'End') { e.preventDefault(); startFrom(plan.length - 1); return; }
-      if (k === ' ' || k === 'p' || k === 'P') { e.preventDefault(); toggleRun(); return; }
-      if (k === 'r' && !e.shiftKey) { resetSlideTimer(); return; }
-      if (k === 'R') { resetSession(); return; }
-      if (k === 'f' || k === 'F') { app.setFocus(!app.focus); return; }
-      if (k === 'm' || k === 'M') { app.setAudible(!app.audible); return; }
-      if (k === 'h' || k === '?') { setHelpOpen((v) => !v); return; }
-      if (k === 'Escape') { setHelpOpen(false); if (app.focus) app.setFocus(false); return; }
+      // کلیدهای غیرکاراکتری همیشه فعال‌اند (جهت‌دار، صفحه، ابتدا/انتها)
+      if (k.code === 'ArrowLeft' || k.code === 'PageDown') { e.preventDefault(); a.next(1); return; }
+      if (k.code === 'ArrowRight' || k.code === 'PageUp') { e.preventDefault(); a.prev(-1); return; }
+      if (k.code === 'Home') { e.preventDefault(); a.first(); return; }
+      if (k.code === 'End') { e.preventDefault(); a.last(); return; }
 
-      if (/^[0-9]$/.test(k)) {
+      // بقیه تک‌کلیدی‌اند و فقط با رضایت کاربر
+      if (!a.enabled || k.repeat) return;
+
+      if (k.code === 'Space') {
+        if (isInteractiveTarget(e)) return; // اجازه فعال‌شدن بومی دکمه فوکوس‌شده
         e.preventDefault();
-        const n = k === '0' ? 10 : Number(k);
-        const target = plan.findIndex((p) => p.num === n && !p.optional);
-        if (target >= 0) startFrom(target);
+        a.toggleRun();
+        return;
       }
+      if (k.code === 'KeyP') { e.preventDefault(); a.toggleRun(); return; }
+      if (k.code === 'KeyR') { if (k.shift) a.resetAll(); else a.resetSlide(); return; }
+      if (k.code === 'KeyO') { a.toggleOptional(!a.optional); a.resetAll(); return; }
+      const n = digitFromCode(k.code, k.shift);
+      if (n !== null) { e.preventDefault(); a.jump(n); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current, plan, running, app.focus]);
+  }, []);
 
   const ch = chapters.find((c) => c.id === slide.chapterId) ?? { num: 'شروع', title: 'شروع جلسه' };
   const sessionTotal = totalSession(includeOptional);
@@ -261,7 +302,7 @@ export default function PracticeLab() {
             <h2 className="min-w-0 text-base font-extrabold text-ink md:text-lg">{slide.title}</h2>
           </div>
           <div className="flex items-center gap-1.5">
-            <button type="button" className="icon-btn" title="راهنمای کلیدها (H)" onClick={() => setHelpOpen((v) => !v)}>
+            <button type="button" className="icon-btn" title="راهنمای کلیدها (H)" onClick={() => app.setGuideOpen(true)}>
               <Keyboard className="h-4.5 w-4.5" />
             </button>
             <button
@@ -289,15 +330,16 @@ export default function PracticeLab() {
             <p className="flex items-center gap-1.5 text-xs font-bold text-muted">
               <Timer className="h-3.5 w-3.5" />
               زمان کل ارائه
+              <span className="font-normal text-muted/70">(دقیقه:ثانیه)</span>
             </p>
             <p className="mt-1.5 text-3xl font-black tracking-tight text-ink">
-              <span className="timer-num">{formatClock(totalMs)}</span>
+              <span className="timer-num">{formatClock(totalSec)}</span>
               <span className="mr-2 text-sm font-bold text-muted">
                 از {formatClock(talkTotal)}
               </span>
             </p>
             <p className="mt-1.5 text-xs font-bold text-pine">
-              مانده تا پایان گفتار: <span className="timer-num">{formatClock(Math.max(0, talkTotal - totalMs))}</span>
+              مانده تا پایان گفتار: <span className="timer-num">{formatClock(Math.max(0, talkTotal - totalSec))}</span>
             </p>
           </div>
 
@@ -305,9 +347,10 @@ export default function PracticeLab() {
             <p className="flex items-center gap-1.5 text-xs font-bold text-muted">
               <Flag className="h-3.5 w-3.5" />
               زمان این اسلاید
+              <span className="font-normal text-muted/70">(دقیقه:ثانیه)</span>
             </p>
             <p className="mt-1.5 text-3xl font-black tracking-tight text-ink">
-              <span className="timer-num">{formatClock(slideMs)}</span>
+              <span className="timer-num">{formatClock(slideSec)}</span>
               <span className="mr-2 text-sm font-bold text-muted">
                 از {formatClock(slide.duration)}
               </span>
@@ -326,7 +369,9 @@ export default function PracticeLab() {
               <span key={stage} className="swap-fade">
                 {stage === 'ok' && <span className="text-pine">آرام پیش می‌روی</span>}
                 {stage === 'warn' && (
-                  <span className={`text-ochre ${remaining <= 10 ? 'pulse-soft' : ''}`}>
+                  /* پایدار و بدون چشمک: فقط رنگ و یک نقطه ثابت برای جلب توجه آرام */
+                  <span className="flex items-center gap-2 text-ochre">
+                    <span className="inline-block h-2 w-2 rounded-full bg-ochre" aria-hidden="true" />
                     {remaining <= 10 ? 'پایان نزدیک است' : 'کمی سرعت بگیر'}
                   </span>
                 )}
@@ -402,13 +447,13 @@ export default function PracticeLab() {
         <div className="mb-2 flex items-center justify-between gap-3 text-xs font-bold text-muted">
           <span>پیشرفت کل جلسه</span>
           <span className="flex items-center gap-x-1.5">
-            <span className="timer-num">{formatClock(Math.min(totalMs, sessionTotal))}</span>
+            <span className="timer-num">{formatClock(Math.min(totalSec, sessionTotal))}</span>
             <span>از</span>
             <span className="timer-num">{formatClock(sessionTotal)}</span>
           </span>
         </div>
-        <div className="progress-track" role="progressbar" aria-valuenow={Math.round(Math.min(100, (totalMs / sessionTotal) * 100))} aria-valuemin={0} aria-valuemax={100}>
-          <div className="progress-fill" style={{ width: `${Math.min(100, (totalMs / sessionTotal) * 100)}%` }} />
+        <div className="progress-track" role="progressbar" aria-valuenow={Math.round(Math.min(100, (totalSec / sessionTotal) * 100))} aria-valuemin={0} aria-valuemax={100}>
+          <div className="progress-fill" style={{ width: `${Math.min(100, (totalSec / sessionTotal) * 100)}%` }} />
         </div>
         <div className="mt-2 flex items-center justify-between text-[0.7rem] font-bold text-muted">
           <span>شروع</span>
@@ -469,7 +514,7 @@ export default function PracticeLab() {
           </div>
 
           {slide.goal && (
-            <p className="mt-3 flex items-start gap-2 rounded-xl bg-pine-wash px-3.5 py-2.5 text-[0.85rem] leading-6 text-pine-deep">
+              <p className="mt-3 flex items-start gap-2 rounded-xl bg-pine-wash px-3.5 py-2.5 text-[0.88em] leading-[var(--reading-lh)] text-pine-deep">
               <Target className="mt-0.5 h-4 w-4 shrink-0" />
               <span><b className="font-extrabold">هدف اسلاید: </b>{slide.goal}</span>
             </p>
@@ -500,7 +545,7 @@ export default function PracticeLab() {
                 </h4>
                 <ul className="dot-list">
                   {slide.visual.map((v, i) => (
-                    <li key={i} className="text-[0.95rem] leading-8 text-ink-soft">{v}</li>
+                    <li key={i} className="text-[0.95em] leading-[var(--reading-lh)] text-ink-soft">{v}</li>
                   ))}
                 </ul>
               </div>
@@ -519,13 +564,13 @@ export default function PracticeLab() {
             </div>
 
             {slide.phrase && (
-              <blockquote className="hl-mark rounded-2xl px-5 py-4 text-[1rem] font-extrabold leading-9 text-ink">
+              <blockquote className="hl-mark rounded-2xl px-5 py-4 text-[1.05em] font-extrabold leading-[var(--reading-lh)] text-ink">
                 {slide.phrase}
               </blockquote>
             )}
 
             {slide.transition && (
-              <p className="rounded-xl border border-dashed border-line-strong bg-surface-2/50 px-4 py-3 text-[0.9rem] leading-7 text-ink-soft">
+              <p className="rounded-xl border border-dashed border-line-strong bg-surface-2/50 px-4 py-3 text-[0.92em] leading-[var(--reading-lh)] text-ink-soft">
                 <b className="font-extrabold text-muted">جمله انتقال: </b>
                 {slide.transition}
               </p>
@@ -542,7 +587,7 @@ export default function PracticeLab() {
                 </h4>
                 <ul className="space-y-2.5">
                   {slide.notes.map((n, i) => (
-                    <li key={i} className="rounded-xl border border-line bg-surface px-3.5 py-2.5 text-[0.82rem] leading-6 text-ink-soft">
+                    <li key={i} className="rounded-xl border border-line bg-surface px-3.5 py-2.5 text-[0.85em] leading-[var(--reading-lh)] text-ink-soft">
                       {n}
                     </li>
                   ))}
@@ -557,9 +602,6 @@ export default function PracticeLab() {
         </div>
         </div>
       </article>
-
-      {/* راهنمای کلیدها */}
-      {helpOpen && <HelpSheet onClose={() => setHelpOpen(false)} />}
     </div>
   );
 }
@@ -572,7 +614,7 @@ function SpeechLine({ para, hlKey }: { para: string; hlKey: string }) {
     <div
       className={`flex items-start gap-2 rounded-xl px-3 py-1.5 transition-colors ${on ? 'hl-mark' : ''}`}
     >
-      <p className="min-w-0 flex-1 text-[1.02rem] leading-9 text-ink">{para}</p>
+      <p className="min-w-0 flex-1 text-[1.02em] leading-[var(--reading-lh)] text-ink">{para}</p>
       <button
         type="button"
         className={`note-marker mt-2 shrink-0 ${on ? 'text-ochre' : ''}`}
@@ -586,44 +628,4 @@ function SpeechLine({ para, hlKey }: { para: string; hlKey: string }) {
   );
 }
 
-function HelpSheet({ onClose }: { onClose: () => void }) {
-  const keys: Array<[string, string]> = [
-    ['اسلاید بعد', 'کلید چپ یا PageDown'],
-    ['اسلاید قبلی', 'کلید راست یا PageUp'],
-    ['شروع و توقف هم‌زمان تایمرها', 'Space یا P'],
-    ['تایمر این اسلاید از نو', 'R'],
-    ['کل جلسه از نو', 'Shift+R'],
-    ['پرش به اسلاید', 'عدد ۱ تا ۹ و ۰ برای ۱۰'],
-    ['اولین و آخرین اسلاید', 'Home و End'],
-    ['حالت تمرکز', 'F'],
-    ['صدا روشن و خاموش', 'M'],
-    ['بستن این راهنما', 'H یا Escape'],
-  ];
-  return (
-    <div className="overlay fixed inset-0 z-[60] flex items-end justify-center bg-ink/30 p-4 backdrop-blur-[2px] sm:items-center" onClick={onClose}>
-      <div className="card pop-in w-full max-w-lg p-6" onClick={(e) => e.stopPropagation()}>
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="flex items-center gap-2 text-lg font-extrabold text-ink">
-            <Keyboard className="h-5 w-5 text-pine" />
-            راهنمای کلیدهای جلسه تمرینی
-          </h3>
-          <button type="button" className="icon-btn" onClick={onClose} aria-label="بستن">
-            <CircleHelp className="h-4 w-4" />
-          </button>
-        </div>
-        <ul className="divide-y divide-line">
-          {keys.map(([label, k]) => (
-            <li key={label} className="flex items-center justify-between gap-4 py-2.5 text-sm">
-              <span className="font-bold text-ink-soft">{label}</span>
-              <span className="text-xs font-bold text-muted">{k}</span>
-            </li>
-          ))}
-        </ul>
-        <p className="mt-4 rounded-xl bg-pine-wash px-4 py-3 text-xs leading-6 text-pine-deep">
-          توقف تایمر اسلاید، تایمر کل ارائه را در همان لحظه متوقف می‌کند؛
-          یعنی هر دو تایمر همیشه یک وضعیت دارند و هرگز از هم جدا نمی‌شوند.
-        </p>
-      </div>
-    </div>
-  );
-}
+
