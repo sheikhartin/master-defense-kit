@@ -1,64 +1,231 @@
-import React from 'react';
-import { LayoutDashboard, GraduationCap, ListChecks, HelpCircle } from 'lucide-react';
-import { PWAInstallButton } from './PWAInstallButton';
+/**
+ * سربرگ سایت: برند، ناوبری پنج‌بخشی و کنترل‌های سراسری
+ * (مقیاس متن، فاصله سطر، صدای هشدار، حالت تمرکز).
+ */
 
-interface HeaderProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
-}
+import { useEffect, useRef, useState } from 'react';
+import {
+  Compass,
+  Focus,
+  GraduationCap,
+  ListChecks,
+  Maximize2,
+  MessageCircleQuestion,
+  Minus,
+  Plus,
+  ScrollText,
+  Settings2,
+  Volume2,
+  VolumeX,
+  X,
+} from 'lucide-react';
+import { useApp, type TabId } from '../lib/app-context';
+import { toPersianDigits } from '../lib/persian';
 
-export default function Header({ activeTab, onTabChange }: HeaderProps) {
-  const navItems = [
-    { id: 'presentation', label: 'آزمایشگاه ارائه', icon: LayoutDashboard },
-    { id: 'qa', label: 'شبیه‌ساز داور', icon: HelpCircle },
-    { id: 'checklist', label: 'چک‌لیست‌ها و ترفندها', icon: ListChecks },
-    { id: 'cheatSheet', label: 'برگه تقلب', icon: GraduationCap },
-  ];
+const TABS: Array<{ id: TabId; label: string; hint: string; Icon: typeof Compass }> = [
+  { id: 'home', label: 'نقشه راه دفاع', hint: 'ساختار و زمان‌بندی جلسه', Icon: Compass },
+  { id: 'practice', label: 'جلسه تمرینی', hint: 'شبیه‌سازی زمان‌دار ارائه', Icon: GraduationCap },
+  { id: 'cheat', label: 'برگه تقلب', hint: 'فرمول‌ها و ارقام کلیدی', Icon: ScrollText },
+  { id: 'qa', label: 'پرسش‌های داور', hint: 'پاسخ‌های پیشنهادی', Icon: MessageCircleQuestion },
+  { id: 'checklist', label: 'چک‌لیست روز دفاع', hint: 'آمادگی و کنترل', Icon: ListChecks },
+];
+
+export default function Header() {
+  const app = useApp();
+  const [panel, setPanel] = useState(false);
+  const panelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!panel) return;
+    const onDown = (e: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(e.target as Node)) setPanel(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setPanel(false);
+    };
+    window.addEventListener('mousedown', onDown);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('mousedown', onDown);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [panel]);
 
   return (
-    <header className="bg-[#FDFBF7]/80 backdrop-blur-xl border-b border-slate-200/50 sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-4 md:px-6">
-        <div className="flex flex-col md:flex-row items-center justify-between py-4">
-          <div className="flex items-center gap-4 mb-4 md:mb-0 w-full md:w-auto justify-between md:justify-start">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl shadow-sm border border-indigo-100">
-                <GraduationCap className="w-6 h-6" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-slate-800 tracking-tight">آمادگی دفاع ارشد BCOA</h1>
-                <p className="text-sm text-slate-500 font-medium">پلتفرم تمرین سناریوی جلسه دفاع</p>
-              </div>
-            </div>
-            <div className="md:hidden">
-              <PWAInstallButton />
+    <header className="site-header sticky top-0 z-50 border-b border-line bg-surface/90 backdrop-blur-md">
+      <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 pb-2 pt-3 md:px-6">
+        {/* ردیف بالا */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-pine text-surface shadow-soft">
+              <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" aria-hidden="true">
+                <path
+                  d="M4 17a8 8 0 0 1 8-8h8"
+                  stroke="currentColor"
+                  strokeWidth="1.9"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M16 5l4 4-4 4"
+                  stroke="currentColor"
+                  strokeWidth="1.9"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <circle cx="4" cy="17" r="1.6" fill="currentColor" />
+              </svg>
+            </span>
+            <div className="min-w-0">
+              <h1 className="truncate text-base font-extrabold leading-6 text-ink md:text-lg">
+                بستار دفاع ارشد BCOA
+              </h1>
+              <p className="hidden truncate text-xs text-muted sm:block">
+                تمرین گام‌به‌گام جلسه دفاع پایان‌نامه، کاملاً آفلاین و خصوصی
+              </p>
             </div>
           </div>
-          <div className="flex items-center gap-4 w-full md:w-auto">
-            <nav className="flex gap-1 bg-slate-100/80 p-1.5 rounded-2xl w-full md:w-auto overflow-x-auto hide-scrollbar border border-slate-200 shadow-inner">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = activeTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => onTabChange(item.id)}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 whitespace-nowrap ${
-                      isActive 
-                        ? 'bg-white text-indigo-700 shadow-sm border border-slate-200/60' 
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
-                    }`}
-                  >
-                    <Icon className={`w-4 h-4 ${isActive ? 'text-indigo-600' : 'text-slate-400'}`} />
-                    {item.label}
-                  </button>
-                );
-              })}
-            </nav>
-            <div className="hidden md:block">
-              <PWAInstallButton />
+
+          {/* کنترل‌های سراسری */}
+          <div className="flex shrink-0 items-center gap-1">
+            <span className="sr-only">کوچک‌کردن متن</span>
+            <button
+              type="button"
+              aria-label="کوچک‌کردن متن"
+              className="scale-btn"
+              onClick={() => app.setTextScale(Math.max(0.85, +(app.textScale - 0.05).toFixed(2)))}
+            >
+              <Minus className="h-4 w-4" />
+            </button>
+            <span className="text-xs font-bold text-muted" dir="ltr">
+              {toPersianDigits(Math.round(app.textScale * 100))}٪
+            </span>
+            <button
+              type="button"
+              aria-label="بزرگ‌کردن متن"
+              className="scale-btn"
+              onClick={() => app.setTextScale(Math.min(1.25, +(app.textScale + 0.05).toFixed(2)))}
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+
+            <span className="mx-1 hidden h-5 w-px bg-line sm:block" />
+
+            <button
+              type="button"
+              title="حالت تمرکز (کلید F)"
+              className={`icon-btn ${app.focus ? 'bg-pine-soft text-pine-deep' : ''}`}
+              aria-pressed={app.focus}
+              onClick={() => app.setFocus(!app.focus)}
+            >
+              {app.focus ? <Maximize2 className="h-4.5 w-4.5" /> : <Focus className="h-4.5 w-4.5" />}
+            </button>
+
+            <div className="relative" ref={panelRef}>
+              <button
+                type="button"
+                title="تنظیمات خواندن"
+                aria-label="تنظیمات خواندن"
+                className={`icon-btn ${panel ? 'bg-surface-2 text-ink' : ''}`}
+                aria-expanded={panel}
+                onClick={() => setPanel((v) => !v)}
+              >
+                <Settings2 className="h-4.5 w-4.5" />
+              </button>
+
+              {panel && (
+                <div className="fade-up absolute left-0 top-11 z-50 w-72 rounded-2xl border border-line bg-surface p-4 shadow-lift">
+                  <div className="mb-3 flex items-center justify-between">
+                    <h3 className="text-sm font-extrabold text-ink">تنظیمات خواندن</h3>
+                    <button className="icon-btn h-7 w-7" onClick={() => setPanel(false)} aria-label="بستن">
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <div className="mb-1.5 flex items-center justify-between text-xs font-bold text-ink-soft">
+                        <span>اندازه متن</span>
+                        <span dir="ltr">{toPersianDigits(Math.round(app.textScale * 100))}٪</span>
+                      </div>
+                      <input
+                        type="range"
+                        min={85}
+                        max={125}
+                        step={5}
+                        value={Math.round(app.textScale * 100)}
+                        onChange={(e) => app.setTextScale(Number(e.target.value) / 100)}
+                        className="w-full accent-pine"
+                        aria-label="اندازه متن"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="mb-1.5 text-xs font-bold text-ink-soft">فاصله خطوط</div>
+                      <div className="flex gap-1" role="group" aria-label="فاصله خطوط">
+                        {[1.7, 1.9, 2.1].map((v) => (
+                          <button
+                            key={v}
+                            type="button"
+                            onClick={() => app.setLineHeight(v)}
+                            className={`btn btn-sm flex-1 ${app.lineHeight === v ? 'btn-soft' : 'btn-quiet'}`}
+                          >
+                            {toPersianDigits(String(v).replace('.', '٫'))}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => app.setAudible(!app.audible)}
+                      className="flex w-full items-center justify-between rounded-xl border border-line bg-surface-2/60 px-3 py-2 text-sm font-bold text-ink-soft"
+                    >
+                      <span className="flex items-center gap-2">
+                        {app.audible ? <Volume2 className="h-4 w-4 text-pine" /> : <VolumeX className="h-4 w-4" />}
+                        هشدار صوتی پایان زمان
+                      </span>
+                      <span
+                        className={`relative h-5 w-9 rounded-full transition-colors ${app.audible ? 'bg-pine' : 'bg-line-strong'}`}
+                        aria-hidden="true"
+                      >
+                        <span
+                          className={`absolute top-0.5 h-4 w-4 rounded-full bg-surface transition-all ${app.audible ? 'right-0.5' : 'right-4'}`}
+                        />
+                      </span>
+                    </button>
+
+                    <p className="border-t border-line pt-3 text-[0.72rem] leading-6 text-muted">
+                      همه تنظیمات و یادداشت‌ها فقط در همین دستگاه ذخیره می‌شوند.
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
+
+        {/* ناوبری */}
+        <nav aria-label="بخش‌های برنامه" className="no-hbar -mx-1 flex gap-1 overflow-x-auto px-1 pb-0.5">
+          {TABS.map(({ id, label, Icon }) => {
+            const active = app.tab === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => app.go(id)}
+                aria-current={active ? 'page' : undefined}
+                className={`flex shrink-0 items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-bold transition-colors ${
+                  active
+                    ? 'bg-pine text-surface shadow-soft'
+                    : 'text-ink-soft hover:bg-surface-2 hover:text-ink'
+                }`}
+              >
+                <Icon className={`h-4 w-4 ${active ? 'text-surface/90' : 'text-muted'}`} />
+                {label}
+              </button>
+            );
+          })}
+        </nav>
       </div>
     </header>
   );

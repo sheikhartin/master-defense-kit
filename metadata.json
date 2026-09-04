@@ -1,8 +1,6 @@
 {
-  "name": "آمادگی دفاع ارشد BCOA",
-  "description": "پلتفرم جامع تمرین و شبیه‌سازی جلسه دفاع پایان‌نامه کارشناسی ارشد با الگوریتم BCOA",
+  "name": "بستار دفاع ارشد BCOA",
+  "description": "تمرین گام‌به‌گام، آرام و کاملاً آفلاین جلسه دفاع پایان‌نامه کارشناسی ارشد بر پایه سناریوی نهایی نسخه ۲ (الگوریتم BCOA)",
   "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
+  "majorCapabilities": []
 }
