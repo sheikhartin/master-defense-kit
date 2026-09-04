@@ -3,8 +3,11 @@
  * شبیه‌ساز پرسش تصادفی و یادداشت شخصی برای هر پرسش.
  */
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronDown, Lightbulb, MessageCircleQuestion, RefreshCw, ShieldCheck, Sparkles } from 'lucide-react';
+import { useApp } from '../lib/app-context';
+import { isEditableTarget, isInteractiveTarget, snapshot } from '../lib/keys';
+import { overlaysOpen } from '../lib/ui-bus';
 import { qaMain, qaHard, qaDrill, qaCategories } from '../data/qa';
 import { answerPattern, outOfScopeSteps } from '../data/roadmap';
 import { MarkButton, NoteBox, SectionHead, Tag } from '../components/ui';
@@ -33,7 +36,7 @@ export default function QALab() {
         <h2 className="mt-3 text-2xl font-black leading-10 text-ink md:text-3xl">
           پرسش‌های احتمالی و پاسخ‌های پیشنهادی
         </h2>
-        <p className="mt-2 max-w-3xl text-[1rem] leading-8 text-ink-soft">
+        <p className="mt-2 max-w-3xl text-[1em] leading-[var(--reading-lh)] text-ink-soft">
           همه پرسش‌ها و پاسخ‌ها از سناریوی نهایی نسخه ۲ استخراج شده‌اند. اول خودت پاسخ بده،
           بعد پاسخ پیشنهادی را باز کن و آن را با ساختار «ادعا، دلیل، شاهد» مقایسه کن.
         </p>
@@ -45,7 +48,7 @@ export default function QALab() {
               <Sparkles className="h-4 w-4" />
               {answerPattern.title}
             </h3>
-            <p className="text-[0.92rem] leading-8 text-pine-deep">{answerPattern.example}</p>
+            <p className="text-[0.95em] leading-[var(--reading-lh)] text-pine-deep">{answerPattern.example}</p>
           </div>
           <div className="rounded-2xl border border-line bg-surface-2/50 px-5 py-4">
             <h3 className="mb-2 flex items-center gap-1.5 text-sm font-extrabold text-ink">
@@ -121,7 +124,7 @@ function QaCard({ item }: { item: QaItem }) {
               <Tag tone="ochre">{tone}</Tag>
               <span className="text-[0.7rem] font-bold text-muted">پرسش {toFa(item.id)}</span>
             </div>
-            <h3 className="text-base font-extrabold leading-8 text-ink md:text-lg">{item.question}</h3>
+            <h3 className="text-[1em] font-extrabold leading-[var(--reading-lh)] text-ink md:text-[1.1em]">{item.question}</h3>
           </div>
           <button
             type="button"
@@ -136,7 +139,7 @@ function QaCard({ item }: { item: QaItem }) {
 
         {open && (
           <div className="fade-up mt-4 space-y-3 border-t border-line pt-4">
-            <p className="rounded-2xl bg-surface-2/70 px-5 py-4 text-[0.98rem] leading-9 text-ink">
+            <p className="rounded-2xl bg-surface-2/70 px-5 py-4 text-[1em] leading-[var(--reading-lh)] text-ink">
               {item.answer}
             </p>
             {item.keySentence && (
@@ -183,6 +186,7 @@ function DrillZone() {
       ),
     [],
   );
+  const app = useApp();
   const [stack, setStack] = useState<typeof pool>(() => [...pool].sort(() => Math.random() - 0.5));
   const [idx, setIdx] = useState(0);
   const [revealed, setRevealed] = useState(false);
@@ -200,6 +204,29 @@ function DrillZone() {
     setIdx(0);
     setRevealed(false);
   };
+
+  /* میان‌برهای شبیه‌ساز: N پرسش بعدی، Enter پاسخ، R چینش تازه */
+  const kb = useRef({ next, reshuffle, setRevealed, enabled: app.shortcutsOn });
+  useEffect(() => {
+    kb.current = { next, reshuffle, setRevealed, enabled: app.shortcutsOn };
+  });
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (overlaysOpen() || isEditableTarget(e)) return;
+      const h = kb.current;
+      const k = snapshot(e);
+      if (k.ctrl || k.meta || k.alt || k.repeat) return;
+      if (!h.enabled) return;
+      if (k.code === 'KeyN') { e.preventDefault(); h.next(); return; }
+      if (k.code === 'KeyR') { e.preventDefault(); h.reshuffle(); return; }
+      if (k.code === 'Enter') {
+        if (isInteractiveTarget(e)) return;
+        h.setRevealed((v) => !v);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   return (
     <section className="card overflow-hidden">
@@ -225,11 +252,11 @@ function DrillZone() {
             <Tag tone="pine">{current.role}</Tag>
             <Tag tone="ochre">{current.category}</Tag>
           </div>
-          <h4 className="text-lg font-extrabold leading-9 text-ink">{current.q}</h4>
+          <h4 className="text-[1.1em] font-extrabold leading-[var(--reading-lh)] text-ink">{current.q}</h4>
 
           {revealed ? (
             <div className="fade-up mt-4">
-              <p className="rounded-2xl bg-pine-wash px-5 py-4 text-[0.98rem] leading-9 text-pine-deep">
+              <p className="rounded-2xl bg-pine-wash px-5 py-4 text-[1em] leading-[var(--reading-lh)] text-pine-deep">
                 {current.a}
               </p>
               <div className="mt-4 flex flex-wrap gap-2">

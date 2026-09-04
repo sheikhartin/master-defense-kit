@@ -1,9 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="112" fill="#1e5a49"/>
-  <circle cx="146" cy="332" r="34" fill="#f4f0e6"/>
-  <path d="M146 332c60-24 118-58 168-102 30-26 56-56 78-90"
-        fill="none" stroke="#f4f0e6" stroke-width="34" stroke-linecap="round"/>
-  <path d="M336 74l96 74-96 66" fill="none" stroke="#f4f0e6"
-        stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="146" cy="332" r="14" fill="#c9a14b"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="bcoa-title">
+  <title id="bcoa-title">بستار دفاع ارشد BCOA</title>
+  <!-- این فایل با «npm run icons» از src/lib/brand.mjs ساخته می‌شود؛ دستی ویرایش نشود -->
+  <rect width="512" height="512" rx="120" fill="#1e5a49"/>
+  <path d="M 162 108 H 350 A 26 26 0 0 1 376 134 V 250 C 376 322 324 372 256 404 C 188 372 136 322 136 250 V 134 A 26 26 0 0 1 162 108 Z" fill="none" stroke="#f4f0e6" stroke-width="32" stroke-linejoin="round"/>
+  <path d="M 256 250 V 176 M 256 250 L 316 302" fill="none" stroke="#f4f0e6" stroke-width="30" stroke-linecap="round"/>
+  <circle cx="256" cy="250" r="19" fill="#c9a14b"/>
 </svg>

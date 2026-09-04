@@ -29,6 +29,14 @@ interface AppState {
   focus: boolean;
   setFocus: (v: boolean) => void;
 
+  /** میان‌برهای تک‌کلیدی (WCAG 2.1.4: کاربر می‌تواند خاموش کند) */
+  shortcutsOn: boolean;
+  setShortcutsOn: (v: boolean) => void;
+
+  /** راهنمای سراسری کلیدها */
+  guideOpen: boolean;
+  setGuideOpen: (v: boolean) => void;
+
   /** چاپ برگه تقلب */
   printOpen: boolean;
   openPrint: () => void;
@@ -45,7 +53,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [textScale, setTextScale] = useStoredState<number>('pref:textScale', 1);
   const [lineHeight, setLineHeight] = useStoredState<number>('pref:lineHeight', 1.95);
   const [audible, setAudible] = useStoredState<boolean>('pref:audible', false);
+  const [shortcutsOn, setShortcutsOn] = useStoredState<boolean>('pref:shortcuts', true);
   const [focus, setFocusState] = useState(false);
+  const [guideOpen, setGuideOpen] = useState(false);
 
   const go = useCallback((next: TabId, slideIndex?: number) => {
     setTab(next);
@@ -76,11 +86,35 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setAudible,
       focus,
       setFocus,
+      shortcutsOn,
+      setShortcutsOn,
+      guideOpen,
+      setGuideOpen,
       printOpen,
       openPrint,
       closePrint,
     }),
-    [tab, go, pendingStart, consumeStart, textScale, setTextScale, lineHeight, setLineHeight, audible, setAudible, focus, setFocus, printOpen, openPrint, closePrint],
+    [
+      tab,
+      go,
+      pendingStart,
+      consumeStart,
+      textScale,
+      setTextScale,
+      lineHeight,
+      setLineHeight,
+      audible,
+      setAudible,
+      focus,
+      setFocus,
+      shortcutsOn,
+      setShortcutsOn,
+      guideOpen,
+      setGuideOpen,
+      printOpen,
+      openPrint,
+      closePrint,
+    ],
   );
 
   // همگام‌سازی کلاس حالت تمرکز روی body
@@ -111,10 +145,16 @@ export function rememberSession(marker: SessionMarker): void {
   writeStore('session:last', marker);
 }
 
-/** اعمال مقیاس قلم و فاصله سطر روی یک ناحیه */
+/**
+ * اعمال مقیاس قلم و فاصله سطر روی یک ناحیه.
+ * اندازه با درصد روی ظرف تنظیم می‌شود تا فرزندانِ `em` از آن پیروی کنند و
+ * فاصله سطر هم به‌صورت متغیر `--reading-lh` و هم به‌صورت lineHeight ارثی اعمال
+ * می‌شود تا متن‌هایی که leading اختصاصی ندارند هم از آن بهره ببرند.
+ */
 export function readingStyle(scale: number, lineHeight: number): React.CSSProperties {
   return {
     fontSize: `${Math.round(scale * 100)}%`,
+    lineHeight,
     ['--reading-lh' as string]: `${lineHeight}`,
   } as React.CSSProperties;
 }

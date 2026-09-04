@@ -51,11 +51,11 @@ export default function HomeLab() {
           <h2 className="mt-5 max-w-3xl text-2xl font-black leading-10 text-ink md:text-[1.9rem] md:leading-[1.5]">
             جلسه دفاع پایان‌نامه خود را آرام و گام‌به‌گام تمرین کنید
           </h2>
-          <p className="mt-3 max-w-3xl leading-9 text-ink-soft">
+          <p className="mt-3 max-w-3xl leading-[var(--reading-lh)] text-ink-soft">
             این بستار، سناریوی رسمی دفاع پایان‌نامه شما را به ابزار تمرینی تبدیل کرده است:
             متن گفتار، زمان‌بندی دقیق، فرمول‌های کامل، پرسش‌های داور و چک‌لیست روز دفاع.
           </p>
-          <blockquote className="mt-5 max-w-3xl rounded-2xl border-r-4 border-ochre bg-ochre-soft/60 px-5 py-4 leading-8 text-ink-soft">
+          <blockquote className="mt-5 max-w-3xl rounded-2xl border-r-4 border-ochre bg-ochre-soft/60 px-5 py-4 leading-[var(--reading-lh)] text-ink-soft">
             <span className="font-extrabold text-ochre">اصل حاکم: </span>
             {governingPrinciple}
           </blockquote>

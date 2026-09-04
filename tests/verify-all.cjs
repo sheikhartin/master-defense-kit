@@ -211,6 +211,71 @@ assert(
 const printCss = read('src/index.css') + '\n' + read('src/components/PrintSheet.tsx');
 assert(/@media print/.test(printCss), 'سبک چاپی برای نسخه کاغذی برگه تقلب');
 
+/* ------------------------------------------------------------------ */
+/* ۹) پایداری بصری: هاور بدون جابه‌جایی، بدون چشمک بی‌پایان             */
+/* ------------------------------------------------------------------ */
+const cssText = read('src/index.css');
+assert(!/translateY\(-/.test(cssText), 'هیچ هاور یا حالتی عنصر را به بالا هل نمی‌دهد (بدون لرزش)');
+assert(!cssText.includes('pulse-soft') && !/animation:[^;]*infinite/.test(cssText), 'هیچ انیمیشن چشمک بی‌پایان وجود ندارد');
+assert(/hover[\s\S]{0,120}box-shadow: var\(--shadow-glow/.test(cssText), 'هاور با درخشش آرام (گلو) بیان می‌شود نه جابه‌جایی');
+
+/* ------------------------------------------------------------------ */
+/* ۱۰) نشان برند یکپارچه: یک منبع حقیقت و همه آیکون‌ها                  */
+/* ------------------------------------------------------------------ */
+for (const rel of [
+  'public/icon.svg',
+  'public/favicon.ico',
+  'public/apple-touch-icon.png',
+  'public/pwa-192x192.png',
+  'public/pwa-512x512.png',
+  'public/pwa-maskable-512.png',
+]) {
+  assert(fs.existsSync(path.join(ROOT, rel)), `وجود فایل آیکون ${rel}`);
+}
+assert(read('public/icon.svg').includes('M 162 108'), 'فاوآیکون برداری از همان هندسه برند ساخته شده');
+assert(read('src/components/Header.tsx').includes('BrandMark'), 'سربرگ از نشان مشترک برند استفاده می‌کند');
+assert(read('src/App.tsx').includes('BrandMark'), 'پابرگ از نشان مشترک برند استفاده می‌کند');
+assert(
+  /<link rel="icon"[^>]*icon\.svg/.test(read('index.html')) && /favicon\.ico/.test(read('index.html')),
+  'هر دو نسخه SVG و ICO فاوآیکون وصل شده‌اند',
+);
+
+/* یکپارچگی رنگ نوار مرورگر بین HTML و manifest */
+const htmlTheme = (read('index.html').match(/name="theme-color" content="(#[0-9a-fA-F]{6})"/) || [])[1];
+const manifestTheme = (read('vite.config.ts').match(/theme_color: '(#[0-9a-fA-F]{6})'/) || [])[1];
+assert(!!htmlTheme && htmlTheme === manifestTheme, `theme-color یکسان در HTML و manifest (${htmlTheme})`);
+
+/* ------------------------------------------------------------------ */
+/* ۱۱) صفحه‌کلید دقیق و دسترس‌پذیر                                      */
+/* ------------------------------------------------------------------ */
+const keysText = read('src/lib/keys.ts');
+assert(keysText.includes('e.code'), 'تطبیق کلیدها با e.code (مستقل از چیدمان فارسی/انگلیسی)');
+const globalKb = read('src/lib/use-global-shortcuts.ts');
+assert(globalKb.includes('overlaysOpen') && globalKb.includes('isEditableTarget'), 'سکوت میان‌برها پشت لایه باز و داخل ورودی متنی');
+assert(globalKb.includes('shortcutsOn'), 'میان‌برهای تک‌کلیدی با رضایت کاربر (WCAG 2.1.4)');
+const practiceKb = read('src/labs/PracticeLab.tsx');
+assert(practiceKb.includes('digitFromCode'), 'پرش عددی به اسلاید با نگاشت دقیق ۱ تا ۲۰');
+assert(practiceKb.includes('isInteractiveTarget'), 'احترام به فعال‌شدن بومی دکمه فوکوس‌شده با Space');
+assert(read('src/lib/app-context.tsx').includes('pref:shortcuts'), 'ذخیره ترجیح میان‌برها در localStorage');
+
+/* ------------------------------------------------------------------ */
+/* ۱۲) یکپارچگی واحد زمان تایمر (بدون عدد غول‌پیکر)                     */
+/* ------------------------------------------------------------------ */
+const practiceNow = read('src/labs/PracticeLab.tsx');
+assert(!practiceNow.includes('* 1000'), 'هیچ مسیر ناوبری زمان را در ۱۰۰۰ ضرب نمی‌کند (واحد ثانیه یکسان است)');
+assert(practiceNow.includes('totalSec') && !practiceNow.includes('totalMs'), 'نام متغیر زمان، واحد ثانیه را دقیق بیان می‌کند');
+assert(practiceNow.includes('(دقیقه:ثانیه)'), 'واحد نمایش زمان برای کاربر شفاف است');
+
+/* ------------------------------------------------------------------ */
+/* ۱۳) اعمال واقعی تنظیمات تایپوگرافی (اندازه و فاصله سطر)            */
+/* ------------------------------------------------------------------ */
+const ctxNow = read('src/lib/app-context.tsx');
+assert(/lineHeight,/.test(ctxNow) && /--reading-lh/.test(ctxNow), 'readingStyle هم اندازه و هم فاصله سطر را اعمال می‌کند');
+for (const rel of ['src/labs/PracticeLab.tsx', 'src/labs/QALab.tsx', 'src/labs/CheatSheetLab.tsx']) {
+  assert(read(rel).includes('var(--reading-lh)'), `متن خواندنی ${rel} از فاصله سطر تنظیمی کاربر پیروی می‌کند`);
+}
+assert(/font-size: 1\.0625em/.test(read('src/index.css')), 'کلاس reading با em بزرگ/کوچک می‌شود نه rem ثابت');
+
 console.log(`--- نتیجه تست‌ها: ${passCount} قبول، ${failCount} خطا ---`);
 
 if (failCount > 0) {

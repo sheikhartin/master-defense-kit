@@ -3,11 +3,12 @@
  * (مقیاس متن، فاصله سطر، صدای هشدار، حالت تمرکز).
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Compass,
   Focus,
   GraduationCap,
+  Keyboard,
   ListChecks,
   Maximize2,
   MessageCircleQuestion,
@@ -18,7 +19,9 @@ import {
   X,
 } from 'lucide-react';
 import { useApp, type TabId } from '../lib/app-context';
+import { useModalBehavior } from '../lib/use-modal';
 import { toPersianDigits } from '../lib/persian';
+import BrandMark from './BrandMark';
 
 const TABS: Array<{ id: TabId; label: string; hint: string; Icon: typeof Compass }> = [
   { id: 'home', label: 'نقشه راه دفاع', hint: 'ساختار و زمان‌بندی جلسه', Icon: Compass },
@@ -31,23 +34,18 @@ const TABS: Array<{ id: TabId; label: string; hint: string; Icon: typeof Compass
 export default function Header() {
   const app = useApp();
   const [panel, setPanel] = useState(false);
-  const panelRef = useRef<HTMLDivElement | null>(null);
+  /* رفتار یکپارچه لایه باز: Escape، به‌دام‌انداختن Tab و ثبت در شمارنده لایه‌ها */
+  const panelRef = useModalBehavior<HTMLDivElement>(panel, () => setPanel(false));
 
+  /* بستن با کلیک بیرون پنل */
   useEffect(() => {
     if (!panel) return;
     const onDown = (e: MouseEvent) => {
       if (panelRef.current && !panelRef.current.contains(e.target as Node)) setPanel(false);
     };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setPanel(false);
-    };
     window.addEventListener('mousedown', onDown);
-    window.addEventListener('keydown', onKey);
-    return () => {
-      window.removeEventListener('mousedown', onDown);
-      window.removeEventListener('keydown', onKey);
-    };
-  }, [panel]);
+    return () => window.removeEventListener('mousedown', onDown);
+  }, [panel, panelRef]);
 
   return (
     <header className="site-header sticky top-0 z-50 border-b border-line bg-surface/90 backdrop-blur-md">
@@ -55,24 +53,7 @@ export default function Header() {
         {/* ردیف بالا */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex min-w-0 items-center gap-2.5">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-pine text-surface shadow-soft">
-              <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" aria-hidden="true">
-                <path
-                  d="M4 17a8 8 0 0 1 8-8h8"
-                  stroke="currentColor"
-                  strokeWidth="1.9"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M16 5l4 4-4 4"
-                  stroke="currentColor"
-                  strokeWidth="1.9"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <circle cx="4" cy="17" r="1.6" fill="currentColor" />
-              </svg>
-            </span>
+            <BrandMark className="h-10 w-10 shrink-0 shadow-soft" />
             <div className="min-w-0">
               <h1 className="truncate text-base font-extrabold leading-6 text-ink md:text-lg">
                 بستار دفاع ارشد BCOA
@@ -165,6 +146,26 @@ export default function Header() {
                       >
                         <span
                           className={`absolute top-0.5 h-4 w-4 rounded-full bg-surface transition-all ${app.audible ? 'right-0.5' : 'right-4'}`}
+                        />
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => app.setShortcutsOn(!app.shortcutsOn)}
+                      className="flex w-full items-center justify-between rounded-xl border border-line bg-surface-2/60 px-3 py-2 text-sm font-bold text-ink-soft"
+                      aria-pressed={app.shortcutsOn}
+                    >
+                      <span className="flex items-center gap-2">
+                        <Keyboard className={`h-4 w-4 ${app.shortcutsOn ? 'text-pine' : ''}`} />
+                        میان‌برهای تک‌کلیدی
+                      </span>
+                      <span
+                        className={`relative h-5 w-9 rounded-full transition-colors ${app.shortcutsOn ? 'bg-pine' : 'bg-line-strong'}`}
+                        aria-hidden="true"
+                      >
+                        <span
+                          className={`absolute top-0.5 h-4 w-4 rounded-full bg-surface transition-all ${app.shortcutsOn ? 'right-0.5' : 'right-4'}`}
                         />
                       </span>
                     </button>
