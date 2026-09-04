@@ -23,7 +23,7 @@ export default function QALab() {
   );
 
   return (
-    <div className="space-y-12">
+    <div className="stagger space-y-12">
       {/* سربرگ */}
       <section className="card p-7 md:p-9">
         <span className="eyebrow">
@@ -84,7 +84,7 @@ export default function QALab() {
       {/* پرسش‌های اصلی */}
       <section>
         <SectionHead index={1} title="پرسش‌های اصلی داور" subtitle="به ترتیب سناریو، هفده پرسش پرتکرار" />
-        <div className="mt-5 space-y-4">
+        <div key={`main-${cat}`} className="fade-up mt-5 space-y-4">
           {mainList.map((q) => (
             <QaCard key={q.id} item={q} />
           ))}

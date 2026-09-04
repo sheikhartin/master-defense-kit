@@ -5,7 +5,7 @@
 
 import { NotebookPen, Star } from 'lucide-react';
 import { useStoredFlag, useStoredNote } from '../lib/storage';
-import { toPersianDigits } from '../lib/persian';
+import { clockOf, toPersianDigits } from '../lib/persian';
 import type { ReactNode } from 'react';
 
 /** سربرگ یک بخش با شماره فارسی */
@@ -94,4 +94,19 @@ export function Tag({ tone, children }: { tone: 'pine' | 'ochre' | 'clay' | 'mut
     mute: 'chip-mute',
   }[tone];
   return <span className={`chip ${cls}`}>{children}</span>;
+}
+
+/**
+ * بازه زمانی فارسی مثل «۰۹:۳۰ تا ۱۰:۱۵».
+ * هر زمان به‌صورت یک بلوک جداگانه چپ‌به‌راست (ایزوله) رندر می‌شود و واژه «تا»
+ * بیرون از بلوک و در جریان طبیعی راست‌به‌چپ می‌ماند تا ترتیب خوانش همیشه درست باشد.
+ */
+export function TimeRange({ from, to, className = '' }: { from: number; to: number; className?: string }) {
+  return (
+    <span className={`time-range ${className}`}>
+      <span className="timer-num">{clockOf(from)}</span>
+      <span> تا </span>
+      <span className="timer-num">{clockOf(to)}</span>
+    </span>
+  );
 }

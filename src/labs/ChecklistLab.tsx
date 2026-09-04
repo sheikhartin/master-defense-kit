@@ -11,7 +11,7 @@ import { toPersianDigits } from '../lib/persian';
 
 export default function ChecklistLab() {
   return (
-    <div className="space-y-10">
+    <div className="stagger space-y-12">
       <section className="card p-7 md:p-9">
         <span className="eyebrow">
           <Check className="h-3.5 w-3.5" />

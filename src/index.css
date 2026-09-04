@@ -33,6 +33,16 @@
   --shadow-lift: 0 2px 4px rgba(43, 37, 28, 0.05), 0 16px 40px rgba(43, 37, 28, 0.08);
 }
 
+/* ---------- توکن‌های حرکت: نرم، کوتاه و آرام ---------- */
+
+:root {
+  --ease-soft: cubic-bezier(0.25, 0.62, 0.22, 1);
+  --ease-out: cubic-bezier(0.16, 0.75, 0.24, 1);
+  --t-fast: 200ms;
+  --t-med: 320ms;
+  --t-slow: 560ms;
+}
+
 /* ---------- پایه ---------- */
 
 html {
@@ -218,13 +228,22 @@ p {
   padding: 0.55rem 1.05rem;
   line-height: 1.7;
   border: 1px solid transparent;
-  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease, transform 120ms ease;
+  transition:
+    background-color var(--t-med) var(--ease-soft),
+    border-color var(--t-med) var(--ease-soft),
+    color var(--t-med) var(--ease-soft),
+    box-shadow var(--t-slow) var(--ease-soft),
+    transform var(--t-fast) var(--ease-soft);
   user-select: none;
   white-space: nowrap;
 }
 
+.btn:hover {
+  transform: translateY(-1px);
+}
+
 .btn:active {
-  transform: translateY(1px);
+  transform: translateY(0);
 }
 
 .btn-primary {
@@ -283,12 +302,17 @@ p {
   color: var(--color-ink-soft);
   border: 1px solid transparent;
   background: transparent;
-  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+  transition:
+    background-color var(--t-med) var(--ease-soft),
+    color var(--t-med) var(--ease-soft),
+    border-color var(--t-med) var(--ease-soft),
+    transform var(--t-med) var(--ease-soft);
 }
 .icon-btn:hover {
   background: var(--color-surface-2);
   border-color: var(--color-line);
   color: var(--color-ink);
+  transform: translateY(-1px);
 }
 
 /* ---------- حالت تمرکز ---------- */
@@ -311,30 +335,114 @@ p {
   box-shadow: var(--shadow-lift);
 }
 
-/* ---------- پیمایش آرام بدون انیمیشن سنگین ---------- */
+/* ---------- پیمایش آرام: محو نرم، ورود پله‌ای ملایم، بی‌انیمیشن سنگین ---------- */
 
 @keyframes soft-pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.55; }
+  50% { opacity: 0.5; }
 }
 
 .pulse-soft {
-  animation: soft-pulse 1.6s ease-in-out infinite;
+  animation: soft-pulse 2s ease-in-out infinite;
 }
 
+/* محو و بالا آمدن بسیار ملایم برای ورود هر بلوک */
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: none; }
 }
 
 .fade-up {
-  animation: fade-up 240ms ease both;
+  animation: fade-up var(--t-slow) var(--ease-out) both;
+}
+
+/* ورود پله‌ای آرام بخش‌های هر صفحه: یکی پس از دیگری، بدون عجله */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+.stagger > * {
+  animation: rise-in 680ms var(--ease-out) both;
+}
+.stagger > *:nth-child(1) { animation-delay: 40ms; }
+.stagger > *:nth-child(2) { animation-delay: 110ms; }
+.stagger > *:nth-child(3) { animation-delay: 180ms; }
+.stagger > *:nth-child(4) { animation-delay: 250ms; }
+.stagger > *:nth-child(5) { animation-delay: 320ms; }
+.stagger > *:nth-child(6) { animation-delay: 390ms; }
+.stagger > *:nth-child(7) { animation-delay: 460ms; }
+.stagger > *:nth-child(8) { animation-delay: 530ms; }
+
+/* پنل و پنجره: محو همراه با بزرگ‌شدن نرم */
+@keyframes pop-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+
+.pop-in {
+  animation: pop-in 420ms var(--ease-out) both;
+  transform-origin: top left;
+}
+
+/* پس‌زمینه پنجره */
+@keyframes overlay-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.overlay {
+  animation: overlay-fade var(--t-med) ease both;
+}
+
+/* تغییر محتوای اسلاید: محو ملایم به بالا */
+@keyframes slide-swap {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.slide-enter {
+  animation: slide-swap 460ms var(--ease-out) both;
+}
+
+/* جابه‌جایی وضعیت هشدار: نرم و یک‌نواخت */
+@keyframes swap-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.swap-fade {
+  animation: swap-fade 420ms ease both;
+}
+
+/* کارت‌هایی که نشانه‌ای از تعامل دارند */
+.hover-card {
+  transition:
+    transform 380ms var(--ease-out),
+    box-shadow 380ms var(--ease-out),
+    border-color 380ms var(--ease-out);
+}
+.hover-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lift);
+  border-color: var(--color-line-strong);
 }
 
 @media (prefers-reduced-motion: reduce) {
   .pulse-soft,
-  .fade-up {
+  .fade-up,
+  .stagger > *,
+  .pop-in,
+  .overlay,
+  .slide-enter,
+  .swap-fade {
     animation: none;
+    animation-delay: 0s;
+  }
+  .btn:hover,
+  .icon-btn:hover,
+  .hover-card:hover {
+    transform: none;
   }
   * {
     scroll-behavior: auto !important;
@@ -354,6 +462,14 @@ p {
   padding: 0.22rem 0.7rem;
   border: 1px solid transparent;
   white-space: nowrap;
+  transition:
+    background-color var(--t-med) var(--ease-soft),
+    color var(--t-med) var(--ease-soft),
+    border-color var(--t-med) var(--ease-soft),
+    transform var(--t-fast) var(--ease-soft);
+}
+.chip:hover {
+  transform: translateY(-1px);
 }
 
 .chip-pine { background: var(--color-pine-wash); color: var(--color-pine-deep); border-color: rgba(30, 90, 73, 0.16); }
@@ -371,9 +487,14 @@ p {
 .note-marker {
   color: var(--color-muted);
   cursor: pointer;
-  transition: color 140ms ease;
+  transition:
+    color var(--t-med) var(--ease-soft),
+    transform var(--t-med) var(--ease-soft);
 }
-.note-marker:hover { color: var(--color-ink); }
+.note-marker:hover {
+  color: var(--color-ink);
+  transform: translateY(-1px) scale(1.06);
+}
 
 /* ---------- نوار پیشرفت ---------- */
 .progress-track {
@@ -386,7 +507,7 @@ p {
   height: 100%;
   border-radius: 999px;
   background: var(--color-pine);
-  transition: width 300ms linear;
+  transition: width 600ms var(--ease-out);
 }
 
 /* ---------- دسترس‌پذیری: پنهان‌کردن فقط برای صفحه، در دسترس برای نقاله صفحه ---------- */
@@ -495,26 +616,6 @@ kbd {
   gap: 0.3rem;
 }
 
-/* ---------- دکمه تنظیم فونت ---------- */
-.scale-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 2rem;
-  height: 2rem;
-  border-radius: 10px;
-  font-weight: 700;
-  font-size: 0.85rem;
-  color: var(--color-ink-soft);
-  border: 1px solid transparent;
-  background: transparent;
-}
-.scale-btn:hover {
-  background: var(--color-surface-2);
-  border-color: var(--color-line);
-  color: var(--color-ink);
-}
-
 /* ---------- اسلایدشمار ---------- */
 .slide-dot {
   display: inline-flex;
@@ -529,16 +630,22 @@ kbd {
   color: var(--color-ink-soft);
   border: 1px solid var(--color-line);
   background: var(--color-surface);
-  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease;
+  transition:
+    background-color var(--t-med) var(--ease-soft),
+    border-color var(--t-med) var(--ease-soft),
+    color var(--t-med) var(--ease-soft),
+    transform var(--t-fast) var(--ease-soft);
 }
 .slide-dot:hover {
   border-color: var(--color-line-strong);
   color: var(--color-ink);
+  transform: translateY(-1px);
 }
 .slide-dot.active {
   background: var(--color-pine);
   border-color: var(--color-pine);
   color: #fdfbf4;
+  transform: none;
 }
 .slide-dot.optional {
   border-style: dashed;

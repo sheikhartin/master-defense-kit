@@ -62,18 +62,11 @@ function Shell() {
       <div className="app-shell flex min-h-screen flex-col">
         <Header />
 
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 md:px-6 md:py-8">
-          <div key={app.tab} className="fade-up" style={readingStyle(app.textScale, app.lineHeight)}>
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-12 pt-6 md:px-6 md:pb-16 md:pt-8">
+          <div key={app.tab} style={readingStyle(app.textScale, app.lineHeight)}>
             <Lab />
           </div>
         </main>
-
-        <footer className="site-footer border-t border-line py-5">
-          <p className="mx-auto max-w-6xl px-4 text-center text-[0.75rem] leading-6 text-muted md:px-6">
-            بستار دفاع ارشد BCOA · سناریوی نهایی نسخه ۲ · همه داده‌ها و یادداشت‌ها فقط روی همین
-            دستگاه می‌ماند و برنامه بدون هیچ اتصال اینترنتی کار می‌کند
-          </p>
-        </footer>
       </div>
 
       {/* خروج از حالت تمرکز */}

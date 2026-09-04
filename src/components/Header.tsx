@@ -11,8 +11,6 @@ import {
   ListChecks,
   Maximize2,
   MessageCircleQuestion,
-  Minus,
-  Plus,
   ScrollText,
   Settings2,
   Volume2,
@@ -87,29 +85,6 @@ export default function Header() {
 
           {/* کنترل‌های سراسری */}
           <div className="flex shrink-0 items-center gap-1">
-            <span className="sr-only">کوچک‌کردن متن</span>
-            <button
-              type="button"
-              aria-label="کوچک‌کردن متن"
-              className="scale-btn"
-              onClick={() => app.setTextScale(Math.max(0.85, +(app.textScale - 0.05).toFixed(2)))}
-            >
-              <Minus className="h-4 w-4" />
-            </button>
-            <span className="text-xs font-bold text-muted" dir="ltr">
-              {toPersianDigits(Math.round(app.textScale * 100))}٪
-            </span>
-            <button
-              type="button"
-              aria-label="بزرگ‌کردن متن"
-              className="scale-btn"
-              onClick={() => app.setTextScale(Math.min(1.25, +(app.textScale + 0.05).toFixed(2)))}
-            >
-              <Plus className="h-4 w-4" />
-            </button>
-
-            <span className="mx-1 hidden h-5 w-px bg-line sm:block" />
-
             <button
               type="button"
               title="حالت تمرکز (کلید F)"
@@ -133,7 +108,7 @@ export default function Header() {
               </button>
 
               {panel && (
-                <div className="fade-up absolute left-0 top-11 z-50 w-72 rounded-2xl border border-line bg-surface p-4 shadow-lift">
+                <div className="pop-in absolute left-0 top-12 z-50 w-72 rounded-2xl border border-line bg-surface p-4 shadow-lift">
                   <div className="mb-3 flex items-center justify-between">
                     <h3 className="text-sm font-extrabold text-ink">تنظیمات خواندن</h3>
                     <button className="icon-btn h-7 w-7" onClick={() => setPanel(false)} aria-label="بستن">

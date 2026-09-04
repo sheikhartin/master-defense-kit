@@ -31,12 +31,12 @@ import {
   VolumeX,
 } from 'lucide-react';
 import { chapters } from '../data/deck';
-import { planSlides, slideWindow, totalSession, totalTalk, practiceTarget } from '../lib/session';
+import { planSlides, practiceWindow, totalSession, totalTalk } from '../lib/session';
 import { useApp, rememberSession } from '../lib/app-context';
 import { readStore, removeStore, useStoredState } from '../lib/storage';
 import { formatClock, toPersianDigits } from '../lib/persian';
 import { TeX } from '../lib/tex';
-import { MarkButton, NoteBox, Tag } from '../components/ui';
+import { MarkButton, NoteBox, Tag, TimeRange } from '../components/ui';
 
 /* ---------- صدا ---------- */
 let audioCtx: AudioContext | null = null;
@@ -246,12 +246,14 @@ export default function PracticeLab() {
 
   const ch = chapters.find((c) => c.id === slide.chapterId) ?? { num: 'شروع', title: 'شروع جلسه' };
   const sessionTotal = totalSession(includeOptional);
+  const targetWindow = practiceWindow();
+  const slideKey = slide.optional ? 'opt' : String(slide.num);
 
   return (
     <div className="space-y-5">
       {/* نوار وضعیت و تایمر */}
       <section className="card overflow-hidden">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-3.5">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-4">
           <div className="flex min-w-0 flex-wrap items-center gap-2">
             <Tag tone={slide.optional ? 'ochre' : 'pine'}>
               {slide.optional ? 'اسلاید اختیاری' : `بخش ${ch.num} · ${ch.title}`}
@@ -283,53 +285,55 @@ export default function PracticeLab() {
 
         {/* سه نمایشگر زمان */}
         <div className="grid gap-px bg-line sm:grid-cols-3">
-          <div className="bg-surface px-5 py-4">
+          <div className="bg-surface px-5 py-5">
             <p className="flex items-center gap-1.5 text-xs font-bold text-muted">
               <Timer className="h-3.5 w-3.5" />
               زمان کل ارائه
             </p>
-            <p className="mt-1 text-3xl font-black tracking-tight text-ink">
+            <p className="mt-1.5 text-3xl font-black tracking-tight text-ink">
               <span className="timer-num">{formatClock(totalMs)}</span>
               <span className="mr-2 text-sm font-bold text-muted">
                 از {formatClock(talkTotal)}
               </span>
             </p>
-            <p className="mt-1 text-xs font-bold text-pine">
+            <p className="mt-1.5 text-xs font-bold text-pine">
               مانده تا پایان گفتار: <span className="timer-num">{formatClock(Math.max(0, talkTotal - totalMs))}</span>
             </p>
           </div>
 
-          <div className="bg-surface px-5 py-4">
+          <div className="bg-surface px-5 py-5">
             <p className="flex items-center gap-1.5 text-xs font-bold text-muted">
               <Flag className="h-3.5 w-3.5" />
               زمان این اسلاید
             </p>
-            <p className="mt-1 text-3xl font-black tracking-tight text-ink">
+            <p className="mt-1.5 text-3xl font-black tracking-tight text-ink">
               <span className="timer-num">{formatClock(slideMs)}</span>
               <span className="mr-2 text-sm font-bold text-muted">
                 از {formatClock(slide.duration)}
               </span>
             </p>
-            <p className="mt-1 text-xs font-bold text-muted">
-              پنجره برنامه‌ریزی: <span className="timer-num">{slideWindow(slide)}</span>
+            <p className="mt-1.5 text-xs font-bold text-muted">
+              پنجره برنامه‌ریزی: <TimeRange from={slide.start} to={slide.end} />
             </p>
           </div>
 
-          <div className={`bg-surface px-5 py-4 ${stage === 'end' ? 'bg-clay-soft/50' : ''}`}>
+          <div className={`bg-surface px-5 py-5 transition-colors duration-700 ${stage === 'end' ? 'bg-clay-soft/50' : ''}`}>
             <p className="flex items-center gap-1.5 text-xs font-bold text-muted">
               <Lightbulb className="h-3.5 w-3.5" />
               وضعیت زمان
             </p>
-            <p className="mt-1 text-3xl font-black tracking-tight">
-              {stage === 'ok' && <span className="text-pine">آرام پیش می‌روی</span>}
-              {stage === 'warn' && (
-                <span className={`text-ochre ${remaining <= 10 ? 'pulse-soft' : ''}`}>
-                  {remaining <= 10 ? 'پایان نزدیک است' : 'کمی سرعت بگیر'}
-                </span>
-              )}
-              {stage === 'end' && <span className="text-clay">زمان اسلاید تمام شد</span>}
+            <p className="mt-1.5 text-3xl font-black tracking-tight">
+              <span key={stage} className="swap-fade">
+                {stage === 'ok' && <span className="text-pine">آرام پیش می‌روی</span>}
+                {stage === 'warn' && (
+                  <span className={`text-ochre ${remaining <= 10 ? 'pulse-soft' : ''}`}>
+                    {remaining <= 10 ? 'پایان نزدیک است' : 'کمی سرعت بگیر'}
+                  </span>
+                )}
+                {stage === 'end' && <span className="text-clay">زمان اسلاید تمام شد</span>}
+              </span>
             </p>
-            <p className="mt-1 text-xs font-bold text-muted">
+            <p className="mt-1.5 text-xs font-bold text-muted">
               {stage === 'ok' && (
                 <>
                   باقی‌مانده: <span className="timer-num">{formatClock(remaining)}</span>
@@ -350,8 +354,8 @@ export default function PracticeLab() {
         </div>
 
         {/* کنترل‌ها */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line px-5 py-3.5">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-t border-line px-5 py-4">
+          <div className="flex flex-wrap items-center gap-2">
             <button type="button" className="btn btn-quiet btn-sm" onClick={() => go(-1)} title="اسلاید قبلی">
               <ChevronRight className="h-4 w-4" />
               قبلی
@@ -379,27 +383,34 @@ export default function PracticeLab() {
               جلسه از اول
             </button>
           </div>
-          <p className="text-xs font-bold text-muted">
-            اسلاید <span className="text-ink">{toPersianDigits(current + 1)}</span> از{' '}
-            {toPersianDigits(plan.length)}
-            {' · '}
-            هدف پایان: {practiceTarget()}
+          <p className="flex flex-wrap items-center gap-x-1.5 text-xs font-bold text-muted">
+            <span>
+              اسلاید <span className="text-ink">{toPersianDigits(current + 1)}</span> از{' '}
+              {toPersianDigits(plan.length)}
+            </span>
+            <span className="text-line-strong">·</span>
+            <span className="flex items-center gap-x-1.5">
+              هدف پایان:
+              <TimeRange from={targetWindow.from} to={targetWindow.to} />
+            </span>
           </p>
         </div>
       </section>
 
       {/* نوار پیشرفت کل جلسه */}
       <section className="card px-5 py-4">
-        <div className="mb-1.5 flex items-center justify-between text-xs font-bold text-muted">
+        <div className="mb-2 flex items-center justify-between gap-3 text-xs font-bold text-muted">
           <span>پیشرفت کل جلسه</span>
-          <span className="timer-num" dir="ltr">
-            {formatClock(Math.min(totalMs, sessionTotal))} / {formatClock(sessionTotal)}
+          <span className="flex items-center gap-x-1.5">
+            <span className="timer-num">{formatClock(Math.min(totalMs, sessionTotal))}</span>
+            <span>از</span>
+            <span className="timer-num">{formatClock(sessionTotal)}</span>
           </span>
         </div>
         <div className="progress-track" role="progressbar" aria-valuenow={Math.round(Math.min(100, (totalMs / sessionTotal) * 100))} aria-valuemin={0} aria-valuemax={100}>
           <div className="progress-fill" style={{ width: `${Math.min(100, (totalMs / sessionTotal) * 100)}%` }} />
         </div>
-        <div className="mt-1.5 flex items-center justify-between text-[0.7rem] font-bold text-muted">
+        <div className="mt-2 flex items-center justify-between text-[0.7rem] font-bold text-muted">
           <span>شروع</span>
           <span>پایان گفتار {formatClock(talkTotal)}</span>
           <span>حداکثر {formatClock(sessionTotal)}</span>
@@ -407,7 +418,7 @@ export default function PracticeLab() {
       </section>
 
       {/* ناوبری سریع اسلایدها */}
-      <section className="card focus-hidden px-5 py-4">
+      <section className="card focus-hidden p-5">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs font-bold text-muted">
             ناوبری سریع: روی هر اسلاید بزن، یا با کلیدهای ۱ تا ۹ و ۰ پرش کن
@@ -444,6 +455,7 @@ export default function PracticeLab() {
 
       {/* کارت اسلاید */}
       <article className="card overflow-hidden">
+        <div key={slideKey} className="slide-enter">
         <div className="border-b border-line px-6 py-5 md:px-8">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
@@ -521,16 +533,16 @@ export default function PracticeLab() {
           </div>
 
           {/* ستون یادداشت */}
-          <aside className="space-y-4 border-t border-line bg-surface-2/40 px-6 py-6 lg:border-r lg:border-t-0 md:px-5">
+          <aside className="space-y-5 border-t border-line bg-surface-2/40 px-6 py-6 lg:border-r lg:border-t-0">
             {slide.notes.length > 0 && (
               <div>
-                <h4 className="mb-2 flex items-center gap-1.5 text-sm font-extrabold text-ink">
+                <h4 className="mb-2.5 flex items-center gap-1.5 text-sm font-extrabold text-ink">
                   <Lightbulb className="h-4 w-4 text-ochre" />
                   یادداشت اجرا
                 </h4>
-                <ul className="space-y-2">
+                <ul className="space-y-2.5">
                   {slide.notes.map((n, i) => (
-                    <li key={i} className="rounded-xl border border-line bg-surface px-3 py-2 text-[0.8rem] leading-6 text-ink-soft">
+                    <li key={i} className="rounded-xl border border-line bg-surface px-3.5 py-2.5 text-[0.82rem] leading-6 text-ink-soft">
                       {n}
                     </li>
                   ))}
@@ -538,10 +550,11 @@ export default function PracticeLab() {
               </div>
             )}
             <NoteBox storageKey={`slide-note:${slide.optional ? 'opt' : slide.num}`} />
-            <p className="rounded-xl bg-surface px-3 py-2 text-[0.72rem] leading-6 text-muted">
+            <p className="rounded-xl bg-surface px-3.5 py-2.5 text-[0.72rem] leading-6 text-muted">
               یادداشت‌ها و هایلایت‌ها فقط در همین دستگاه ذخیره می‌شوند.
             </p>
           </aside>
+        </div>
         </div>
       </article>
 
@@ -587,8 +600,8 @@ function HelpSheet({ onClose }: { onClose: () => void }) {
     ['بستن این راهنما', 'H یا Escape'],
   ];
   return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-ink/30 p-4 backdrop-blur-[2px] sm:items-center" onClick={onClose}>
-      <div className="card fade-up w-full max-w-lg p-6" onClick={(e) => e.stopPropagation()}>
+    <div className="overlay fixed inset-0 z-[60] flex items-end justify-center bg-ink/30 p-4 backdrop-blur-[2px] sm:items-center" onClick={onClose}>
+      <div className="card pop-in w-full max-w-lg p-6" onClick={(e) => e.stopPropagation()}>
         <div className="mb-4 flex items-center justify-between">
           <h3 className="flex items-center gap-2 text-lg font-extrabold text-ink">
             <Keyboard className="h-5 w-5 text-pine" />

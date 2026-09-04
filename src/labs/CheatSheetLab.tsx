@@ -15,7 +15,7 @@ export default function CheatSheetLab() {
   const app = useApp();
 
   return (
-    <div className="space-y-12">
+    <div className="stagger space-y-12">
       {/* سربرگ */}
       <section className="card relative overflow-hidden p-7 md:p-9">
         <div className="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full bg-ochre-soft/60 blur-3xl" aria-hidden="true" />

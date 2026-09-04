@@ -43,9 +43,15 @@ export function totalSession(includeOptional = false): number {
  * هدف تمرین: پایان ارائه بین ۱۹:۱۵ تا ۱۹:۳۰ (سناریو نسخه ۲).
  * بازه ثابت است؛ با اسلاید اختیاری، هدف «حداکثر بیست دقیقه» می‌شود.
  */
-export function practiceTarget(): string {
+export function practiceWindow(): { from: number; to: number } {
   const base = 19 * 60;
-  return `${clockOf(base + 15)} تا ${clockOf(base + 30)}`;
+  return { from: base + 15, to: base + 30 };
+}
+
+/** نمایش متنی هدف پایان (برای متن‌های ساده و چاپ) */
+export function practiceTarget(): string {
+  const w = practiceWindow();
+  return `${clockOf(w.from)} تا ${clockOf(w.to)}`;
 }
 
 /** پنجره نمایشی اسلاید: «۰۹:۳۰ تا ۱۰:۱۵» */
