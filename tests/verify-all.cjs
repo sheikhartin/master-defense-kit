@@ -157,6 +157,11 @@ assert(
   !read('package.json').includes('@google') && !read('package.json').includes('express'),
   'حذف وابستگی‌های سرویس‌محور از package.json',
 );
+assert(
+  fs.existsSync(path.join(ROOT, 'wrangler.jsonc')) &&
+    read('wrangler.jsonc').includes('"directory": "./dist"'),
+  'پیکربندی استقرار Cloudflare (wrangler.jsonc) پوشه خروجی ./dist را معرفی می‌کند',
+);
 
 /* ------------------------------------------------------------------ */
 /* ۶) پرهیز از موتورهای رندر قدیمی و فایل‌های حذف‌شده                 */

@@ -349,6 +349,11 @@ The site exports clean A4 PDFs through the browser's print dialog
   hand-edit. The brand geometry single-source is `src/lib/brand.mjs`.
 - Dev/preview servers bind `0.0.0.0:3000` and allow `.e2b.app` hosts for
   sandboxed live previews.
+- Cloudflare deploys use Workers Static Assets: `wrangler.jsonc` points at
+  `./dist` (with SPA `not_found_handling`, mirroring the SW fallback). Without
+  it `npx wrangler versions upload` fails with "Missing entry-point". The
+  `name` field must match the Workers project name in the Cloudflare
+  dashboard — update it if the project is renamed.
 
 ---
 
