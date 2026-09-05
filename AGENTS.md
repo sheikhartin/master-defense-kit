@@ -281,6 +281,34 @@ structure — keep it passing.
 - Tags/chips: `Tag` with tone `pine | ochre | clay | mute`.
 - Icons: `lucide-react` only, typically `h-4 w-4` or `h-3.5 w-3.5`.
 
+
+### 6.5 Responsive / no-overflow invariants (test-enforced in §16 of verify-all)
+
+The site must never develop horizontal overflow, broken layouts, or clipped
+content at any viewport ≥ 320px. Hard-won rules:
+
+- **Every grid gets an explicit track template.** A bare `display: grid`
+  creates *auto*-sized implicit tracks whose base size derives from the
+  largest min-content contribution of their items. A nowrap flex row with
+  `shrink-0` children inside such a card inflates the track far beyond the
+  viewport (this is what broke the cheat-sheet tables and parameter tags on
+  mobile). Always pair `grid` with `grid-cols-1` (`minmax(0, 1fr)` under the
+  hood) even when the grid is conceptually single-column.
+- **Grid items hosting tables or scrollers get `min-w-0`** so their automatic
+  minimum size never exceeds the track.
+- **Tables live inside `.table-wrap`** (internal horizontal scroller with a
+  subtle visible thumb). The page itself never scrolls sideways.
+- **Composite chips wrap via `.chip-wrap`** (white-space: normal, max-width:
+  100%) so no tag is wider than its card.
+- **Content scroll rows use `.hbar`** (thin *visible* scrollbar). `.no-hbar`
+  is reserved for discoverable UIs only (the header tab navigation).
+- **Overlays/dropdowns are viewport-capped**: `max-w-[calc(100vw-2rem)]`, and
+  header menus anchor to the controls *group*, not to an individual button,
+  so they can never stick out past the screen edge at 320px.
+- **Last line of defense:** `main` and `.site-footer` carry
+  `overflow-x: clip` (keeps sticky intact, unlike `hidden`). The header is
+  deliberately exempt so its dropdowns are not clipped.
+
 ---
 
 ## 7. Print / PDF System
@@ -373,6 +401,8 @@ dev server. Headless browsers are typically unavailable in the sandbox.
    `npm run icons`.
 10. **Em/en dashes pasted from LLM output** — strip them; use «تا», «؛» or
     restructure the sentence.
+11. **Bare `grid` without `grid-cols-*`** — implicit auto tracks inflate to the
+    widest child's min-content and break every narrow viewport; see §6.5.
 
 ---
 

@@ -86,9 +86,10 @@ export default function Header() {
             </div>
           </div>
 
-          {/* کنترل‌های سراسری */}
-          <div className="flex shrink-0 items-center gap-1">
-            <div className="relative" ref={pdfRef}>
+          {/* کنترل‌های سراسری: لنگر منوها روی کل گروه است تا در صفحه‌های باریک
+              هرگز از لبه دید بیرون نزنند (به‌جای لنگر روی هر دکمه جداگانه) */}
+          <div className="relative flex shrink-0 items-center gap-1">
+            <div ref={pdfRef}>
               <button
                 type="button"
                 title="دانلود PDF (Alt + P برای بخش فعلی)"
@@ -105,7 +106,7 @@ export default function Header() {
                 <div
                   role="menu"
                   aria-label="دانلود PDF"
-                  className="pop-in absolute left-0 top-12 z-50 w-72 rounded-2xl border border-line bg-surface p-2 shadow-lift"
+                  className="pop-in absolute left-0 top-12 z-50 w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-line bg-surface p-2 shadow-lift"
                 >
                   <p className="px-3 pb-1 pt-2 text-xs font-extrabold text-muted">
                     دانلود PDF تمیز و قابل چاپ
@@ -146,7 +147,7 @@ export default function Header() {
               {app.focus ? <Maximize2 className="h-4.5 w-4.5" /> : <Focus className="h-4.5 w-4.5" />}
             </button>
 
-            <div className="relative" ref={panelRef}>
+            <div ref={panelRef}>
               <button
                 type="button"
                 title="تنظیمات خواندن"
@@ -159,7 +160,7 @@ export default function Header() {
               </button>
 
               {panel && (
-                <div className="pop-in absolute left-0 top-12 z-50 w-72 rounded-2xl border border-line bg-surface p-4 shadow-lift">
+                <div className="pop-in absolute left-0 top-12 z-50 w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-line bg-surface p-4 shadow-lift">
                   <div className="mb-3 flex items-center justify-between">
                     <h3 className="text-sm font-extrabold text-ink">تنظیمات خواندن</h3>
                     <button className="icon-btn h-7 w-7" onClick={() => setPanel(false)} aria-label="بستن">

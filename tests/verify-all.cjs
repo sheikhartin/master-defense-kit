@@ -321,6 +321,79 @@ assert(
 assert(/ps-checklist li::before/.test(cssNow), 'چک‌لیست چاپی با مربع خالی برای تیک‌زدن روی کاغذ');
 assert(/break-inside: avoid/.test(cssNow), 'بلوک‌های چاپی وسط صفحه نمی‌شکنند (PDF تمیز)');
 
+/* ------------------------------------------------------------------ */
+/* ۱۶) مقاومت واکنش‌گرایی: هرگز بیرون‌زدگی افقی یا شکست چیدمان نداشته باشیم */
+/* ------------------------------------------------------------------ */
+/*
+  ریشه خرابی برگه تقلب در موبایل: گرید جدول‌های پشتیبان بدون ترک ستونی
+  صریح (grid بدون grid-cols) بود؛ در پهنای کم، ترکِ auto تک‌ستونه بر اساس
+  min-content پهناترین محتوا (ردیف برچسب‌های اندازه اثر با overflow-x:auto
+  و آیتم‌های shrink-0) بزرگ می‌شد و کل گرید ~۱۱۰۰ پیکسل عریض می‌گرفت.
+  قواعد تثبیت‌شده:
+  ۱. هر گرید ترک صریح بگیرد (grid-cols-1 برای تک‌ستونه پایه).
+  ۲. آیتم‌های گریدِ میزبان جدول/اسکرولر min-w-0 بگیرند.
+  ۳. جدول‌ها داخل قاب لغزان .table-wrap باشند.
+  ۴. برچسب‌های ترکیبی طولانی با .chip-wrap روی چند خط بنشینند.
+  ۵. اسکرولرهای افقی محتوا (برخلاف ناوبری) نوار مرئی .hbar داشته باشند.
+*/
+const cssResp = read('src/index.css');
+assert(
+  /\.table-wrap\s*\{[^}]*overflow-x:\s*auto/s.test(cssResp),
+  'قاب لغزان .table-wrap با overflow-x: auto برای جدول‌ها تعریف شده است',
+);
+assert(/\.chip-wrap\s*\{[^}]*white-space:\s*normal/s.test(cssResp), 'گونه .chip-wrap برای نشستن برچسب‌ها روی چند خط');
+assert(/\.hbar\s*\{[^}]*overflow-x:\s*auto/s.test(cssResp), 'اسکرولر .hbar با نوار مرئی برای ردیف‌های لغزان');
+
+const cheatLabResp = read('src/labs/CheatSheetLab.tsx');
+assert(
+  cheatLabResp.includes('grid grid-cols-1 gap-5 lg:grid-cols-2'),
+  'گرید جدول‌های پشتیبان ترک تک‌ستونه صریح دارد (بدون ترک auto انفجاری)',
+);
+assert(
+  (cheatLabResp.match(/card min-w-0 p-6/g) || []).length >= 2,
+  'کارت‌های جدول‌های پشتیبان min-w-0 دارند تا از ترک گرید بیرون نزنند',
+);
+assert(
+  (cheatLabResp.match(/className="table-wrap"/g) || []).length === 2,
+  'هر دو جدول (نرخ موفقیت و تحلیل حذف) داخل قاب لغزان .table-wrap هستند',
+);
+assert(cheatLabResp.includes('chip chip-pine chip-wrap'), 'برچسب‌های پارامترها با chip-wrap در صفحه باریک می‌شکنند');
+assert(
+  cheatLabResp.includes('hbar flex min-w-0 gap-2') && !cheatLabResp.includes('no-hbar'),
+  'ردیف اندازه اثر از اسکرولر مرئی .hbar استفاده می‌کند، نه اسکرولر پنهان',
+);
+
+const practiceLabResp = read('src/labs/PracticeLab.tsx');
+assert(
+  practiceLabResp.includes('grid grid-cols-1 gap-px bg-line sm:grid-cols-3'),
+  'گرید سه نمایشگر زمان ترک تک‌ستونه صریح دارد',
+);
+assert(
+  practiceLabResp.includes('hbar') && !practiceLabResp.includes('no-hbar'),
+  'نوار لغزان اسلایدها از .hbar مرئی استفاده می‌کند',
+);
+
+for (const [rel, snippet] of [
+  ['src/labs/QALab.tsx', 'grid grid-cols-1 gap-4 lg:grid-cols-2'],
+  ['src/labs/ChecklistLab.tsx', 'grid grid-cols-1 gap-5 lg:grid-cols-2'],
+  ['src/labs/ChecklistLab.tsx', 'grid grid-cols-1 gap-4 md:grid-cols-2'],
+]) {
+  assert(read(rel).includes(snippet), `گرید ${rel} ترک تک‌ستونه صریح دارد (${snippet})`);
+}
+
+const headerResp = read('src/components/Header.tsx');
+assert(
+  (headerResp.match(/max-w-\[calc\(100vw-2rem\)\]/g) || []).length === 2,
+  'هر دو منوی کشویی سربرگ (PDF و تنظیمات) به عرض دید محدود شده‌اند',
+);
+assert(
+  /relative flex shrink-0 items-center gap-1/.test(headerResp),
+  'لنگر منوهای سربرگ روی گروه کنترل‌هاست تا از لبه دید بیرون نزنند',
+);
+
+/* دفاع خط آخر: ناحیه محتوا و پابرگ هرگز قاب را افقاً نمی‌لغزانند */
+assert(/main\s*\{\s*overflow-x:\s*clip;/s.test(cssResp), 'خط دفاع overflow-x: clip روی ناحیه محتوای اصلی');
+
 console.log(`--- نتیجه تست‌ها: ${passCount} قبول، ${failCount} خطا ---`);
 
 if (failCount > 0) {

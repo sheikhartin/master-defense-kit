@@ -324,9 +324,9 @@ export default function PracticeLab() {
           </div>
         </div>
 
-        {/* سه نمایشگر زمان */}
-        <div className="grid gap-px bg-line sm:grid-cols-3">
-          <div className="bg-surface px-5 py-5">
+        {/* سه نمایشگر زمان: ترک صریح تا min-content محتوا چیدمان را نشکند */}
+        <div className="grid grid-cols-1 gap-px bg-line sm:grid-cols-3">
+          <div className="min-w-0 bg-surface px-5 py-5">
             <p className="flex items-center gap-1.5 text-xs font-bold text-muted">
               <Timer className="h-3.5 w-3.5" />
               زمان کل ارائه
@@ -343,7 +343,7 @@ export default function PracticeLab() {
             </p>
           </div>
 
-          <div className="bg-surface px-5 py-5">
+          <div className="min-w-0 bg-surface px-5 py-5">
             <p className="flex items-center gap-1.5 text-xs font-bold text-muted">
               <Flag className="h-3.5 w-3.5" />
               زمان این اسلاید
@@ -360,7 +360,7 @@ export default function PracticeLab() {
             </p>
           </div>
 
-          <div className={`bg-surface px-5 py-5 transition-colors duration-700 ${stage === 'end' ? 'bg-clay-soft/50' : ''}`}>
+          <div className={`min-w-0 bg-surface px-5 py-5 transition-colors duration-700 ${stage === 'end' ? 'bg-clay-soft/50' : ''}`}>
             <p className="flex items-center gap-1.5 text-xs font-bold text-muted">
               <Lightbulb className="h-3.5 w-3.5" />
               وضعیت زمان
@@ -481,7 +481,7 @@ export default function PracticeLab() {
             چیدمان گسترده با اسلاید اختیاری وراثت و رقابت
           </label>
         </div>
-        <div className="no-hbar flex gap-1.5 overflow-x-auto pb-1">
+        <div className="hbar flex min-w-0 gap-1.5 overflow-x-auto pb-2">
           {plan.map((p, i) => (
             <button
               key={`${p.num}-${i}`}
@@ -521,7 +521,7 @@ export default function PracticeLab() {
           )}
         </div>
 
-        <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <div className="grid grid-cols-1 gap-0 lg:grid-cols-[minmax(0,1fr)_300px]">
           {/* ستون اصلی */}
           <div className="min-w-0 space-y-7 px-6 py-6 md:px-8">
             {slide.tex.length > 0 && (
@@ -578,7 +578,7 @@ export default function PracticeLab() {
           </div>
 
           {/* ستون یادداشت */}
-          <aside className="space-y-5 border-t border-line bg-surface-2/40 px-6 py-6 lg:border-r lg:border-t-0">
+          <aside className="min-w-0 space-y-5 border-t border-line bg-surface-2/40 px-6 py-6 lg:border-r lg:border-t-0">
             {slide.notes.length > 0 && (
               <div>
                 <h4 className="mb-2.5 flex items-center gap-1.5 text-sm font-extrabold text-ink">
