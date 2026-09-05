@@ -8,6 +8,18 @@ import { useStoredState, writeStore } from './storage';
 
 export type TabId = 'home' | 'practice' | 'cheat' | 'qa' | 'checklist';
 
+/** دامنه خروجی PDF: یکی از بخش‌ها یا کل وب‌سایت */
+export type PrintScope = 'all' | 'roadmap' | 'deck' | 'cheat' | 'qa' | 'checklist';
+
+/** نگاشت هر تب به دامنه چاپی متناظر آن */
+export const printScopeOfTab: Record<TabId, PrintScope> = {
+  home: 'roadmap',
+  practice: 'deck',
+  cheat: 'cheat',
+  qa: 'qa',
+  checklist: 'checklist',
+};
+
 interface AppState {
   tab: TabId;
   go: (tab: TabId, slideIndex?: number) => void;
@@ -37,9 +49,9 @@ interface AppState {
   guideOpen: boolean;
   setGuideOpen: (v: boolean) => void;
 
-  /** چاپ برگه تقلب */
-  printOpen: boolean;
-  openPrint: () => void;
+  /** خروجی چاپی / PDF: دامنه فعال یا null یعنی بسته */
+  printScope: PrintScope | null;
+  openPrint: (scope?: PrintScope) => void;
   closePrint: () => void;
 }
 
@@ -48,7 +60,7 @@ const Ctx = createContext<AppState | null>(null);
 export function AppProvider({ children }: { children: ReactNode }) {
   const [tab, setTab] = useState<TabId>('home');
   const [pendingStart, setPendingStart] = useState<{ slide: number; stamp: number } | null>(null);
-  const [printOpen, setPrintOpen] = useState(false);
+  const [printScope, setPrintScope] = useState<PrintScope | null>(null);
 
   const [textScale, setTextScale] = useStoredState<number>('pref:textScale', 1);
   const [lineHeight, setLineHeight] = useStoredState<number>('pref:lineHeight', 1.95);
@@ -69,8 +81,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const setFocus = useCallback((v: boolean) => setFocusState(v), []);
 
-  const openPrint = useCallback(() => setPrintOpen(true), []);
-  const closePrint = useCallback(() => setPrintOpen(false), []);
+  const openPrint = useCallback((scope: PrintScope = 'cheat') => setPrintScope(scope), []);
+  const closePrint = useCallback(() => setPrintScope(null), []);
 
   const state = useMemo<AppState>(
     () => ({
@@ -90,7 +102,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setShortcutsOn,
       guideOpen,
       setGuideOpen,
-      printOpen,
+      printScope,
       openPrint,
       closePrint,
     }),
@@ -111,7 +123,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setShortcutsOn,
       guideOpen,
       setGuideOpen,
-      printOpen,
+      printScope,
       openPrint,
       closePrint,
     ],

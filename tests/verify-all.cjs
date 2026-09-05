@@ -276,6 +276,51 @@ for (const rel of ['src/labs/PracticeLab.tsx', 'src/labs/QALab.tsx', 'src/labs/C
 }
 assert(/font-size: 1\.0625em/.test(read('src/index.css')), 'کلاس reading با em بزرگ/کوچک می‌شود نه rem ثابت');
 
+/* ------------------------------------------------------------------ */
+/* ۱۴) لایه‌بندی درست CSS: قواعد سراسری بر ابزارهای Tailwind غلبه نکنند */
+/* ------------------------------------------------------------------ */
+/*
+  ریشه مشکل فاصله‌گذاری سراسری (مثل بی‌اثر شدن mb-2 روی «تشریح نمادهای رابطه»):
+  در Tailwind v4 همه ابزارها داخل @layer utilities تولید می‌شوند و هر قاعده
+  بدون لایه طبق استاندارد Cascade Layers بر قواعد لایه‌دار غلبه می‌کند.
+  پس p { margin: 0 } سراسری باید داخل @layer base بماند.
+*/
+const cssNow = read('src/index.css');
+{
+  const baseIdx = cssNow.indexOf('@layer base');
+  assert(baseIdx > -1, 'قواعد پایه (عنصری) داخل @layer base ثبت شده‌اند');
+  const pMargin = cssNow.search(/\np \{\s*\n\s*margin: 0;/);
+  const baseEnd = cssNow.indexOf('پایان @layer base');
+  assert(
+    pMargin > baseIdx && baseEnd > pMargin,
+    'قاعده p { margin: 0 } داخل @layer base است تا mb-* و mt-* روی پاراگراف‌ها اثر کنند',
+  );
+  assert(cssNow.includes('@layer components'), 'کلاس‌های مؤلفه‌ای داخل @layer components ثبت شده‌اند');
+}
+
+/* ------------------------------------------------------------------ */
+/* ۱۵) خروجی PDF: دامنه‌دار، کامل و در دسترس از سربرگ                  */
+/* ------------------------------------------------------------------ */
+const printSheetNow = read('src/components/PrintSheet.tsx');
+for (const scope of ["'all'", "'roadmap'", "'deck'", "'cheat'", "'qa'", "'checklist'"]) {
+  assert(read('src/lib/app-context.tsx').includes(scope), `دامنه چاپی ${scope} در PrintScope تعریف شده است`);
+}
+assert(
+  printSheetNow.includes('qaMain') &&
+    printSheetNow.includes('qaHard') &&
+    printSheetNow.includes('checklistGroups') &&
+    printSheetNow.includes('missionPoints') &&
+    printSheetNow.includes('planSlides'),
+  'نسخه چاپی همه بخش‌های وب‌سایت (نقشه راه، اسلایدها، برگه تقلب، پرسش‌ها، چک‌لیست) را پوشش می‌دهد',
+);
+assert(read('src/components/Header.tsx').includes('PDF_OPTIONS'), 'منوی دانلود PDF در سربرگ در دسترس است');
+assert(
+  read('src/lib/use-global-shortcuts.ts').includes("k.shift ? 'all'"),
+  'میان‌بر Alt + Shift + P خروجی PDF کل وب‌سایت را باز می‌کند',
+);
+assert(/ps-checklist li::before/.test(cssNow), 'چک‌لیست چاپی با مربع خالی برای تیک‌زدن روی کاغذ');
+assert(/break-inside: avoid/.test(cssNow), 'بلوک‌های چاپی وسط صفحه نمی‌شکنند (PDF تمیز)');
+
 console.log(`--- نتیجه تست‌ها: ${passCount} قبول، ${failCount} خطا ---`);
 
 if (failCount > 0) {

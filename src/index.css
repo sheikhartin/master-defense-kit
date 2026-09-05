@@ -50,6 +50,18 @@
 
 /* ---------- پایه ---------- */
 
+/*
+  نکته مهم معماری CSS (ریشه مشکل فاصله‌گذاری سراسری):
+  در Tailwind نسخه ۴ همه کلاس‌های ابزاری داخل «@layer utilities» تولید می‌شوند و
+  طبق استاندارد Cascade Layers، هر قاعده بدون لایه بر همه قواعد لایه‌دار غلبه می‌کند.
+  بنابراین اگر انتخاب‌گرهای عنصری مثل «p { margin: 0 }» بدون لایه بمانند، همه
+  ابزارهای فاصله مانند mb-2 و mt-3 روی پاراگراف‌ها بی‌اثر می‌شوند و فاصله‌گذاری
+  کل وب‌سایت به هم می‌ریزد. برای همین، قواعد پایه در «@layer base» و کلاس‌های
+  مؤلفه‌ای در «@layer components» ثبت می‌شوند تا utilities همیشه حرف آخر را بزند.
+*/
+
+@layer base {
+
 html {
   background-color: var(--color-paper);
   overflow-x: hidden;
@@ -107,9 +119,16 @@ p {
   margin: 0;
 }
 
+} /* پایان @layer base */
+
 /* ==========================================================================
    ابزارهای اختصاصی (بدون وابستگی به کلاس‌های ابزاری سنگین)
+   همه کلاس‌های مؤلفه‌ای در «@layer components» ثبت می‌شوند تا کلاس‌های ابزاری
+   Tailwind (مثل h-7 یا hover:border-ochre/40) بتوانند در صورت نیاز آن‌ها را
+   لغو کنند؛ این همان ترتیب استاندارد لایه‌هاست: base، سپس components، سپس utilities.
    ========================================================================== */
+
+@layer components {
 
 /* کارت پایه */
 .card {
@@ -172,9 +191,15 @@ p {
   font-weight: 700;
 }
 
+} /* پایان @layer components (بخش اول) */
+
 /* ---------- فرمول‌ها ---------- */
 
 /*
+  این قواعد عمداً بدون لایه می‌مانند: شیوه‌نامه katex.min.css از درون جاوااسکریپت
+  وارد می‌شود و بدون لایه است؛ اگر قواعد زیر داخل لایه بروند، قواعد کیتکس بر
+  آن‌ها غلبه می‌کنند و فاصله و اندازه فرمول‌ها به هم می‌ریزد.
+
   ظرف فرمول همیشه چپ‌به‌راست است و هرگز از قاب بیرون نمی‌زند.
   اگر در صفحه‌های بسیار باریک جا نشد، داخل خود ظرف اسکرول می‌شود
   و هیچ اسکرول افقی سراسری ایجاد نمی‌کند.
@@ -204,11 +229,14 @@ p {
   unicode-bidi: isolate;
 }
 
-.katex {
+/* انتخاب‌گر با دقت بالاتر تا بر قاعده «font» خود کیتکس (که بعدتر بارگذاری می‌شود) غلبه کند */
+.tex-frame .katex,
+.tex-standalone .katex,
+.tex-inline .katex {
   font-size: 1.18em;
 }
 
-.katex-display > .katex {
+.tex-frame .katex-display > .katex {
   white-space: normal;
 }
 
@@ -222,6 +250,8 @@ p {
 }
 
 /* ---------- دکمه‌ها ---------- */
+
+@layer components {
 
 .btn {
   display: inline-flex;
@@ -517,7 +547,10 @@ p {
 .no-hbar::-webkit-scrollbar { display: none; }
 .no-hbar { scrollbar-width: none; }
 
-/* ---------- چاپ: برگه تقلب کاغذی ---------- */
+} /* پایان @layer components (بخش دوم) */
+
+/* ---------- چاپ: برگه تقلب کاغذی ----------
+   قواعد چاپ عمداً بدون لایه می‌مانند تا بر هر قاعده دیگری غلبه کنند. */
 
 /* محتوای چاپی همیشه به‌صورت جداگانه در DOM سوار می‌شود و روی صفحه دیده نمی‌شود */
 .print-root {
@@ -535,7 +568,8 @@ p {
     overflow: visible !important;
   }
 
-  body.printing .app-shell {
+  body.printing .app-shell,
+  body.printing .focus-exit {
     display: none !important;
   }
 
@@ -546,13 +580,77 @@ p {
   .print-sheet {
     color: #1f1a12;
     font-size: 10.5px;
-    line-height: 1.6;
+    line-height: 1.75;
     direction: rtl;
   }
-  .print-sheet h2 { font-size: 15px; margin: 0 0 2mm; }
-  .print-sheet h3 { font-size: 12px; margin: 3mm 0 1mm; }
-  .print-sheet .ps-grid { display: grid; grid-template-columns: 1fr; gap: 0; }
-  .print-sheet table { border-collapse: collapse; width: 100%; margin: 1.5mm 0; }
+
+  /* سربرگ سند */
+  .print-sheet .ps-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6mm;
+    border-bottom: 2px solid #1e5a49;
+    padding-bottom: 3mm;
+    margin-bottom: 3mm;
+  }
+  .print-sheet h2 { font-size: 15px; margin: 0 0 1mm; line-height: 1.5; }
+  .print-sheet h3 {
+    font-size: 12.5px;
+    margin: 0 0 2mm;
+    padding-bottom: 1mm;
+    border-bottom: 1px solid #d8d0bd;
+    color: #163f35;
+    break-after: avoid;
+  }
+  .print-sheet h4 {
+    font-size: 11px;
+    margin: 3mm 0 1mm;
+    color: #1e5a49;
+    break-after: avoid;
+  }
+  .print-sheet p { margin: 0.8mm 0; orphans: 2; widows: 2; }
+  .print-sheet .ps-sub { font-size: 9px; color: #5a5342; margin: 0; }
+  .print-sheet .ps-side { font-size: 9px; text-align: left; color: #5a5342; margin: 0; }
+  .print-sheet .ps-lead { font-weight: 700; color: #163f35; }
+
+  /* بلوک‌های محتوایی: هر بخش با فاصله روشن از بخش بعدی */
+  .print-sheet .ps-block { margin: 0 0 6mm; }
+  .print-sheet .page-break { break-before: page; }
+
+  /* فهرست‌ها */
+  .print-sheet ul.ps-list,
+  .print-sheet ol.ps-list {
+    margin: 0.8mm 0 1.5mm;
+    padding-right: 5mm;
+  }
+  .print-sheet .ps-list li { margin: 0.4mm 0; break-inside: avoid; }
+
+  /* چک‌لیست با مربع خالی برای تیک‌زدن روی کاغذ */
+  .print-sheet ul.ps-checklist {
+    list-style: none;
+    margin: 0.8mm 0 1.5mm;
+    padding-right: 1mm;
+  }
+  .print-sheet .ps-checklist li {
+    position: relative;
+    padding-right: 6mm;
+    margin: 0.8mm 0;
+    break-inside: avoid;
+  }
+  .print-sheet .ps-checklist li::before {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 1mm;
+    width: 3mm;
+    height: 3mm;
+    border: 0.35mm solid #7d7563;
+    border-radius: 0.7mm;
+  }
+
+  /* جدول‌ها */
+  .print-sheet table { border-collapse: collapse; width: 100%; margin: 1.5mm 0 2.5mm; }
   .print-sheet td, .print-sheet th {
     border: 1px solid #c9c2b2;
     padding: 1.2mm 2mm;
@@ -560,17 +658,76 @@ p {
     vertical-align: top;
     font-size: 9.5px;
   }
+  .print-sheet th { background: #f3efe3; color: #163f35; }
+  .print-sheet tr { break-inside: avoid; }
+  .print-sheet .ps-sym { direction: ltr; text-align: left; white-space: nowrap; }
+
+  /* فرمول‌ها */
   .print-sheet .ps-formula {
     direction: ltr;
     text-align: center;
     padding: 1.5mm;
+    margin: 1mm 0;
     font-size: 13px;
+    break-inside: avoid;
   }
-  .print-sheet .ps-kv { display: grid; grid-template-columns: 1fr 2fr; gap: 0.6mm 3mm; }
-  .print-sheet .kv b { color: #1e5a49; }
-  .print-sheet .page-break { break-before: page; }
+  .print-sheet .ps-caption {
+    direction: rtl;
+    text-align: center;
+    font-size: 8.5px;
+    color: #5a5342;
+    margin: 0.5mm 0 0;
+  }
   .print-sheet .katex { font-size: 1.12em; }
   .print-sheet .tex-frame { overflow: visible; padding: 0; }
+
+  /* روابط برگه تقلب: هر رابطه یک واحد جدانشدنی */
+  .print-sheet .ps-eq { margin: 0 0 3.5mm; break-inside: avoid; }
+  .print-sheet .ps-eq-title { font-weight: 700; margin: 0; color: #163f35; }
+
+  /* اسلایدها: عنوان با پنجره زمانی، متن گفتار با حاشیه راست */
+  .print-sheet .ps-slide { break-inside: avoid-page; margin: 0 0 4.5mm; }
+  .print-sheet .ps-slide-title {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4mm;
+    font-size: 11.5px;
+    margin: 0 0 1mm;
+    padding: 1mm 2mm;
+    background: #f3efe3;
+    border-radius: 1.2mm;
+    border-right: 1mm solid #1e5a49;
+  }
+  .print-sheet .ps-slide-meta { font-size: 8.5px; font-weight: 400; color: #5a5342; white-space: nowrap; }
+  .print-sheet .ps-label {
+    font-size: 8.5px;
+    font-weight: 800;
+    color: #9a7126;
+    margin: 1.5mm 0 0.3mm;
+    break-after: avoid;
+  }
+  .print-sheet .ps-speech {
+    margin: 0.6mm 0;
+    padding-right: 2.5mm;
+    border-right: 0.5mm solid #d8d0bd;
+  }
+
+  /* پرسش و پاسخ */
+  .print-sheet .ps-qa { margin: 0 0 3mm; break-inside: avoid; }
+  .print-sheet .ps-qa-q { font-weight: 700; color: #163f35; margin: 0; }
+  .print-sheet .ps-qa-a { margin: 0.5mm 0; }
+  .print-sheet .ps-chip {
+    display: inline-block;
+    font-size: 8px;
+    font-weight: 700;
+    color: #1e5a49;
+    border: 0.3mm solid #1e5a49;
+    border-radius: 2mm;
+    padding: 0 1.5mm;
+    margin-left: 1mm;
+    vertical-align: middle;
+  }
 }
 
 
@@ -579,6 +736,8 @@ p {
 .focus-active .focus-hidden {
   display: none !important;
 }
+
+@layer components {
 
 /* ---------- کلیدها و راهنما ---------- */
 kbd {
@@ -689,3 +848,5 @@ kbd {
 .mini-table tr:last-child td {
   border-bottom: none;
 }
+
+} /* پایان @layer components (بخش سوم) */

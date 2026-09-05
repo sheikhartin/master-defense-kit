@@ -35,9 +35,9 @@ function Shell() {
   const app = useApp();
   useGlobalShortcuts();
 
-  /* چاپ */
+  /* چاپ / خروجی PDF */
   useEffect(() => {
-    if (!app.printOpen) return;
+    if (!app.printScope) return;
     document.body.classList.add('printing');
     const finish = () => {
       document.body.classList.remove('printing');
@@ -50,7 +50,7 @@ function Shell() {
       cancelAnimationFrame(raf);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [app.printOpen]);
+  }, [app.printScope]);
 
   const labs: Record<string, ComponentType> = {
     home: HomeLab,
@@ -104,7 +104,7 @@ function Shell() {
       )}
 
       {/* محتوای چاپی (روی صفحه پنهان است) */}
-      {app.printOpen && <PrintSheet />}
+      {app.printScope && <PrintSheet scope={app.printScope} />}
     </>
   );
 }
