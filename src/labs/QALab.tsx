@@ -41,16 +41,16 @@ export default function QALab() {
           بعد پاسخ پیشنهادی را باز کن و آن را با ساختار «ادعا، دلیل، شاهد» مقایسه کن.
         </p>
 
-        {/* ساختار پاسخ و پرسش خارج از پایان‌نامه */}
-        <div className="mt-6 grid gap-4 lg:grid-cols-2">
-          <div className="rounded-2xl border-r-4 border-pine bg-pine-wash px-5 py-4">
+        {/* ساختار پاسخ و پرسش خارج از پایان‌نامه (ترک تک‌ستونه صریح برای پایداری) */}
+        <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div className="min-w-0 rounded-2xl border-r-4 border-pine bg-pine-wash px-5 py-4">
             <h3 className="mb-2 flex items-center gap-1.5 text-sm font-extrabold text-pine-deep">
               <Sparkles className="h-4 w-4" />
               {answerPattern.title}
             </h3>
             <p className="text-[0.95em] leading-[var(--reading-lh)] text-pine-deep">{answerPattern.example}</p>
           </div>
-          <div className="rounded-2xl border border-line bg-surface-2/50 px-5 py-4">
+          <div className="min-w-0 rounded-2xl border border-line bg-surface-2/50 px-5 py-4">
             <h3 className="mb-2 flex items-center gap-1.5 text-sm font-extrabold text-ink">
               <ShieldCheck className="h-4 w-4 text-ochre" />
               سؤال خارج از پایان‌نامه

@@ -1,0 +1,17 @@
+/**
+ * پیکربندی استقرار Cloudflare Workers (دارایی‌های ایستا).
+ * فرمان «npm run build» خروجی کامل SPA را در ./dist می‌سازد و همین پوشه
+ * به‌صورت ایستا سرو می‌شود؛ بدون این فایل، فرمان wrangler نمی‌داند کدام
+ * پوشه را به‌عنوان دارایی منتشر کند و استقرار شکست می‌خورد.
+ * مسیرهای ناشناخته همان index.html را می‌گیرند (هم‌خوان با navigateFallback
+ * سرویس‌ورکر تا حالت آفلاین کامل حفظ شود).
+ * نکته: مقدار «name» باید با نام پروژه در داشبورد Cloudflare یکی باشد.
+ */
+{
+  "name": "master-defense-kit",
+  "compatibility_date": "2026-09-05",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}

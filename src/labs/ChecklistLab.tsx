@@ -26,7 +26,7 @@ export default function ChecklistLab() {
         </p>
       </section>
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
         {checklistGroups.map((g, gi) => (
           <GroupCard key={g.id} group={g} order={gi + 1} />
         ))}
@@ -34,7 +34,7 @@ export default function ChecklistLab() {
         {/* کارت لحن */}
         <section className="card self-start p-6 md:p-7 lg:col-span-2">
           <SectionHead title="بگو یا نگو" subtitle="شش جفت پرتکرار؛ لحن دفاع با همین تفاوت‌ها ساخته می‌شود" />
-          <div className="mt-5 grid gap-4 md:grid-cols-2">
+          <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
             {doDonts.map((d, i) => (
               <div key={i} className="overflow-hidden rounded-2xl border border-line">
                 <div className="flex items-center gap-2 border-b border-line bg-clay-soft/40 px-4 py-2.5">
@@ -62,7 +62,7 @@ function GroupCard({ group, order }: { group: (typeof checklistGroups)[number]; 
   const marked = group.items.filter((_, i) => done[i]).length;
 
   return (
-    <section className="card p-6 md:p-7">
+    <section className="card min-w-0 p-6 md:p-7">
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
           <p className="text-[0.7rem] font-extrabold text-muted">چک‌لیست {toPersianDigits(order)}</p>

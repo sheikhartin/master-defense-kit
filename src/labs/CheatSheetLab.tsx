@@ -92,62 +92,69 @@ export default function CheatSheetLab() {
       {/* جدول‌های پشتیبان */}
       <section>
         <SectionHead index={4} title="جدول‌های پشتیبان برای پرسش‌های دقیق" subtitle="این ارقام برای پرسش‌های ریز داوران است؛ نه برای اسلاید اصلی" />
-        <div className="mt-5 grid gap-5 lg:grid-cols-2">
-          <div className="card p-6">
+        {/* گرید جدول‌ها: ترکِ تک‌ستونه صریح (grid-cols-1) تا در صفحه‌های باریک
+            چیدمان بر اساس min-content محتوا منفجر نشود و هر کارت با min-w-0
+            بتواند کوچک‌تر از عریض‌ترین محتوایش شود. */}
+        <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
+          <div className="card min-w-0 p-6">
             <h3 className="mb-3 flex items-center gap-2 text-base font-extrabold text-ink">
               <ShieldCheck className="h-5 w-5 text-pine" />
               نرخ موفقیت هفت مسئله (۳۰ اجرا)
             </h3>
-            <table className="mini-table">
-              <thead>
-                <tr>
-                  <th>مسئله</th>
-                  <th>نرخ</th>
-                  <th>معادل اجرا</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reliabilityRows.map((r) => (
-                  <tr key={r.problem}>
-                    <td className="font-bold">{r.problem}</td>
-                    <td className="text-pine-deep">{r.rate}</td>
-                    <td className="text-muted">{r.note}</td>
+            <div className="table-wrap">
+              <table className="mini-table">
+                <thead>
+                  <tr>
+                    <th>مسئله</th>
+                    <th>نرخ</th>
+                    <th>معادل اجرا</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {reliabilityRows.map((r) => (
+                    <tr key={r.problem}>
+                      <td className="font-bold">{r.problem}</td>
+                      <td className="text-pine-deep">{r.rate}</td>
+                      <td className="text-muted">{r.note}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
-          <div className="card p-6">
+          <div className="card min-w-0 p-6">
             <h3 className="mb-3 flex items-center gap-2 text-base font-extrabold text-ink">
               <Sigma className="h-5 w-5 text-pine" />
               تحلیل حذف مؤلفه‌ها (میانگین رتبه)
             </h3>
-            <table className="mini-table">
-              <thead>
-                <tr>
-                  <th>نسخه</th>
-                  <th>رتبه</th>
-                  <th>نکته</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ablationRows.map((r) => (
-                  <tr key={r.version}>
-                    <td className="font-bold">{r.version}</td>
-                    <td className="text-ink">{r.rank}</td>
-                    <td className="text-muted">{r.note ?? ''}</td>
+            <div className="table-wrap">
+              <table className="mini-table">
+                <thead>
+                  <tr>
+                    <th>نسخه</th>
+                    <th>رتبه</th>
+                    <th>نکته</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {ablationRows.map((r) => (
+                    <tr key={r.version}>
+                      <td className="font-bold">{r.version}</td>
+                      <td className="text-ink">{r.rank}</td>
+                      <td className="text-muted">{r.note ?? ''}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
             <h3 className="mb-3 mt-6 flex items-center gap-2 text-base font-extrabold text-ink">
               پارامترهای گزارش‌شده مقاله
             </h3>
             <div className="flex flex-wrap gap-2">
               {parameterRows.map((p) => (
-                <span key={p.sym} className="chip chip-pine">
+                <span key={p.sym} className="chip chip-pine chip-wrap">
                   <TeX tex={p.sym} />
                   <span>{p.value}</span>
                   <span className="font-normal text-pine-deep/80">{p.role}</span>
@@ -156,7 +163,7 @@ export default function CheatSheetLab() {
             </div>
 
             <h3 className="mb-3 mt-6 text-base font-extrabold text-ink">اندازه اثر وارا و دلینی (پشتیبان)</h3>
-            <div className="no-hbar flex gap-2 overflow-x-auto pb-1">
+            <div className="hbar flex min-w-0 gap-2 pb-2">
               {effectSizeRows.map((r) => (
                 <span key={r.rival} className="chip chip-mute shrink-0">
                   {r.rival} <b>{r.value}</b> <span className="font-normal">{r.level}</span>

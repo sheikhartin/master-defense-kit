@@ -119,6 +119,17 @@ p {
   margin: 0;
 }
 
+/*
+  آخرین خط دفاع چیدمان: ناحیه محتوای اصلی هرگز بیرون‌زدگی افقی را به
+  قاب صفحه منتقل نمی‌کند. اگر موردی از قواعد بالا جا بماند، داخل همین
+  ناحیه بریده می‌شود و کل صفحه افقاً نمی‌لغزد. سربرگ عمداً مستثنی است
+  تا منوهای کشویی‌اش (خروجی PDF و تنظیمات خواندن) بریده نشوند.
+  clip به‌جای hidden تا ظرف اسکرول تازه ساخته نشود و sticky سالم بماند.
+*/
+main {
+  overflow-x: clip;
+}
+
 } /* پایان @layer base */
 
 /* ==========================================================================
@@ -143,6 +154,11 @@ p {
   background: var(--color-surface-2);
   border: 1px solid var(--color-line);
   border-radius: 14px;
+}
+
+/* همان خط دفاع افقی برای پابرگ (فرزند لایه‌دار بیرون‌ران ندارد) */
+.site-footer {
+  overflow-x: clip;
 }
 
 .eyebrow {
@@ -547,6 +563,45 @@ p {
 .no-hbar::-webkit-scrollbar { display: none; }
 .no-hbar { scrollbar-width: none; }
 
+/* ---------- پایداری واکنش‌گرایی: ضد بیرون‌زدگی افقی ----------
+   سه ابزار مکمل برای این‌که هیچ محتوایی هرگز قاب را به‌هم نریزد:
+   ۱) .table-wrap: قاب لغزان برای جدول‌ها؛ جدول در صورت نیاز داخل قاب
+      خودش اسکرول می‌شود و هرگز صفحه را عریض نمی‌کند.
+   ۲) .chip-wrap: گونه برچسب ترکیبی که در صورت کمبود جا روی چند خط
+      می‌نشیند و از پهنای ظرفش بیرون نمی‌زند (برای برچسب‌هایی که
+      نماد + مقدار + شرح دارند).
+   ۳) .hbar: اسکرولر افقی داخلی با نوار نازک و مرئی تا قابلیت کشف
+      اسکرول حفظ شود (برخلاف .no-hbar که فقط برای ناوبریِ قابل‌حدس است). */
+
+.table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+  /* قاب بیرونی جدول این‌جا کشیده می‌شود تا کادر جدول از هر چهار سمت
+     کامل و بسته دیده شود (گوشه‌های گرد هم‌خوان با سیستم طراحی) */
+  border: 1px solid var(--color-line);
+  border-radius: 14px;
+}
+
+.chip-wrap {
+  white-space: normal;
+  max-width: 100%;
+  border-radius: 18px;
+  padding-block: 0.3rem;
+}
+
+.hbar {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+
 } /* پایان @layer components (بخش دوم) */
 
 /* ---------- چاپ: برگه تقلب کاغذی ----------
@@ -827,7 +882,9 @@ kbd {
   background: rgba(30, 90, 73, 0.45);
 }
 
-/* ---------- جدول ساده ---------- */
+/* ---------- جدول ساده ----------
+   جدولهای داخل .table-wrap قاب بیرونی ندارند؛ قاب توسط خود لفاف کشیده
+   می‌شود تا خط پایانی سطر آخر هرگز گم نشود. تنها خطوط داخلی می‌مانند. */
 .mini-table {
   width: 100%;
   border-collapse: collapse;
@@ -847,6 +904,23 @@ kbd {
 }
 .mini-table tr:last-child td {
   border-bottom: none;
+}
+
+/*
+  در داخل قاب‌لغزان: خطوط بیرونی سلول‌های لبه برداشته می‌شوند تا با قاب
+  گردِ لفاف دوبله نشوند؛ جدول فقط خط‌جداکننده‌های داخلی خود را حفظ می‌کند.
+  سمت راستِ اولین سلول هر سطر و سمت چپِ آخرین سلول (در بافت راست‌به‌چپ)
+  لبه‌های بیرونی جدول هستند. خط بالای سطر سربرگ هم بیرونی است، اما
+  خط بالای اولین سطر بدنه باید بماند تا از سربرگ جدا شود.
+*/
+.table-wrap .mini-table > thead > tr > * {
+  border-top: none;
+}
+.table-wrap .mini-table tr > *:first-child {
+  border-right: none;
+}
+.table-wrap .mini-table tr > *:last-child {
+  border-left: none;
 }
 
 } /* پایان @layer components (بخش سوم) */
