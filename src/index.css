@@ -580,6 +580,10 @@ main {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: var(--color-line-strong) transparent;
+  /* قاب بیرونی جدول این‌جا کشیده می‌شود تا کادر جدول از هر چهار سمت
+     کامل و بسته دیده شود (گوشه‌های گرد هم‌خوان با سیستم طراحی) */
+  border: 1px solid var(--color-line);
+  border-radius: 14px;
 }
 
 .chip-wrap {
@@ -878,7 +882,9 @@ kbd {
   background: rgba(30, 90, 73, 0.45);
 }
 
-/* ---------- جدول ساده ---------- */
+/* ---------- جدول ساده ----------
+   جدولهای داخل .table-wrap قاب بیرونی ندارند؛ قاب توسط خود لفاف کشیده
+   می‌شود تا خط پایانی سطر آخر هرگز گم نشود. تنها خطوط داخلی می‌مانند. */
 .mini-table {
   width: 100%;
   border-collapse: collapse;
@@ -898,6 +904,23 @@ kbd {
 }
 .mini-table tr:last-child td {
   border-bottom: none;
+}
+
+/*
+  در داخل قاب‌لغزان: خطوط بیرونی سلول‌های لبه برداشته می‌شوند تا با قاب
+  گردِ لفاف دوبله نشوند؛ جدول فقط خط‌جداکننده‌های داخلی خود را حفظ می‌کند.
+  سمت راستِ اولین سلول هر سطر و سمت چپِ آخرین سلول (در بافت راست‌به‌چپ)
+  لبه‌های بیرونی جدول هستند. خط بالای سطر سربرگ هم بیرونی است، اما
+  خط بالای اولین سطر بدنه باید بماند تا از سربرگ جدا شود.
+*/
+.table-wrap .mini-table > thead > tr > * {
+  border-top: none;
+}
+.table-wrap .mini-table tr > *:first-child {
+  border-right: none;
+}
+.table-wrap .mini-table tr > *:last-child {
+  border-left: none;
 }
 
 } /* پایان @layer components (بخش سوم) */

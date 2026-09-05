@@ -298,6 +298,10 @@ content at any viewport ≥ 320px. Hard-won rules:
   minimum size never exceeds the track.
 - **Tables live inside `.table-wrap`** (internal horizontal scroller with a
   subtle visible thumb). The page itself never scrolls sideways.
+- **The table frame belongs to `.table-wrap`** (rounded border on all four
+  sides); cell border edges touching the frame are suppressed so nothing
+  doubles. Never strip the bottom of `.mini-table`'s last row without the
+  wrapper frame, or the table looks cut off at its last row.
 - **Composite chips wrap via `.chip-wrap`** (white-space: normal, max-width:
   100%) so no tag is wider than its card.
 - **Content scroll rows use `.hbar`** (thin *visible* scrollbar). `.no-hbar`

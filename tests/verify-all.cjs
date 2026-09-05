@@ -394,6 +394,19 @@ assert(
 /* دفاع خط آخر: ناحیه محتوا و پابرگ هرگز قاب را افقاً نمی‌لغزانند */
 assert(/main\s*\{\s*overflow-x:\s*clip;/s.test(cssResp), 'خط دفاع overflow-x: clip روی ناحیه محتوای اصلی');
 
+/* قاب کامل چهارطرفه جدول‌ها: خط پایانی سطر آخر هرگز گم نشود.
+   قاب بیرونی توسط .table-wrap کشیده می‌شود و خطوط لبه سلول‌ها برداشته می‌شوند. */
+assert(
+  /\.table-wrap\s*\{[^}]*border:\s*1px solid var\(--color-line\)/s.test(cssResp),
+  'قاب کامل جدول (شامل خط پایانی سطر آخر) توسط .table-wrap کشیده می‌شود',
+);
+assert(
+  cssResp.includes('.table-wrap .mini-table > thead > tr > *') &&
+    cssResp.includes('.table-wrap .mini-table tr > *:first-child') &&
+    cssResp.includes('.table-wrap .mini-table tr > *:last-child'),
+  'خطوط لبه بیرونی سلول‌ها داخل قاب برداشته شده‌اند تا قاب دوبله نشود',
+);
+
 console.log(`--- نتیجه تست‌ها: ${passCount} قبول، ${failCount} خطا ---`);
 
 if (failCount > 0) {
