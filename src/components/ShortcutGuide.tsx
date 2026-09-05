@@ -19,7 +19,8 @@ const GLOBAL_ROWS: Row[] = [
   { action: 'هشدار صوتی روشن و خاموش', keys: ['M'] },
   { action: 'بستن لایه باز / خروج از تمرکز', keys: ['Esc'] },
   { action: 'پرش به یکی از پنج بخش', keys: ['Alt', '۱ تا ۵'] },
-  { action: 'نسخه چاپی برگه تقلب', keys: ['Alt', 'P'] },
+  { action: 'خروجی PDF بخش فعلی', keys: ['Alt', 'P'] },
+  { action: 'خروجی PDF کل وب‌سایت', keys: ['Alt', 'Shift', 'P'] },
 ];
 
 const PRACTICE_ROWS: Row[] = [

@@ -1,7 +1,8 @@
 /**
  * میان‌برهای سراسری که در همه تب‌ها کار می‌کنند:
  *   راهنما (H / ؟)، حالت تمرکز (F)، صدا (M)، بستن (Esc)،
- *   پرش به بخش‌ها (Alt + ۱ تا ۵) و چاپ برگه تقلب (Alt + P).
+ *   پرش به بخش‌ها (Alt + ۱ تا ۵)، خروجی PDF بخش فعلی (Alt + P)
+ *   و خروجی PDF کل وب‌سایت (Alt + Shift + P).
  *
  * قواعد دقت:
  *   تطبیق با e.code (مستقل از چیدمان فارسی/انگلیسی)، نادیده‌گرفتن وقتی یک
@@ -12,7 +13,7 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { useApp, type TabId } from './app-context';
+import { printScopeOfTab, useApp, type TabId } from './app-context';
 import { isEditableTarget, snapshot } from './keys';
 import { overlaysOpen } from './ui-bus';
 
@@ -43,7 +44,8 @@ export function useGlobalShortcuts() {
         }
         if (k.code === 'KeyP') {
           e.preventDefault();
-          a.openPrint();
+          /* Alt + P: خروجی PDF بخش فعلی؛ Alt + Shift + P: کل وب‌سایت */
+          a.openPrint(k.shift ? 'all' : printScopeOfTab[a.tab]);
           return;
         }
         return;

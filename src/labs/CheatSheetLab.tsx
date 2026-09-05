@@ -33,7 +33,7 @@ export default function CheatSheetLab() {
               توضیح فارسی نمادها و راهنمای گفتن آن بدون روخوانی آمده است.
             </p>
           </div>
-          <button type="button" className="btn btn-primary shrink-0" onClick={() => app.openPrint()}>
+          <button type="button" className="btn btn-primary shrink-0" onClick={() => app.openPrint('cheat')}>
             <Printer className="h-4 w-4" />
             نسخه چاپی / PDF
           </button>

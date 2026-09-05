@@ -5,7 +5,9 @@
 
 import { useEffect, useState } from 'react';
 import {
+  BookOpenText,
   Compass,
+  FileDown,
   Focus,
   GraduationCap,
   Keyboard,
@@ -18,7 +20,7 @@ import {
   VolumeX,
   X,
 } from 'lucide-react';
-import { useApp, type TabId } from '../lib/app-context';
+import { useApp, type PrintScope, type TabId } from '../lib/app-context';
 import { useModalBehavior } from '../lib/use-modal';
 import { toPersianDigits } from '../lib/persian';
 import BrandMark from './BrandMark';
@@ -31,21 +33,41 @@ const TABS: Array<{ id: TabId; label: string; hint: string; Icon: typeof Compass
   { id: 'checklist', label: 'چک‌لیست روز دفاع', hint: 'آمادگی و کنترل', Icon: ListChecks },
 ];
 
+/** گزینه‌های منوی خروجی PDF: کل وب‌سایت در صدر، سپس تک‌بخش‌ها */
+const PDF_OPTIONS: Array<{ scope: PrintScope; label: string; hint: string; Icon: typeof Compass }> = [
+  { scope: 'all', label: 'کل وب‌سایت', hint: 'همه بخش‌ها در یک سند تمیز', Icon: BookOpenText },
+  { scope: 'roadmap', label: 'نقشه راه دفاع', hint: 'ساختار، زمان‌بندی و مرزهای ادعا', Icon: Compass },
+  { scope: 'deck', label: 'متن کامل ارائه', hint: 'بیست اسلاید با گفتار و نکات', Icon: GraduationCap },
+  { scope: 'cheat', label: 'برگه تقلب', hint: 'فرمول‌ها، ارقام و جدول‌ها', Icon: ScrollText },
+  { scope: 'qa', label: 'بانک پرسش داور', hint: 'همه پرسش‌ها و پاسخ‌ها', Icon: MessageCircleQuestion },
+  { scope: 'checklist', label: 'چک‌لیست روز دفاع', hint: 'همه چک‌لیست‌ها و نگو/بگو', Icon: ListChecks },
+];
+
 export default function Header() {
   const app = useApp();
   const [panel, setPanel] = useState(false);
+  const [pdfMenu, setPdfMenu] = useState(false);
   /* رفتار یکپارچه لایه باز: Escape، به‌دام‌انداختن Tab و ثبت در شمارنده لایه‌ها */
   const panelRef = useModalBehavior<HTMLDivElement>(panel, () => setPanel(false));
+  const pdfRef = useModalBehavior<HTMLDivElement>(pdfMenu, () => setPdfMenu(false));
 
   /* بستن با کلیک بیرون پنل */
   useEffect(() => {
-    if (!panel) return;
+    if (!panel && !pdfMenu) return;
     const onDown = (e: MouseEvent) => {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) setPanel(false);
+      const t = e.target as Node;
+      if (panel && panelRef.current && !panelRef.current.contains(t)) setPanel(false);
+      if (pdfMenu && pdfRef.current && !pdfRef.current.contains(t)) setPdfMenu(false);
     };
     window.addEventListener('mousedown', onDown);
     return () => window.removeEventListener('mousedown', onDown);
-  }, [panel, panelRef]);
+  }, [panel, pdfMenu, panelRef, pdfRef]);
+
+  const startPdf = (scope: PrintScope) => {
+    setPdfMenu(false);
+    /* اجازه بده منو اول بسته شود، سپس گفت‌وگوی چاپ باز شود */
+    requestAnimationFrame(() => app.openPrint(scope));
+  };
 
   return (
     <header className="site-header sticky top-0 z-50 border-b border-line bg-surface/90 backdrop-blur-md">
@@ -66,6 +88,54 @@ export default function Header() {
 
           {/* کنترل‌های سراسری */}
           <div className="flex shrink-0 items-center gap-1">
+            <div className="relative" ref={pdfRef}>
+              <button
+                type="button"
+                title="دانلود PDF (Alt + P برای بخش فعلی)"
+                aria-label="دانلود PDF"
+                className={`icon-btn ${pdfMenu ? 'bg-surface-2 text-ink' : ''}`}
+                aria-expanded={pdfMenu}
+                aria-haspopup="menu"
+                onClick={() => setPdfMenu((v) => !v)}
+              >
+                <FileDown className="h-4.5 w-4.5" />
+              </button>
+
+              {pdfMenu && (
+                <div
+                  role="menu"
+                  aria-label="دانلود PDF"
+                  className="pop-in absolute left-0 top-12 z-50 w-72 rounded-2xl border border-line bg-surface p-2 shadow-lift"
+                >
+                  <p className="px-3 pb-1 pt-2 text-xs font-extrabold text-muted">
+                    دانلود PDF تمیز و قابل چاپ
+                  </p>
+                  {PDF_OPTIONS.map(({ scope, label, hint, Icon }) => (
+                    <button
+                      key={scope}
+                      type="button"
+                      role="menuitem"
+                      onClick={() => startPdf(scope)}
+                      className={`flex w-full items-start gap-2.5 rounded-xl px-3 py-2 text-right transition-colors hover:bg-surface-2 ${
+                        scope === 'all' ? 'mb-1 border border-pine/20 bg-pine-wash/70 hover:bg-pine-wash' : ''
+                      }`}
+                    >
+                      <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${scope === 'all' ? 'text-pine' : 'text-muted'}`} />
+                      <span className="min-w-0">
+                        <span className={`block text-sm font-bold ${scope === 'all' ? 'text-pine-deep' : 'text-ink'}`}>
+                          {label}
+                        </span>
+                        <span className="block text-[0.72rem] leading-5 text-muted">{hint}</span>
+                      </span>
+                    </button>
+                  ))}
+                  <p className="border-t border-line px-3 pb-2 pt-2 text-[0.7rem] leading-5 text-muted">
+                    در پنجره چاپ مرورگر، «ذخیره به‌صورت PDF» را انتخاب کن.
+                  </p>
+                </div>
+              )}
+            </div>
+
             <button
               type="button"
               title="حالت تمرکز (کلید F)"
