@@ -9,7 +9,7 @@
 ## منابع پژوهش
 
 - [پایان‌نامه کارشناسی ارشد (BCOA)](https://drive.google.com/file/d/1KzHFbapLFc58Qk9BiGoxxV0vHeNjIyNW/view?usp=drive_link)
-- [مقاله اصلی منتشر شده در مجله Biomimetics](https://drive.google.com/file/d/1V1FRt5pVgGHuTOz1tX8hhXIxwBg4OI5x/view?usp=drive_link)
+- [مقاله اصلی منتشر شده در مجله Biomimetics: Blackcap Optimization Algorithm (BCOA): A Novel Metaheuristic Algorithm for Global and Engineering Optimization Problems](https://www.mdpi.com/2313-7673/11/6/419)
 - [سناریوی جامع شبیه‌سازی جلسه دفاع](https://drive.google.com/file/d/1WAfTFpvInMT8Wt6n02KL6fSfLBa1m84_/view?usp=drive_link)
 
 ## ویژگی‌ها
