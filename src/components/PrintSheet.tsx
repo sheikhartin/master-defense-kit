@@ -60,7 +60,7 @@ export default function PrintSheet({ scope = 'cheat' }: { scope?: PrintScope }) 
           <div>
             <h2>بستار دفاع ارشد BCOA · {subtitle}</h2>
             <p className="ps-sub">
-              سناریوی نهایی نسخه ۲ · گفتار {clockOf(planSlides(false).at(-1)?.end ?? 0)} + حاشیه امن{' '}
+              سناریوی نهایی · گفتار {clockOf(planSlides(false).at(-1)?.end ?? 0)} + حاشیه امن{' '}
               {clockOf(SAFETY_BUFFER)} · هدف پایان {practiceTarget()}
             </p>
           </div>

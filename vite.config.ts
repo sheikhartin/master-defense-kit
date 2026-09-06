@@ -24,7 +24,7 @@ export default defineConfig(() => {
         ],
         manifest: {
           name: 'بستار دفاع ارشد BCOA',
-          short_name: 'بستار دفاع',
+          short_name: 'بستار دفاع ارشد BCOA',
           description:
             'تمرین گام‌به‌گام و کاملاً آفلاین جلسه دفاع پایان‌نامه کارشناسی ارشد (الگوریتم BCOA)',
           lang: 'fa',
