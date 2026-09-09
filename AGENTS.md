@@ -15,9 +15,10 @@ session about the *Black-Capped Warbler Optimization Algorithm (BCOA)*.
 
 All content is derived from one canonical document referred to as
 **"Final Scenario, Version 2" (سناریوی نهایی نسخه ۲)**: an 8-chapter table of
-contents, a 20-slide order (+1 optional slide), exact timing (19:00 of speech
-+ 1:00 safety buffer), full speech text, formulas, examiner Q&A, and
-defense-day checklists.
+contents, a compact 19-slide order plus an extended 20-slide order (the
+optional «وراثت جهت و رقابت سرزمینی» slide sits at #11), exact timing
+(compact speech 18:30 + 1:00 safety buffer; extended speech 19:15 + 1:00),
+full speech text, formulas, examiner Q&A, and defense-day checklists.
 
 - **UI language:** Persian (Farsi), RTL everywhere (`<html lang="fa" dir="rtl">`).
 - **Code language:** TypeScript/React. Code comments are intentionally in
@@ -45,9 +46,12 @@ any of them fails CI-style verification. Never weaken a test to make a change
 pass; fix the change instead.
 
 1. **100% offline.** No network requests of any kind: no CDN, no online fonts,
-   no APIs, no analytics, no external URLs anywhere in the source
-   (the only allowed URL substring is `w3.org/2000/svg`). Fonts come from the
-   locally installed `@fontsource/vazirmatn` package; KaTeX is local too.
+   no APIs, no analytics, no external URLs in any file the app ships or
+   builds (src/, index.html, configs; the only allowed URL substring is
+   `w3.org/2000/svg`). Fonts come from the locally installed
+   `@fontsource/vazirmatn` package; KaTeX is local too. Repository
+   documentation (README.md, AGENTS.md) may cite the thesis/paper by URL; it
+   is never shipped by the app.
 2. **ASCII-only LaTeX.** No Persian characters or Persian digits inside any
    LaTeX string in `src/data/cheat.ts` / `src/data/deck.ts`. Persian
    explanations live *next to* formulas, never inside them.
@@ -57,11 +61,16 @@ pass; fix the change instead.
 4. **Persian digits in UI.** All user-facing numbers go through helpers in
    `src/lib/persian.ts` (`toPersianDigits`, `formatClock`, `faNumber`,
    `faPercent`). Decimal separator is «٫». Timers use `.timer-num`
-   (tabular numerals, LTR-isolated).
-5. **Timing must add up.** 21 slide entries total (20 standard + 1 optional,
-   flagged `optional: true`); main slides sum to exactly **1140 seconds
-   (19:00)**; safety buffer is `SAFETY_BUFFER = 60`; the finish target is
-   «۱۹:۱۵ تا ۱۹:۳۰». All timing displayed anywhere is *derived* via
+   (tabular numerals, LTR-isolated). Unit hints beside clocks describe how
+   the clock reads right-to-left, e.g. «(ثانیه:دقیقه)» — on an LTR-isolated
+   `mm:ss` clock the seconds group sits on the right.
+5. **Timing must add up.** 20 slide entries total (19 standard + 1 optional,
+   flagged `optional: true`); the standard slides sum to exactly
+   **1110 seconds (18:30)**; the optional slide adds 45 seconds in the
+   extended layout (speech 19:15); safety buffer is `SAFETY_BUFFER = 60`;
+   the finish target is derived from the speech end of the active layout
+   (15 to 30 seconds later): compact «۱۸:۴۵ تا ۱۹:۰۰», extended
+   «۱۹:۳۰ تا ۱۹:۴۵». All timing displayed anywhere is *derived* via
    `planSlides()` in `src/lib/session.ts` — never hardcode cumulative times.
 6. **Canonical equations.** Certain LaTeX fragments are asserted verbatim by
    the tests (e.g. `\overrightarrow{d(\theta_{i}^{t})}`, the `\kappa` social
@@ -122,7 +131,7 @@ src/
                             QaItem, ConceptCard, FactRow, ChecklistGroup, DoDont)
 
   data/                     Pure content modules — no logic, no JSX
-    deck.ts                 chapters[], slides[] (21 entries), SAFETY_BUFFER
+    deck.ts                 chapters[], slides[] (20 entries), SAFETY_BUFFER
     cheat.ts                coreEquations, conceptCards, keyFacts,
                             reliabilityRows, ablationRows, parameterRows,
                             effectSizeRows
@@ -187,6 +196,12 @@ at startup so the cheat sheet opens with zero rendering delay.
   It registers in the layer counter (`ui-bus.ts`), traps Tab, closes on
   Escape, and restores focus. Global shortcuts automatically go silent while
   any layer is open or while typing in an input.
+- **Slide numbering:** the practice UI labels slides by their position in the
+  *active* layout, never by a hardcoded total: compact shows 1–19, extended
+  shows 1–20 with the optional «وراثت جهت و رقابت سرزمینی» slide as #11
+  (dashed dot, no star). The canonical `num` field in `deck.ts` is the
+  compact-layout number; extended numbering is always `position` in
+  `planSlides()`, and number-key jumps map to that same position.
 - **Keyboard:** always match `e.code` (physical key), never `e.key` — Persian
   keyboard layouts remap letters. Use helpers from `lib/keys.ts`
   (`snapshot`, `isEditableTarget`, `isInteractiveTarget`, `digitFromCode`).
@@ -205,8 +220,11 @@ at startup so the cheat sheet opens with zero rendering delay.
 | `Alt+P`           | PDF of the current tab's section    |
 | `Alt+Shift+P`     | PDF of the whole site               |
 
-PracticeLab adds its own local keys (arrows, Space/P, R, Shift+R, digits 1–20,
-Home/End, O for the extended layout).
+PracticeLab adds its own local keys (arrows, Space/P, R, Shift+R, digits and
+Shift+digits to jump by slide number of the active layout, Home/End, O for the
+extended layout). Navigating with those keys blurs the previously focused
+control so a stale focus ring never lingers on an old slide number; the
+current position is shown by the `.active` slide dot.
 
 ---
 

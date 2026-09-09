@@ -2,8 +2,9 @@
  * محاسبه زمان‌بندی جلسه از روی مدت‌های اسلایدها.
  * پنجره هر اسلاید همیشه به‌صورت تجمعی از شروع محاسبه می‌شود تا
  * هنگام افزودن اسلاید اختیاری «وراثت و رقابت»، همه زمان‌ها خودکار و
- * بدون تناقض جابه‌جا شوند. بدون اسلاید اختیاری، خروجی دقیقاً با
- * زمان‌بندی سناریوی نهایی یکی است (۱۹:۰۰ به‌علاوه ۱:۰۰ حاشیه امن).
+ * بدون تناقض جابه‌جا شوند. چیدمان فشرده (بدون اسلاید اختیاری) گفتاری
+ * به مدت ۱۸:۳۰ دارد و چیدمان گسترده با افزودن ۴۵ ثانیه به ۱۹:۱۵
+ * می‌رسد؛ در هر دو حالت ۱:۰۰ حاشیه امن به انتها افزوده می‌شود.
  */
 
 import { SAFETY_BUFFER, slides } from '../data/deck';
@@ -40,17 +41,18 @@ export function totalSession(includeOptional = false): number {
 }
 
 /**
- * هدف تمرین: پایان ارائه بین ۱۹:۱۵ تا ۱۹:۳۰ (سناریوی نهایی).
- * بازه ثابت است؛ با اسلاید اختیاری، هدف «حداکثر بیست دقیقه» می‌شود.
+ * هدف تمرین: پایان ارائه ۱۵ تا ۳۰ ثانیه پس از پایان متن گفتارِ همان چیدمان
+ * (فشرده: پایان گفتار ۱۸:۳۰ و بازه هدف ۱۸:۴۵ تا ۱۹:۰۰؛ گسترده: پایان گفتار
+ * ۱۹:۱۵ و بازه هدف ۱۹:۳۰ تا ۱۹:۴۵).
  */
-export function practiceWindow(): { from: number; to: number } {
-  const base = 19 * 60;
-  return { from: base + 15, to: base + 30 };
+export function practiceWindow(includeOptional = false): { from: number; to: number } {
+  const end = totalTalk(includeOptional);
+  return { from: end + 15, to: end + 30 };
 }
 
 /** نمایش متنی هدف پایان (برای متن‌های ساده و چاپ) */
-export function practiceTarget(): string {
-  const w = practiceWindow();
+export function practiceTarget(includeOptional = false): string {
+  const w = practiceWindow(includeOptional);
   return `${clockOf(w.from)} تا ${clockOf(w.to)}`;
 }
 

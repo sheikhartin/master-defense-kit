@@ -25,7 +25,7 @@ export interface SlideFormula {
 }
 
 export interface DeckSlide {
-  /** شماره اسلاید در چیدمان استاندارد ۲۰تایی */
+  /** شماره اسلاید در چیدمان استاندارد (فشرده) */
   num: number;
   /** عنوان فارسی روی اسلاید */
   title: string;

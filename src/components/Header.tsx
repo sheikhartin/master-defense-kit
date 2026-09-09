@@ -37,7 +37,7 @@ const TABS: Array<{ id: TabId; label: string; hint: string; Icon: typeof Compass
 const PDF_OPTIONS: Array<{ scope: PrintScope; label: string; hint: string; Icon: typeof Compass }> = [
   { scope: 'all', label: 'کل وب‌سایت', hint: 'همه بخش‌ها در یک سند تمیز', Icon: BookOpenText },
   { scope: 'roadmap', label: 'نقشه راه دفاع', hint: 'ساختار، زمان‌بندی و مرزهای ادعا', Icon: Compass },
-  { scope: 'deck', label: 'متن کامل ارائه', hint: 'بیست اسلاید با گفتار و نکات', Icon: GraduationCap },
+  { scope: 'deck', label: 'متن کامل ارائه', hint: 'نوزده اسلاید + پشتیبان اختیاری', Icon: GraduationCap },
   { scope: 'cheat', label: 'برگه تقلب', hint: 'فرمول‌ها، ارقام و جدول‌ها', Icon: ScrollText },
   { scope: 'qa', label: 'بانک پرسش داور', hint: 'همه پرسش‌ها و پاسخ‌ها', Icon: MessageCircleQuestion },
   { scope: 'checklist', label: 'چک‌لیست روز دفاع', hint: 'همه چک‌لیست‌ها و نگو/بگو', Icon: ListChecks },

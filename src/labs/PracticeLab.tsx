@@ -216,10 +216,11 @@ export default function PracticeLab() {
     startFrom(target);
   };
 
-  /* پرش به اسلاید بر اساس شماره (۱ تا ۲۰) */
+  /* پرش به اسلاید بر اساس شماره نمایشی در چیدمان فعلی
+     (فشرده: ۱ تا ۱۹؛ گسترده: ۱ تا ۲۰ که اختیاری همان ۱۱ است) */
   const jumpTo = (n: number) => {
-    const target = plan.findIndex((p) => p.num === n && !p.optional);
-    if (target >= 0) startFrom(target);
+    const target = n - 1;
+    if (target >= 0 && target < plan.length) startFrom(target);
   };
 
   /* آخرین نسخه اکشن‌ها تا شنونده تنها یک‌بار سوار شود و هرگز کهنه نماند */
@@ -260,11 +261,19 @@ export default function PracticeLab() {
       const k = snapshot(e);
       if (k.ctrl || k.meta || k.alt) return; // مادیفایر = میان‌بر مرورگر/سراسری
 
+      // پس از هر پیمایش با صفحه‌کلید، فوکوسِ عنصر قبلی برداشته می‌شود تا
+      // حلقه کهنه‌ای روی شماره اسلاید قبلی نماند (نشانگر جاری همان رنگ
+      // فعال اسلایدشمار است).
+      const clearFocus = () => {
+        const el = document.activeElement;
+        if (el instanceof HTMLElement) el.blur();
+      };
+
       // کلیدهای غیرکاراکتری همیشه فعال‌اند (جهت‌دار، صفحه، ابتدا/انتها)
-      if (k.code === 'ArrowLeft' || k.code === 'PageDown') { e.preventDefault(); a.next(1); return; }
-      if (k.code === 'ArrowRight' || k.code === 'PageUp') { e.preventDefault(); a.prev(-1); return; }
-      if (k.code === 'Home') { e.preventDefault(); a.first(); return; }
-      if (k.code === 'End') { e.preventDefault(); a.last(); return; }
+      if (k.code === 'ArrowLeft' || k.code === 'PageDown') { e.preventDefault(); a.next(1); clearFocus(); return; }
+      if (k.code === 'ArrowRight' || k.code === 'PageUp') { e.preventDefault(); a.prev(-1); clearFocus(); return; }
+      if (k.code === 'Home') { e.preventDefault(); a.first(); clearFocus(); return; }
+      if (k.code === 'End') { e.preventDefault(); a.last(); clearFocus(); return; }
 
       // بقیه تک‌کلیدی‌اند و فقط با رضایت کاربر
       if (!a.enabled || k.repeat) return;
@@ -279,7 +288,7 @@ export default function PracticeLab() {
       if (k.code === 'KeyR') { if (k.shift) a.resetAll(); else a.resetSlide(); return; }
       if (k.code === 'KeyO') { a.toggleOptional(!a.optional); a.resetAll(); return; }
       const n = digitFromCode(k.code, k.shift);
-      if (n !== null) { e.preventDefault(); a.jump(n); }
+      if (n !== null) { e.preventDefault(); a.jump(n); clearFocus(); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -287,8 +296,9 @@ export default function PracticeLab() {
 
   const ch = chapters.find((c) => c.id === slide.chapterId) ?? { num: 'شروع', title: 'شروع جلسه' };
   const sessionTotal = totalSession(includeOptional);
-  const targetWindow = practiceWindow();
+  const targetWindow = practiceWindow(includeOptional);
   const slideKey = slide.optional ? 'opt' : String(slide.num);
+  const shownNumber = current + 1;
 
   return (
     <div className="space-y-5">
@@ -330,7 +340,7 @@ export default function PracticeLab() {
             <p className="flex items-center gap-1.5 text-xs font-bold text-muted">
               <Timer className="h-3.5 w-3.5" />
               زمان کل ارائه
-              <span className="font-normal text-muted/70">(دقیقه:ثانیه)</span>
+              <span className="font-normal text-muted/70">(ثانیه:دقیقه)</span>
             </p>
             <p className="mt-1.5 text-3xl font-black tracking-tight text-ink">
               <span className="timer-num">{formatClock(totalSec)}</span>
@@ -347,7 +357,7 @@ export default function PracticeLab() {
             <p className="flex items-center gap-1.5 text-xs font-bold text-muted">
               <Flag className="h-3.5 w-3.5" />
               زمان این اسلاید
-              <span className="font-normal text-muted/70">(دقیقه:ثانیه)</span>
+              <span className="font-normal text-muted/70">(ثانیه:دقیقه)</span>
             </p>
             <p className="mt-1.5 text-3xl font-black tracking-tight text-ink">
               <span className="timer-num">{formatClock(slideSec)}</span>
@@ -466,7 +476,7 @@ export default function PracticeLab() {
       <section className="card focus-hidden p-5">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
           <p className="text-xs font-bold text-muted">
-            ناوبری سریع: روی هر اسلاید بزن، یا با کلیدهای ۱ تا ۹ و ۰ پرش کن
+            ناوبری سریع: روی هر اسلاید بزن، یا با کلیدهای ۱ تا ۹ و ۰ (و Shift + عدد برای ۱۱ به بعد) پرش کن
           </p>
           <label className="flex cursor-pointer items-center gap-2 text-xs font-bold text-ink-soft">
             <input
@@ -481,7 +491,7 @@ export default function PracticeLab() {
             چیدمان گسترده با اسلاید اختیاری وراثت و رقابت
           </label>
         </div>
-        <div className="hbar flex min-w-0 gap-1.5 overflow-x-auto pb-2">
+        <div className="hbar flex min-w-0 gap-1.5 overflow-x-auto px-1 pb-2 pt-1.5">
           {plan.map((p, i) => (
             <button
               key={`${p.num}-${i}`}
@@ -492,7 +502,7 @@ export default function PracticeLab() {
               }`}
               onClick={() => startFrom(i)}
             >
-              {p.optional ? '★' : toPersianDigits(p.num)}
+              {toPersianDigits(i + 1)}
             </button>
           ))}
         </div>
@@ -505,8 +515,8 @@ export default function PracticeLab() {
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <p className="text-xs font-bold text-muted">
-                {slide.optional ? 'اسلاید اختیاری' : `اسلاید ${toPersianDigits(slide.num)} از ${toPersianDigits(20)}`}
-                {slide.backupRef ? ` · ${slide.backupRef}` : ''}
+                اسلاید {toPersianDigits(shownNumber)} از {toPersianDigits(plan.length)}
+                {slide.optional ? ' · اختیاری' : ''}
               </p>
               <h3 className="mt-1 text-xl font-black text-ink md:text-2xl">{slide.title}</h3>
             </div>

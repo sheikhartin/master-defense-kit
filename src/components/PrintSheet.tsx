@@ -5,7 +5,7 @@
  * دامنه خروجی با PrintScope مشخص می‌شود:
  *   'all'       کل وب‌سایت (همه بخش‌ها پشت سر هم با شکست صفحه تمیز)
  *   'roadmap'   نقشه راه دفاع
- *   'deck'      متن کامل بیست اسلاید و اسلاید پشتیبان
+ *   'deck'      متن کامل نوزده اسلاید و اسلاید پشتیبان
  *   'cheat'     برگه تقلب و فرمول‌ها
  *   'qa'        بانک پرسش داور
  *   'checklist' چک‌لیست‌های روز دفاع
@@ -94,7 +94,7 @@ function RoadmapPrint() {
         <h3>نقشه راه دفاع · اصل حاکم</h3>
         <p className="ps-lead">{governingPrinciple}</p>
 
-        <h4>پنج گزاره‌ای که داور باید پس از بیست دقیقه بتواند بگوید</h4>
+        <h4>پنج گزاره‌ای که داور باید در پایان ارائه بتواند بگوید</h4>
         <ol className="ps-list">
           {missionPoints.map((m) => (
             <li key={m}>{m}</li>
@@ -215,7 +215,7 @@ function RoadmapPrint() {
 }
 
 /* ------------------------------------------------------------------ */
-/* متن کامل ارائه (بیست اسلاید + اسلاید پشتیبان)                        */
+/* متن کامل ارائه (نوزده اسلاید + اسلاید پشتیبان)                        */
 /* ------------------------------------------------------------------ */
 
 function DeckPrint({ pageBreak }: { pageBreak: boolean }) {
@@ -373,7 +373,7 @@ function CheatPrint({ pageBreak }: { pageBreak: boolean }) {
       </section>
 
       <section className="ps-block">
-        <h3>سه مفهوم پرکاربرد روز دفاع</h3>
+        <h3>مفاهیم پرکاربرد روز دفاع</h3>
         {conceptCards.map((c) => (
           <div key={c.id} style={{ margin: '2mm 0' }}>
             <p style={{ margin: 0, fontWeight: 700 }}>
