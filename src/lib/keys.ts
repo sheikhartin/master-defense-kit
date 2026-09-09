@@ -70,7 +70,8 @@ export function isCharacterOnly(k: KeySnapshot): boolean {
   return k.key.length === 1 && !k.repeat ? true : k.key.length === 1;
 }
 
-/** نگاشت ارقام بالای کیبورد به شماره اسلاید: ۰ یعنی ۱۰، با Shift یعنی ۱۱ تا ۲۰ */
+/** نگاشت ارقام بالای کیبورد به شماره اسلاید: ۰ یعنی ۱۰ و با Shift یعنی ۱۱ تا ۲۰؛
+ *  پرش نهایی در مصرف‌کننده به اسلایدهای موجود در چیدمان فعلی محدود می‌شود. */
 export function digitFromCode(code: string, shift: boolean): number | null {
   const m = /^Digit(\d)$/.exec(code);
   if (!m) return null;

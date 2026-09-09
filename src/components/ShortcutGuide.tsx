@@ -29,7 +29,7 @@ const PRACTICE_ROWS: Row[] = [
   { action: 'تایمر این اسلاید از نو', keys: ['R'] },
   { action: 'کل جلسه از نو', keys: ['Shift', 'R'] },
   { action: 'پرش به اسلاید ۱ تا ۱۰', keys: ['۱ تا ۹', '۰'] },
-  { action: 'پرش به اسلاید ۱۱ تا ۲۰', keys: ['Shift', 'عدد'] },
+  { action: 'پرش به اسلایدهای ۱۱ به بعد', keys: ['Shift', 'عدد'] },
   { action: 'اولین و آخرین اسلاید', keys: ['Home', 'End'] },
   { action: 'چیدمان گسترده با اسلاید اختیاری', keys: ['O'] },
 ];

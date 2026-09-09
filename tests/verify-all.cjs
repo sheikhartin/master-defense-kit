@@ -112,18 +112,18 @@ assert(
 );
 
 /* ------------------------------------------------------------------ */
-/* ۴) ساختار بیست‌اسلایدی و زمان‌بندی ۱۹ دقیقه‌ای                     */
+/* ۴) ساختار نوزده‌اسلایدی (فشرده) و زمان‌بندی ۱۸:۳۰                  */
 /* ------------------------------------------------------------------ */
 const deckText = read('src/data/deck.ts');
 const durations = [...deckText.matchAll(/duration:\s*(\d+)/g)].map((m) => Number(m[1]));
 assert(
-  durations.length === 21,
-  `وجود ۲۰ اسلاید اصلی + ۱ اختیاری (یافت‌شده: ${durations.length})`,
+  durations.length === 20,
+  `وجود ۱۹ اسلاید اصلی + ۱ اختیاری (یافت‌شده: ${durations.length})`,
 );
 const optionalIndex = deckText.indexOf('optional: true');
 assert(optionalIndex > -1, 'اسلاید اختیاری با پرچم optional مشخص شده است');
 const mainSum = durations.reduce((a, b) => a + b, 0) - durations[10]; // ایندکس ۱۰: اسلاید اختیاری num:0
-assert(mainSum === 1140, `مجموع زمان اسلایدهای اصلی دقیقاً ۱۹:۰۰ باشد (یافت‌شده: ${mainSum} ثانیه)`);
+assert(mainSum === 1110, `مجموع زمان اسلایدهای اصلی دقیقاً ۱۸:۳۰ باشد (یافت‌شده: ${mainSum} ثانیه)`);
 assert(!durations.some((d) => d <= 0), 'همه زمان‌ها مثبت و معتبر هستند');
 assert(/export const chapters/.test(deckText), 'وجود فهرست رسمی بخش‌ها در deck.ts');
 assert(/id: 'ch[1-8]'/.test(deckText), 'بخش‌های ۰۱ تا ۰۸ در فهرست رسمی');
@@ -131,6 +131,9 @@ assert(/id: 'ch[1-8]'/.test(deckText), 'بخش‌های ۰۱ تا ۰۸ در فه
 /* ------------------------------------------------------------------ */
 /* ۵) آفلاین کامل: هیچ آدرس خارجی در سورس برنامه نباشد                */
 /* ------------------------------------------------------------------ */
+/* مستندات (README.md و AGENTS.md) جزو خروجی برنامه نیستند و می‌توانند برای
+   ارجاع به پایان‌نامه و مقاله، پیوند بیرونی داشته باشند؛ قاعده آفلاین بودن
+   فقط فایل‌هایی را می‌سنجد که برنامه واقعاً می‌سازد یا سرو می‌کند. */
 const allSources = [
   'index.html',
   'vite.config.ts',
@@ -142,7 +145,7 @@ const allSources = [
   'src/lib/storage.ts',
   'src/lib/session.ts',
   'src/lib/app-context.tsx',
-  ...textFiles,
+  ...textFiles.filter((rel) => rel !== 'README.md'),
 ];
 let externalFound = [];
 for (const rel of allSources) {
@@ -207,10 +210,13 @@ assert(
 const qaText = read('src/data/qa.ts');
 assert(qaText.includes('ویلکاکسون') && qaText.includes('فریدمن'), 'وجود توضیح آزمون‌های ویلکاکسون و فریدمن');
 assert(qaText.includes('نموینی'), 'وجود توضیح آزمون نموینی');
+const sessionNow = read('src/lib/session.ts');
 assert(
-  /۱۹:۱۵|حاشیه|SAFETY_BUFFER/.test(read('src/lib/session.ts')) &&
-    /۱۹:۱۵/.test(read('src/lib/session.ts')),
-  'وجود منطق حاشیه امن و بازه پایان ۱۹:۱۵ تا ۱۹:۳۰',
+  /SAFETY_BUFFER/.test(sessionNow) &&
+    /حاشیه/.test(sessionNow) &&
+    /۱۸:۴۵/.test(sessionNow) &&
+    /۱۹:۳۰/.test(sessionNow),
+  'وجود منطق حاشیه امن و بازه هدف پایان (فشرده ۱۸:۴۵ تا ۱۹:۰۰ / گسترده ۱۹:۳۰ تا ۱۹:۴۵)',
 );
 
 const printCss = read('src/index.css') + '\n' + read('src/components/PrintSheet.tsx');
@@ -259,7 +265,7 @@ const globalKb = read('src/lib/use-global-shortcuts.ts');
 assert(globalKb.includes('overlaysOpen') && globalKb.includes('isEditableTarget'), 'سکوت میان‌برها پشت لایه باز و داخل ورودی متنی');
 assert(globalKb.includes('shortcutsOn'), 'میان‌برهای تک‌کلیدی با رضایت کاربر (WCAG 2.1.4)');
 const practiceKb = read('src/labs/PracticeLab.tsx');
-assert(practiceKb.includes('digitFromCode'), 'پرش عددی به اسلاید با نگاشت دقیق ۱ تا ۲۰');
+assert(practiceKb.includes('digitFromCode'), 'پرش عددی به اسلاید با نگاشت دقیق بر پایه شماره در چیدمان فعال');
 assert(practiceKb.includes('isInteractiveTarget'), 'احترام به فعال‌شدن بومی دکمه فوکوس‌شده با Space');
 assert(read('src/lib/app-context.tsx').includes('pref:shortcuts'), 'ذخیره ترجیح میان‌برها در localStorage');
 
@@ -269,7 +275,7 @@ assert(read('src/lib/app-context.tsx').includes('pref:shortcuts'), 'ذخیره �
 const practiceNow = read('src/labs/PracticeLab.tsx');
 assert(!practiceNow.includes('* 1000'), 'هیچ مسیر ناوبری زمان را در ۱۰۰۰ ضرب نمی‌کند (واحد ثانیه یکسان است)');
 assert(practiceNow.includes('totalSec') && !practiceNow.includes('totalMs'), 'نام متغیر زمان، واحد ثانیه را دقیق بیان می‌کند');
-assert(practiceNow.includes('(دقیقه:ثانیه)'), 'واحد نمایش زمان برای کاربر شفاف است');
+assert(practiceNow.includes('(ثانیه:دقیقه)'), 'واحد نمایش زمان برای کاربر شفاف است (ثانیه سمت راست ساعت است)');
 
 /* ------------------------------------------------------------------ */
 /* ۱۳) اعمال واقعی تنظیمات تایپوگرافی (اندازه و فاصله سطر)            */
