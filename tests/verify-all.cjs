@@ -1,11 +1,11 @@
 /**
- * تست‌های مستقل برای صحت‌سنجی ساختار داده‌ها، قواعد نگارش و آفلاین بودن کامل.
- * اجرا: npm run verify
+ * Independent tests for data structure, authoring rules and full offline operation.
+ * Run: npm run verify
  *
- * این آزمون‌ها به هیچ وابستگی خارجی نیاز ندارند و فقط محتوای متنی سورس را می‌سنجند.
- * نکته: در فایل‌های TypeScript هر بک‌اسلش LaTeX به‌صورت «\\» (دونویسه) ذخیره شده؛
- * تابع norm پایین، آن را به شکل زمان اجرا (تک‌نویسه) درمی‌آورد تا رشته‌های واقعی
- * رسیده به کیتکس سنجیده شوند.
+ * These tests need no external dependency and only inspect text content of the source.
+ * Note: in TypeScript files every LaTeX backslash is stored in doubled form;
+ * the norm function below turns it back into the runtime form (a single character)
+ * so the real strings that reach KaTeX are what gets verified.
  */
 const fs = require('fs');
 const path = require('path');
@@ -30,7 +30,7 @@ function read(rel) {
   return fs.readFileSync(path.join(ROOT, rel), 'utf8');
 }
 
-/** بازسازی محتوای زمان‌اجرای رشته‌ها: هر جفت بک‌اسلش به یک بک‌اسلش تبدیل می‌شود */
+/** Rebuild the runtime string content: every doubled backslash becomes a single one */
 function norm(source) {
   return source.replace(/\\\\/g, '\\');
 }
@@ -46,10 +46,10 @@ function walk(dir, pred, base = dir) {
   return out;
 }
 
-console.log('--- شروع تست‌های اعتبارسنجی ---');
+console.log('--- starting validation tests ---');
 
 /* ------------------------------------------------------------------ */
-/* ۱) قواعد نگارش: بدون em dash و en dash                               */
+/* 1) Authoring rules: no em dash and no en dash                        */
 /* ------------------------------------------------------------------ */
 const textFiles = [
   'src/content.generated.ts',
@@ -74,11 +74,11 @@ for (const rel of textFiles) {
   const content = read(rel);
   assert(
     !content.includes('\u2014') && !content.includes('\u2013'),
-    `عدم وجود em dash و en dash در ${rel}`,
+    `no em dash or en dash in ${rel}`,
   );
 }
 
-/* content/ هم باید بدون dash باشد */
+/* content/ must be dash-free as well */
 const contentFiles = walk(path.join(ROOT, 'content'), () => true).map((p) =>
   path.relative(ROOT, p),
 );
@@ -86,12 +86,12 @@ for (const rel of contentFiles) {
   const content = read(rel);
   assert(
     !content.includes('\u2014') && !content.includes('\u2013'),
-    `عدم وجود em dash و en dash در ${rel}`,
+    `no em dash or en dash in ${rel}`,
   );
 }
 
 /* ------------------------------------------------------------------ */
-/* ۲) هیچ رقم یا حرف فارسی داخل عبارت‌های LaTeX نباشد                  */
+/* 2) No Persian digit or letter inside LaTeX expressions              */
 /* ------------------------------------------------------------------ */
 const persianChar = /[\u0600-\u06FF]/
 const latexMacro = /\\[a-zA-Z]{2,}/;
@@ -109,62 +109,62 @@ for (const rel of ['src/content.generated.ts']) {
     }
   }
 }
-assert(persianInLatex.length === 0, 'عدم وجود حروف یا ارقام فارسی داخل عبارت‌های LaTeX');
+assert(persianInLatex.length === 0, 'no Persian letters or digits inside LaTeX expressions');
 
 /* ------------------------------------------------------------------ */
-/* ۳) روابط ریاضی اصیل                                                  */
+/* 3) Authentic math relations                                          */
 /* ------------------------------------------------------------------ */
 const genNorm = norm(read('src/content.generated.ts'));
 
 const arrowCount = (genNorm.match(/\\overrightarrow\{d\(\\theta_\{i\}\^\{t\}\)\}/g) || []).length;
-assert(arrowCount >= 1, 'وجود رابطه موقعیت با پیکان روی کل گروه d(θ)');
+assert(arrowCount >= 1, 'a position relation with an arrow over the whole group d(theta) exists');
 assert(
   genNorm.includes('\\overrightarrow{d(\\theta_{i}^{t})}'),
-  'وجود رابطه اصلی در اسلاید روش با پیکان روی کل گروه d(θ)',
+  'the main relation in the method slide has an arrow over the whole group d(theta)',
 );
 assert(
   /\\kappa\\,\\bigl\(X_g\^t-X_i\^t\\bigr\)/.test(genNorm),
-  'وجود جمله اجتماعی با ضریب کاپا در رابطه اصلی',
+  'an agreement sentence with the kappa coefficient exists in the main relation',
 );
 assert(
   /\\theta_i\^\{?t\+1\}?=\\theta_i\^t.*\\sigma_i\^t/.test(genNorm),
-  'وجود رابطه اصلاح زاویه با سیگمای تطبیقی',
+  'an angle correction relation with the adaptive sigma exists',
 );
 assert(
   /\\sigma_i\^t=\\xi_i\^t\\,?\\exp\\bigl\(-t\/T\\bigr\)/.test(genNorm),
-  'وجود رابطه اختلال تطبیقی نمایی (سیگما برابر کسی نمایی کاهنده)',
+  'an exponential adaptive perturbation relation exists (sigma equal to a decaying exponential)',
 );
 
 /* ------------------------------------------------------------------ */
-/* ۴) ساختار اسلایدها: همه اسلایدها، بدون optional، جمع مدت از content   */
+/* 4) Slide structure: all slides, no optional, duration sum from content */
 /* ------------------------------------------------------------------ */
 const genText = read('src/content.generated.ts');
 const durations = [...genText.matchAll(/duration: (\d+)/g)].map((m) => Number(m[1]));
-assert(durations.length >= 1, `وجود حداقل یک اسلاید (یافت‌شده: ${durations.length})`);
-assert(!/optional:\s*true/.test(genText), 'هیچ اسلاید optional در خروجی تولیدشده نیست');
-assert(!read('src/labs/PracticeLab.tsx').includes('optionalSlide'), 'PracticeLab دیگر مسیر اسلاید اختیاری ندارد');
-assert(!read('src/components/ShortcutGuide.tsx').includes('اسلاید اختیاری'), 'راهنمای کلیدها دیگر O اختیاری ندارد');
+assert(durations.length >= 1, `at least one slide exists (found: ${durations.length})`);
+assert(!/optional:\s*true/.test(genText), 'no optional slide in the generated output');
+assert(!read('src/labs/PracticeLab.tsx').includes('optionalSlide'), 'PracticeLab no longer has an optional slide path');
+assert(!read('src/components/ShortcutGuide.tsx').includes('اسلاید اختیاری'), 'the key guide no longer has the optional O key');
 
 const talkSum = durations.reduce((a, b) => a + b, 0);
 const talkMeta = Number((genText.match(/talkTotalSec: (\d+)/) || [])[1]);
-assert(talkSum === talkMeta, `جمع duration اسلایدها با talkTotalSec یکی است (${talkSum})`);
-assert(talkSum === 1155, `مجموع زمان گفتار بسته BCOA برابر ۱۹:۱۵ است (یافت‌شده: ${talkSum} ثانیه)`);
-assert(!durations.some((d) => d <= 0), 'همه زمان‌ها مثبت و معتبر هستند');
+assert(talkSum === talkMeta, `slide duration sum matches talkTotalSec (${talkSum})`);
+assert(talkSum === 1155, `BCOA pack talk total is 19:15 (found: ${talkSum} seconds)`);
+assert(!durations.some((d) => d <= 0), 'all durations are positive and valid');
 
-/* estimatedTime انگلیسی در هر فایل اسلاید */
+/* English estimatedTime in every slide file */
 const deckMd = walk(path.join(ROOT, 'content', 'deck'), (n) => n.endsWith('.md'));
-assert(deckMd.length === durations.length, `تعداد فایل‌های deck با اسلایدهای تولیدشده یکی است (${deckMd.length})`);
+assert(deckMd.length === durations.length, `deck file count matches the generated slide count (${deckMd.length})`);
 for (const p of deckMd) {
   const t = fs.readFileSync(p, 'utf8');
-  assert(/durationSec:\s*\d+/.test(t), `durationSec در ${path.basename(p)}`);
-  assert(/estimatedTime:\s*".+"/.test(t), `estimatedTime انگلیسی در ${path.basename(p)}`);
+  assert(/durationSec:\s*\d+/.test(t), `durationSec in ${path.basename(p)}`);
+  assert(/estimatedTime:\s*".+"/.test(t), `English estimatedTime in ${path.basename(p)}`);
 }
 
-assert(/export const chapters/.test(genText), 'وجود فهرست رسمی بخش‌ها در خروجی');
-assert(/id: "ch[1-8]"/.test(genText) || /id: 'ch[1-8]'/.test(genText), 'بخش‌های ۰۱ تا ۰۸ در فهرست رسمی');
+assert(/export const chapters/.test(genText), 'the official chapter list exists in the output');
+assert(/id: "ch[1-8]"/.test(genText) || /id: 'ch[1-8]'/.test(genText), 'chapters 01 to 08 are in the official list');
 
 /* ------------------------------------------------------------------ */
-/* ۴ب) تازگی content.generated نسبت به content/                         */
+/* 4b) content.generated freshness against content/                     */
 /* ------------------------------------------------------------------ */
 function contentHash() {
   const h = crypto.createHash('sha256');
@@ -179,10 +179,10 @@ function contentHash() {
 }
 const expectedHash = contentHash();
 const embeddedHash = (genText.match(/CONTENT_HASH = "([a-f0-9]+)"/) || [])[1];
-assert(embeddedHash === expectedHash, `hash محتوای تولیدشده تازه است (${embeddedHash})`);
+assert(embeddedHash === expectedHash, `the generated content hash is fresh (${embeddedHash})`);
 
 /* ------------------------------------------------------------------ */
-/* ۵) آفلاین کامل                                                       */
+/* 5) Fully offline                                                     */
 /* ------------------------------------------------------------------ */
 const allSources = [
   'index.html',
@@ -208,24 +208,24 @@ for (const rel of allSources) {
     externalFound.push(`${rel}: ${u}`);
   }
 }
-assert(externalFound.length === 0, 'عدم وجود هیچ آدرس اینترنتی در سورس برنامه');
+assert(externalFound.length === 0, 'no internet address anywhere in the app source');
 assert(
   !read('package.json').includes('@google') && !read('package.json').includes('express'),
-  'حذف وابستگی‌های سرویس‌محور از package.json',
+  'service-based dependencies removed from package.json',
 );
 assert(
   fs.existsSync(path.join(ROOT, 'wrangler.jsonc')) &&
     read('wrangler.jsonc').includes('"directory": "./dist"'),
-  'پیکربندی استقرار Cloudflare (wrangler.jsonc) پوشه خروجی ./dist را معرفی می‌کند',
+  'the Cloudflare deployment config (wrangler.jsonc) points at the ./dist output folder',
 );
 
 /* ------------------------------------------------------------------ */
-/* ۶) پرهیز از موتورهای رندر قدیمی                                      */
+/* 6) No legacy render engines                                          */
 /* ------------------------------------------------------------------ */
 const combined = textFiles.join('\n') + read('src/main.tsx');
-assert(!combined.includes('react-latex-next'), 'عدم استفاده از react-latex-next');
-assert(!/from 'motion\/react'/.test(combined), 'عدم استفاده از motion/react');
-assert(!combined.includes('content.ts'), 'عدم ارجاع به فایل حذف‌شده content.ts');
+assert(!combined.includes('react-latex-next'), 'react-latex-next is not used');
+assert(!/from 'motion\/react'/.test(combined), 'motion/react is not used');
+assert(!combined.includes('content.ts'), 'no reference to the removed content.ts file');
 
 const legacyFiles = [
   'src/components/PresentationLab.tsx',
@@ -237,74 +237,98 @@ const legacyFiles = [
   'src/data/content.ts',
 ];
 let legacyRemain = legacyFiles.filter((rel) => fs.existsSync(path.join(ROOT, rel)));
-assert(legacyRemain.length === 0, `حذف کامل فایل‌های قدیمی (باقی‌مانده: ${legacyRemain.join('، ') || 'هیچ'})`);
+assert(legacyRemain.length === 0, `legacy file removal is complete (remaining: ${legacyRemain.join(', ') || 'none'})`);
 
 /* ------------------------------------------------------------------ */
-/* ۷) ذخیره محلی، تایمر هم‌زمان و حالت تمرکز                          */
+/* 7) Local storage, synchronized timers and focus mode               */
 /* ------------------------------------------------------------------ */
 const storageText = read('src/lib/storage.ts');
-assert(storageText.includes('localStorage'), 'ذخیره یادداشت‌ها و پیشرفت در localStorage');
+assert(storageText.includes('localStorage'), 'notes and progress are stored in localStorage');
 const practiceText = read('src/labs/PracticeLab.tsx');
-assert(practiceText.includes('session:last'), 'ذخیره و ادامه از آخرین جایگاه جلسه');
-assert(/function formatTimePersian|toPersianDigits/.test(read('src/lib/persian.ts')), 'ابزار ارقام فارسی وجود دارد');
+assert(practiceText.includes('session:last'), 'the session resumes from the last saved position');
+assert(/function formatTimePersian|toPersianDigits/.test(read('src/lib/persian.ts')), 'Persian digit helpers exist');
 
 const appText = read('src/App.tsx');
-assert(appText.includes('focus') && /setFocus/.test(appText), 'وجود حالت تمرکز در پوسته برنامه');
-assert(/readingStyle/.test(appText), 'وجود کنترل تایپوگرافی (اندازه متن و فاصله خط) در پوسته');
+assert(appText.includes('focus') && /setFocus/.test(appText), 'focus mode exists in the app shell');
+assert(/readingStyle/.test(appText), 'typography controls (text size and line spacing) exist in the shell');
 assert(
   /toggleRun|running|startStop/.test(practiceText) || practiceText.includes('pause'),
-  'وجود کنترل شروع و توقف (هم‌زمان) در جلسه تمرینی',
+  'a shared start and stop control exists in the practice session',
 );
 
 /* ------------------------------------------------------------------ */
-/* ۸) محتوا، حاشیه امن، هدف پایان، صدا، پالت                           */
+/* 8) Content, safety buffer, finish target, sound, palette            */
 /* ------------------------------------------------------------------ */
 const qaText = read('src/content.generated.ts');
-assert(qaText.includes('ویلکاکسون') && qaText.includes('فریدمن'), 'وجود توضیح آزمون‌های ویلکاکسون و فریدمن');
-assert(qaText.includes('نموینی'), 'وجود توضیح آزمون نموینی');
+assert(qaText.includes('ویلکاکسون') && qaText.includes('فریدمن'), 'explanations of the Wilcoxon and Friedman tests exist');
+assert(qaText.includes('نموینی'), 'explanations of the Nemenyi test exist');
 const sessionNow = read('src/lib/session.ts');
 assert(
   /SAFETY_BUFFER/.test(sessionNow) && /finishFromSec|practiceWindow/.test(sessionNow),
-  'وجود منطق حاشیه امن و بازه هدف پایان از meta',
+  'safety buffer and finish target range come from meta',
 );
-assert(genText.includes('finishFromSec') && genText.includes('finishToSec'), 'meta شامل بازه هدف پایان است');
+assert(genText.includes('finishFromSec') && genText.includes('finishToSec'), 'meta includes the finish target range');
 
 const printCss = read('src/index.css') + '\n' + read('src/components/PrintSheet.tsx');
-assert(/@media print/.test(printCss), 'سبک چاپی برای نسخه کاغذی برگه تقلب');
+assert(/@media print/.test(printCss), 'print stylesheet for the paper cheat sheet');
 
 const audioText = read('src/lib/audio.ts');
 assert(
   audioText.includes('CUE_THRESHOLDS') && audioText.includes('cueRemaining') && audioText.includes('playTestCue'),
-  'موتور صدای مشترک با آستانه‌های ۱۰/۵/۰ و آزمایش صدا',
+  'shared audio engine with 10/5/0 thresholds and a test sound',
 );
-assert(practiceText.includes('cueRemaining') && practiceText.includes('playThresholdCue'), 'PracticeLab از موتور صدا در حلقه تایمر استفاده می‌کند');
-assert(!/ناوبری سریع:/.test(practiceText), 'پیام آموزشی دائمی ناوبری سریع حذف شده است');
-assert(practiceText.includes('hl-block'), 'هایلایت بلوکی پاراگراف در جلسه تمرینی');
+assert(practiceText.includes('cueRemaining') && practiceText.includes('playThresholdCue'), 'PracticeLab uses the audio engine inside the timer loop');
+assert(!/ناوبری سریع:/.test(practiceText), 'the permanent quick-navigation instruction banner is removed');
+assert(practiceText.includes('hl-block'), 'paragraph block highlight in the practice session');
 
 const palettes = read('src/lib/palettes.ts');
 for (const id of ['green', 'blue', 'orange', 'purple', 'red']) {
-  assert(palettes.includes(`id: '${id}'`) || palettes.includes(`"${id}"`), `پالت ${id} تعریف شده است`);
-  assert(read('src/index.css').includes(`[data-theme="${id}"]`), `بلاک CSS data-theme=${id}`);
+  assert(palettes.includes(`id: '${id}'`) || palettes.includes(`"${id}"`), `palette ${id} is defined`);
+  assert(read('src/index.css').includes(`[data-theme="${id}"]`), `CSS block data-theme=${id}`);
 }
-assert(read('src/lib/app-context.tsx').includes('pref:palette'), 'ذخیره پالت در localStorage');
-assert(read('src/components/Header.tsx').includes('PALETTES'), 'انتخاب‌گر پالت در تنظیمات');
-assert(read('src/components/BrandMark.tsx').includes('--color-accent'), 'نشان برند از accent پالت پیروی می‌کند');
-assert(read('src/lib/palettes.ts').includes('brandSvg') && read('src/lib/palettes.ts').includes('data-dynamic-favicon'), 'فاوآیکون تب با پالت به‌صورت پویا به‌روز می‌شود');
-assert(read('src/lib/brand.mjs').includes('function brandSvg') || read('src/lib/brand.mjs').includes('export function brandSvg'), 'brandSvg در brand.mjs برای نشان پویا موجود است');
+assert(read('src/lib/app-context.tsx').includes('pref:palette'), 'palette is stored in localStorage');
+assert(read('src/components/Header.tsx').includes('PALETTES'), 'palette picker in the settings panel');
+assert(
+  read('src/components/BrandMark.tsx').includes('APP_ICON.bg') &&
+    !read('src/components/BrandMark.tsx').includes('--color-accent'),
+  'the in-app logo is fixed and does not change color with the palette (D13)',
+);
+assert(
+  !read('src/lib/palettes.ts').includes('data-dynamic-favicon') &&
+    !read('src/lib/palettes.ts').includes('applyFavicon'),
+  'the palette-dependent dynamic favicon is removed; the logo is fixed everywhere',
+);
+assert(read('src/lib/brand.mjs').includes('function brandSvg') || read('src/lib/brand.mjs').includes('export function brandSvg'), 'brandSvg exists in brand.mjs for the icon builder');
 
-assert(read('src/components/Header.tsx').includes('playTestCue'), 'دکمه آزمایش صدا در تنظیمات');
+assert(read('src/components/Header.tsx').includes('playTestCue'), 'test sound button in the settings panel');
 
 /* ------------------------------------------------------------------ */
-/* ۹) پایداری بصری                                                      */
+/* 9) Visual stability                                                  */
 /* ------------------------------------------------------------------ */
 const cssText = read('src/index.css');
-assert(!/translateY\(-/.test(cssText), 'هیچ هاور یا حالتی عنصر را به بالا هل نمی‌دهد (بدون لرزش)');
-assert(!cssText.includes('pulse-soft') && !/animation:[^;]*infinite/.test(cssText), 'هیچ انیمیشن چشمک بی‌پایان وجود ندارد');
-assert(/hover[\s\S]{0,120}box-shadow: var\(--shadow-glow/.test(cssText), 'هاور با درخشش آرام (گلو) بیان می‌شود نه جابه‌جایی');
-assert(/\.hl-block\s*\{/.test(cssText), 'کلاس hl-block برای هایلایت پاراگراف تعریف شده است');
+assert(!/translateY\(-/.test(cssText), 'no hover or state pushes an element upward (no jitter)');
+assert(!cssText.includes('pulse-soft') && !/animation:[^;]*infinite/.test(cssText), 'no endless blinking animation');
+assert(/hover[\s\S]{0,120}box-shadow: var\(--shadow-glow/.test(cssText), 'hover is expressed with subtle neutral depth, not movement');
+assert(/\.hl-block\s*\{/.test(cssText), 'the hl-block class for paragraph highlighting is defined');
+
+/* Radius scale: slightly rounded, unified and never changing in any state */
+assert(cssText.includes('--r-control: 8px'), 'the slightly-rounded radius scale (8/10/14/12) is defined on the root');
+assert(/\.btn\s*\{[^}]*border-radius: var\(--r-control\)/s.test(cssText), 'buttons use the constant slightly-rounded radius');
+{
+  let stateRadius = [];
+  const stateRuleRe = /:(?:hover|active|focus(?:-visible)?)\s*\{([^}]*)\}/g;
+  let sm;
+  while ((sm = stateRuleRe.exec(cssText)) !== null) {
+    if (sm[1].includes('border-radius')) stateRadius.push(sm[0].slice(0, 48).replace(/\s+/g, ' '));
+  }
+  assert(
+    stateRadius.length === 0,
+    `no state rule (hover/active/focus) changes the radius (${stateRadius.join(' | ') || 'none'})`,
+  );
+}
 
 /* ------------------------------------------------------------------ */
-/* ۱۰) نشان برند یکپارچه                                                */
+/* 10) Unified brand mark                                               */
 /* ------------------------------------------------------------------ */
 for (const rel of [
   'public/icon.svg',
@@ -314,74 +338,82 @@ for (const rel of [
   'public/pwa-512x512.png',
   'public/pwa-maskable-512.png',
 ]) {
-  assert(fs.existsSync(path.join(ROOT, rel)), `وجود فایل آیکون ${rel}`);
+  assert(fs.existsSync(path.join(ROOT, rel)), `icon file ${rel} exists`);
 }
-assert(read('public/icon.svg').includes('M 162 108'), 'فاوآیکون برداری از همان هندسه برند ساخته شده');
-assert(read('src/components/Header.tsx').includes('BrandMark'), 'سربرگ از نشان مشترک برند استفاده می‌کند');
-assert(read('src/App.tsx').includes('BrandMark'), 'پابرگ از نشان مشترک برند استفاده می‌کند');
+assert(read('public/icon.svg').includes('M 162 108'), 'the vector favicon is built from the same brand geometry');
+const brandMjsNow = read('src/lib/brand.mjs');
+assert(brandMjsNow.includes('APP_ICON'), 'the fixed global install-icon palette (APP_ICON) is defined in brand.mjs');
+assert(brandMjsNow.includes('#c9a14b') && brandMjsNow.includes('#000000'), 'fixed logo: gold shield on a black background');
+assert(
+  read('public/icon.svg').includes('#c9a14b') && read('public/icon.svg').includes('#000000'),
+  'the global icon (gold shield plus black) is identical in every version and palette-independent',
+);
+assert(read('scripts/build-brand.mjs').includes('APP_ICON'), 'the icon builder uses the fixed APP_ICON palette');
+assert(read('src/components/Header.tsx').includes('BrandMark'), 'the header uses the shared brand mark');
+assert(read('src/App.tsx').includes('BrandMark'), 'the footer uses the shared brand mark');
 assert(
   /<link rel="icon"[^>]*icon\.svg/.test(read('index.html')) && /favicon\.ico/.test(read('index.html')),
-  'هر دو نسخه SVG و ICO فاوآیکون وصل شده‌اند',
+  'both the SVG and the ICO favicon are wired up',
 );
 
 const htmlTheme = (read('index.html').match(/name="theme-color" content="(#[0-9a-fA-F]{6})"/) || [])[1];
 const manifestTheme = (read('vite.config.ts').match(/theme_color: '(#[0-9a-fA-F]{6})'/) || [])[1];
-assert(!!htmlTheme && htmlTheme === manifestTheme, `theme-color یکسان در HTML و manifest (${htmlTheme})`);
+assert(!!htmlTheme && htmlTheme === manifestTheme, `theme-color matches between HTML and manifest (${htmlTheme})`);
 
 /* ------------------------------------------------------------------ */
-/* ۱۱) صفحه‌کلید دقیق و دسترس‌پذیر                                      */
+/* 11) Precise and accessible keyboard handling                         */
 /* ------------------------------------------------------------------ */
 const keysText = read('src/lib/keys.ts');
-assert(keysText.includes('e.code'), 'تطبیق کلیدها با e.code (مستقل از چیدمان فارسی/انگلیسی)');
+assert(keysText.includes('e.code'), 'keys are matched with e.code (independent of the Persian/English layout)');
 const globalKb = read('src/lib/use-global-shortcuts.ts');
-assert(globalKb.includes('overlaysOpen') && globalKb.includes('isEditableTarget'), 'سکوت میان‌برها پشت لایه باز و داخل ورودی متنی');
-assert(globalKb.includes('shortcutsOn'), 'میان‌برهای تک‌کلیدی با رضایت کاربر (WCAG 2.1.4)');
+assert(globalKb.includes('overlaysOpen') && globalKb.includes('isEditableTarget'), 'shortcuts stay silent behind an open overlay and inside text inputs');
+assert(globalKb.includes('shortcutsOn'), 'single-key shortcuts require user consent (WCAG 2.1.4)');
 const practiceKb = read('src/labs/PracticeLab.tsx');
-assert(practiceKb.includes('digitFromCode'), 'پرش عددی به اسلاید با نگاشت دقیق بر پایه شماره در چیدمان فعال');
-assert(practiceKb.includes('isInteractiveTarget'), 'احترام به فعال‌شدن بومی دکمه فوکوس‌شده با Space');
-assert(read('src/lib/app-context.tsx').includes('pref:shortcuts'), 'ذخیره ترجیح میان‌برها در localStorage');
-assert(!practiceKb.includes("KeyO"), 'میان‌بر O برای اسلاید اختیاری حذف شده است');
+assert(practiceKb.includes('digitFromCode'), 'numeric slide jump maps precisely to the number row of the active layout');
+assert(practiceKb.includes('isInteractiveTarget'), 'respects the native activation of a focused button with Space');
+assert(read('src/lib/app-context.tsx').includes('pref:shortcuts'), 'the shortcut preference is stored in localStorage');
+assert(!practiceKb.includes("KeyO"), 'the O shortcut for the optional slide is removed');
 
 /* ------------------------------------------------------------------ */
-/* ۱۲) یکپارچگی واحد زمان تایمر                                         */
+/* 12) Single time unit for timers                                      */
 /* ------------------------------------------------------------------ */
 const practiceNow = read('src/labs/PracticeLab.tsx');
-assert(!practiceNow.includes('* 1000'), 'هیچ مسیر ناوبری زمان را در ۱۰۰۰ ضرب نمی‌کند (واحد ثانیه یکسان است)');
-assert(practiceNow.includes('totalSec') && !practiceNow.includes('totalMs'), 'نام متغیر زمان، واحد ثانیه را دقیق بیان می‌کند');
-assert(practiceNow.includes('(ثانیه:دقیقه)'), 'واحد نمایش زمان برای کاربر شفاف است (ثانیه سمت راست ساعت است)');
+assert(!practiceNow.includes('* 1000'), 'no navigation path multiplies time by 1000 (the unit is seconds everywhere)');
+assert(practiceNow.includes('totalSec') && !practiceNow.includes('totalMs'), 'time variable names state the seconds unit precisely');
+assert(practiceNow.includes('(ثانیه:دقیقه)'), 'the time unit is clear to the user (seconds sit to the right of the clock)');
 
 /* ------------------------------------------------------------------ */
-/* ۱۳) اعمال واقعی تنظیمات تایپوگرافی                                   */
+/* 13) Typography settings actually applied                             */
 /* ------------------------------------------------------------------ */
 const ctxNow = read('src/lib/app-context.tsx');
-assert(/lineHeight,/.test(ctxNow) && /--reading-lh/.test(ctxNow), 'readingStyle هم اندازه و هم فاصله سطر را اعمال می‌کند');
+assert(/lineHeight,/.test(ctxNow) && /--reading-lh/.test(ctxNow), 'readingStyle applies both size and line spacing');
 for (const rel of ['src/labs/PracticeLab.tsx', 'src/labs/QALab.tsx', 'src/labs/CheatSheetLab.tsx']) {
-  assert(read(rel).includes('var(--reading-lh)'), `متن خواندنی ${rel} از فاصله سطر تنظیمی کاربر پیروی می‌کند`);
+  assert(read(rel).includes('var(--reading-lh)'), `reading text in ${rel} follows the user line-spacing setting`);
 }
-assert(/font-size: 1\.0625em/.test(read('src/index.css')), 'کلاس reading با em بزرگ/کوچک می‌شود نه rem ثابت');
+assert(/font-size: 1\.0625em/.test(read('src/index.css')), 'the reading class scales with em, not a fixed rem');
 
 /* ------------------------------------------------------------------ */
-/* ۱۴) لایه‌بندی درست CSS                                               */
+/* 14) Correct CSS layering                                             */
 /* ------------------------------------------------------------------ */
 const cssNow = read('src/index.css');
 {
   const baseIdx = cssNow.indexOf('@layer base');
-  assert(baseIdx > -1, 'قواعد پایه (عنصری) داخل @layer base ثبت شده‌اند');
+  assert(baseIdx > -1, 'base (element) rules are registered inside @layer base');
   const pMargin = cssNow.search(/\np \{\s*\n\s*margin: 0;/);
-  const baseEnd = cssNow.indexOf('پایان @layer base');
+  const baseEnd = cssNow.indexOf('end @layer base');
   assert(
     pMargin > baseIdx && baseEnd > pMargin,
-    'قاعده p { margin: 0 } داخل @layer base است تا mb-* و mt-* روی پاراگراف‌ها اثر کنند',
+    'the p { margin: 0 } rule lives inside @layer base so mb-* and mt-* affect paragraphs',
   );
-  assert(cssNow.includes('@layer components'), 'کلاس‌های مؤلفه‌ای داخل @layer components ثبت شده‌اند');
+  assert(cssNow.includes('@layer components'), 'component classes are registered inside @layer components');
 }
 
 /* ------------------------------------------------------------------ */
-/* ۱۵) خروجی PDF                                                        */
+/* 15) PDF output                                                       */
 /* ------------------------------------------------------------------ */
 const printSheetNow = read('src/components/PrintSheet.tsx');
 for (const scope of ["'all'", "'roadmap'", "'deck'", "'cheat'", "'qa'", "'checklist'"]) {
-  assert(read('src/lib/app-context.tsx').includes(scope), `دامنه چاپی ${scope} در PrintScope تعریف شده است`);
+  assert(read('src/lib/app-context.tsx').includes(scope), `print scope ${scope} is defined in PrintScope`);
 }
 assert(
   printSheetNow.includes('qaMain') &&
@@ -389,55 +421,55 @@ assert(
     printSheetNow.includes('checklistGroups') &&
     printSheetNow.includes('missionPoints') &&
     printSheetNow.includes('planSlides'),
-  'نسخه چاپی همه بخش‌های وب‌سایت (نقشه راه، اسلایدها، برگه تقلب، پرسش‌ها، چک‌لیست) را پوشش می‌دهد',
+  'the print version covers every section of the site (roadmap, slides, cheat sheet, questions, checklist)',
 );
-assert(!printSheetNow.includes('اسلایدهای اختیاری'), 'چاپ دیگر بخش اسلاید اختیاری ندارد');
-assert(read('src/components/Header.tsx').includes('PDF_OPTIONS'), 'منوی دانلود PDF در سربرگ در دسترس است');
+assert(!printSheetNow.includes('اسلایدهای اختیاری'), 'print no longer has an optional slide section');
+assert(read('src/components/Header.tsx').includes('PDF_OPTIONS'), 'the PDF download menu is available in the header');
 assert(
   read('src/lib/use-global-shortcuts.ts').includes("k.shift ? 'all'"),
-  'میان‌بر Alt + Shift + P خروجی PDF کل وب‌سایت را باز می‌کند',
+  'the Alt + Shift + P shortcut opens the whole-site PDF export',
 );
-assert(/ps-checklist li::before/.test(cssNow), 'چک‌لیست چاپی با مربع خالی برای تیک‌زدن روی کاغذ');
-assert(/break-inside: avoid/.test(cssNow), 'بلوک‌های چاپی وسط صفحه نمی‌شکنند (PDF تمیز)');
+assert(/ps-checklist li::before/.test(cssNow), 'printed checklist with an empty square to tick on paper');
+assert(/break-inside: avoid/.test(cssNow), 'print blocks do not break in the middle of a page (clean PDF)');
 
 /* ------------------------------------------------------------------ */
-/* ۱۶) مقاومت واکنش‌گرایی                                               */
+/* 16) Responsive resilience                                            */
 /* ------------------------------------------------------------------ */
 const cssResp = read('src/index.css');
 assert(
   /\.table-wrap\s*\{[^}]*overflow-x:\s*auto/s.test(cssResp),
-  'قاب لغزان .table-wrap با overflow-x: auto برای جدول‌ها تعریف شده است',
+  'the .table-wrap sliding frame with overflow-x: auto is defined for tables',
 );
-assert(/\.chip-wrap\s*\{[^}]*white-space:\s*normal/s.test(cssResp), 'گونه .chip-wrap برای نشستن برچسب‌ها روی چند خط');
-assert(/\.hbar\s*\{[^}]*overflow-x:\s*auto/s.test(cssResp), 'اسکرولر .hbar با نوار مرئی برای ردیف‌های لغزان');
+assert(/\.chip-wrap\s*\{[^}]*white-space:\s*normal/s.test(cssResp), 'the .chip-wrap flavour lets chips wrap onto several lines');
+assert(/\.hbar\s*\{[^}]*overflow-x:\s*auto/s.test(cssResp), 'the .hbar scroller with a visible bar for sliding rows');
 
 const cheatLabResp = read('src/labs/CheatSheetLab.tsx');
 assert(
   cheatLabResp.includes('grid grid-cols-1 gap-5 lg:grid-cols-2'),
-  'گرید جدول‌های پشتیبان ترک تک‌ستونه صریح دارد (بدون ترک auto انفجاری)',
+  'backup-table grids have an explicit single-column track (no exploding auto tracks)',
 );
 assert(
   (cheatLabResp.match(/card min-w-0 p-6/g) || []).length >= 2,
-  'کارت‌های جدول‌های پشتیبان min-w-0 دارند تا از ترک گرید بیرون نزنند',
+  'backup-table cards have min-w-0 so they never escape the grid track',
 );
 assert(
   (cheatLabResp.match(/className="table-wrap"/g) || []).length === 2,
-  'هر دو جدول (نرخ موفقیت و تحلیل حذف) داخل قاب لغزان .table-wrap هستند',
+  'both tables (success rate and ablation) sit inside the .table-wrap sliding frame',
 );
-assert(cheatLabResp.includes('chip chip-pine chip-wrap'), 'برچسب‌های پارامترها با chip-wrap در صفحه باریک می‌شکنند');
+assert(cheatLabResp.includes('chip chip-pine chip-wrap'), 'parameter chips wrap with chip-wrap on narrow screens');
 assert(
   cheatLabResp.includes('hbar flex min-w-0 gap-2') && !cheatLabResp.includes('no-hbar'),
-  'ردیف اندازه اثر از اسکرولر مرئی .hbar استفاده می‌کند، نه اسکرولر پنهان',
+  'the effect-size row uses the visible .hbar scroller, not a hidden one',
 );
 
 const practiceLabResp = read('src/labs/PracticeLab.tsx');
 assert(
   practiceLabResp.includes('grid grid-cols-1 gap-px bg-line sm:grid-cols-3'),
-  'گرید سه نمایشگر زمان ترک تک‌ستونه صریح دارد',
+  'the three timer displays grid has an explicit single-column track',
 );
 assert(
   practiceLabResp.includes('hbar') && !practiceLabResp.includes('no-hbar'),
-  'نوار لغزان اسلایدها از .hbar مرئی استفاده می‌کند',
+  'the slide strip uses the visible .hbar scroller',
 );
 
 for (const [rel, snippet] of [
@@ -445,53 +477,125 @@ for (const [rel, snippet] of [
   ['src/labs/ChecklistLab.tsx', 'grid grid-cols-1 gap-5 lg:grid-cols-2'],
   ['src/labs/ChecklistLab.tsx', 'grid grid-cols-1 gap-4 md:grid-cols-2'],
 ]) {
-  assert(read(rel).includes(snippet), `گرید ${rel} ترک تک‌ستونه صریح دارد (${snippet})`);
+  assert(read(rel).includes(snippet), `grid in ${rel} has an explicit single-column track (${snippet})`);
 }
 
 const headerResp = read('src/components/Header.tsx');
 assert(
   (headerResp.match(/max-w-\[calc\(100vw-2rem\)\]/g) || []).length === 2,
-  'هر دو منوی کشویی سربرگ (PDF و تنظیمات) به عرض دید محدود شده‌اند',
+  'both header dropdowns (PDF and settings) are clamped to the viewport width',
 );
 assert(
   /relative flex shrink-0 items-center gap-1/.test(headerResp),
-  'لنگر منوهای سربرگ روی گروه کنترل‌هاست تا از لبه دید بیرون نزنند',
+  'header menu anchors sit on the control group so they never poke past the viewport edge',
 );
 assert(
   headerResp.includes('tab-nav') && headerResp.includes('tab-pill'),
-  'ناوبری تب‌ها با کلاس‌های tab-nav و tab-pill یکپارچه شده است',
+  'tab navigation is unified with the tab-nav and tab-pill classes',
 );
-assert(/\.tab-pill/.test(cssResp) && /\.lab-pane/.test(cssResp), 'استایل ناوبری تب و ورود نرم صفحه تعریف شده است');
+assert(/\.tab-pill/.test(cssResp) && /\.lab-pane/.test(cssResp), 'tab navigation style and soft pane entrance are defined');
 
-assert(/main\s*\{\s*overflow-x:\s*clip;/s.test(cssResp), 'خط دفاع overflow-x: clip روی ناحیه محتوای اصلی');
+assert(/main\s*\{\s*overflow-x:\s*clip;/s.test(cssResp), 'the overflow-x: clip defense line is on the main content area');
 
 assert(
   /\.table-wrap\s*\{[^}]*border:\s*1px solid var\(--color-line\)/s.test(cssResp),
-  'قاب کامل جدول (شامل خط پایانی سطر آخر) توسط .table-wrap کشیده می‌شود',
+  'the complete table frame (including the closing line of the last row) is drawn by .table-wrap',
 );
 assert(
   cssResp.includes('.table-wrap .mini-table > thead > tr > *') &&
     cssResp.includes('.table-wrap .mini-table tr > *:first-child') &&
     cssResp.includes('.table-wrap .mini-table tr > *:last-child'),
-  'خطوط لبه بیرونی سلول‌ها داخل قاب برداشته شده‌اند تا قاب دوبله نشود',
+  'outer cell edge lines are removed inside the frame so the frame is not doubled',
 );
 
 /* ------------------------------------------------------------------ */
-/* ۱۷) خط لوله محتوا و AGENTS.md                                        */
+/* 17) Content pipeline and AGENTS.md                                   */
 /* ------------------------------------------------------------------ */
-assert(fs.existsSync(path.join(ROOT, 'scripts/compile-content.mjs')), 'اسکریپت compile-content موجود است');
-assert(fs.existsSync(path.join(ROOT, 'content/meta.yaml')), 'content/meta.yaml موجود است');
-assert(fs.existsSync(path.join(ROOT, 'content/README.md')), 'راهنمای content/README.md موجود است');
-assert(read('package.json').includes('"content"'), 'اسکریپت npm run content تعریف شده است');
-assert(read('AGENTS.md').includes('content/'), 'AGENTS.md ساختار content/ را مستند کرده است');
-assert(read('AGENTS.md').includes('pref:palette'), 'AGENTS.md پالت رنگ را مستند کرده است');
-assert(read('README.md').includes('content/'), 'README ساختار محتوا را توضیح می‌دهد');
+assert(fs.existsSync(path.join(ROOT, 'scripts/compile-content.mjs')), 'the compile-content script exists');
+assert(fs.existsSync(path.join(ROOT, 'content/meta.yaml')), 'content/meta.yaml exists');
+assert(fs.existsSync(path.join(ROOT, 'content/README.md')), 'the content/README.md guide exists');
+assert(read('package.json').includes('"content"'), 'the npm run content script is defined');
+assert(read('AGENTS.md').includes('content/'), 'AGENTS.md documents the content/ structure');
+assert(read('AGENTS.md').includes('pref:palette'), 'AGENTS.md documents the color palette');
+assert(read('README.md').includes('content/'), 'the README explains the content structure');
 
-console.log(`--- نتیجه تست‌ها: ${passCount} قبول، ${failCount} خطا ---`);
+/* ------------------------------------------------------------------ */
+/* 18) English code comments (UI strings and content stay Persian)      */
+/* ------------------------------------------------------------------ */
+{
+  // Code comments and developer-facing messages are English so the project is
+  // readable for a global audience. User-visible UI strings, app metadata and
+  // all content/ stay Persian: this test only inspects comment text.
+  const commentTexts = (text) => {
+    const out = [];
+    let i = 0;
+    while (i < text.length) {
+      const c = text[i];
+      if (c === '"' || c === "'" || c === '`') {
+        const q = c;
+        i += 1;
+        while (i < text.length) {
+          if (text[i] === '\\') {
+            i += 2;
+            continue;
+          }
+          if (text[i] === q) {
+            i += 1;
+            break;
+          }
+          i += 1;
+        }
+        continue;
+      }
+      if (c === '/' && text[i + 1] === '/') {
+        const end = text.indexOf('\n', i);
+        const stop = end === -1 ? text.length : end;
+        out.push(text.slice(i + 2, stop));
+        i = stop;
+        continue;
+      }
+      if (c === '/' && text[i + 1] === '*') {
+        const end = text.indexOf('*/', i + 2);
+        const stop = end === -1 ? text.length : end;
+        out.push(text.slice(i + 2, stop));
+        i = stop + 2;
+        continue;
+      }
+      i += 1;
+    }
+    return out;
+  };
+
+  const codeFiles = [
+    ...walk(path.join(ROOT, 'src'), (p) => /\.(ts|tsx|css)$/.test(p)),
+    ...walk(path.join(ROOT, 'scripts'), (p) => /\.(mjs|cjs|js)$/.test(p)),
+    path.join(ROOT, 'tests/verify-all.cjs'),
+    path.join(ROOT, 'vite.config.ts'),
+    path.join(ROOT, 'wrangler.jsonc'),
+  ]
+    .filter((p) => !p.endsWith('content.generated.ts'))
+    .map((p) => path.relative(ROOT, p));
+
+  const fa = /[\u0600-\u06FF]/;
+  const offenders = codeFiles.filter((rel) => commentTexts(read(rel)).some((t) => fa.test(t)));
+  assert(
+    offenders.length === 0,
+    `no Persian text inside code comments (offenders: ${offenders.join(', ') || 'none'})`,
+  );
+
+  const htmlComments = [...read('index.html').matchAll(/<!--([\s\S]*?)-->/g)].map((m) => m[1]);
+  assert(!htmlComments.some((t) => fa.test(t)), 'index.html comments are English as well');
+  assert(
+    read('AGENTS.md').includes('code comments are in English'),
+    'AGENTS.md documents the English-comment convention',
+  );
+}
+
+console.log(`--- test result: ${passCount} passed, ${failCount} failed ---`);
 
 if (failCount > 0) {
-  console.error('برخی تست‌ها ناموفق بودند.');
+  console.error('Some tests failed.');
   process.exit(1);
 } else {
-  console.log('همه تست‌ها با موفقیت پاس شدند.');
+  console.log('All tests passed.');
 }

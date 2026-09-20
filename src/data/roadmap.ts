@@ -1,5 +1,5 @@
 /**
- * سازگاری عقب‌رو: نقشه راه از content/roadmap/* می‌آید.
+ * Backward compatibility: the roadmap comes from content/roadmap/*.
  */
 export {
   governingPrinciple,

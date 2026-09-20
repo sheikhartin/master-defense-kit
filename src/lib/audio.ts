@@ -1,7 +1,7 @@
 /**
- * هشدار صوتی نرم جلسه تمرینی.
- * صدا فقط پس از ژست کاربر (شروع تایمر / آزمایش صدا) فعال می‌شود.
- * آستانه‌ها: ۱۰، ۵ و ۰ ثانیه مانده از زمان اسلاید.
+ * Soft audio alerts for the practice session.
+ * Sound only arms after a user gesture (starting the timer / test sound).
+ * Thresholds: 10, 5 and 0 seconds left on the slide timer.
  */
 
 let audioCtx: AudioContext | null = null;
@@ -18,7 +18,7 @@ export function ensureAudio(): void {
     }
     if (audioCtx?.state === 'suspended') void audioCtx.resume();
   } catch {
-    /* بی‌صدا */
+    /* silent */
   }
 }
 
@@ -35,15 +35,15 @@ export function beep(freq = 660, len = 0.16, gain = 0.05): void {
     osc.start();
     osc.stop(audioCtx.currentTime + len + 0.02);
   } catch {
-    /* نادیده */
+    /* ignored */
   }
 }
 
 /**
- * تشخیص لبه عبور از آستانه‌های ۱۰ / ۵ / ۰.
- * prevRem: باقی‌مانده صحیح قبلی (یا null در شروع اسلاید)
- * nextRem: باقی‌مانده صحیح فعلی
- * برمی‌گرداند nextRem (برای ذخیره به‌عنوان prev)
+ * Detect crossing the 10 / 5 / 0 second thresholds.
+ * prevRem: previous whole remaining value (or null at slide start)
+ * nextRem: current whole remaining value
+ * Returns nextRem (to be stored as prev)
  */
 export function cueRemaining(
   prevRem: number | null,
@@ -51,7 +51,7 @@ export function cueRemaining(
   onCue: (rem: number) => void,
 ): number {
   if (prevRem !== null && nextRem < prevRem) {
-    // هر آستانه‌ای که از بالا به آن یا زیر آن عبور کرده‌ایم (حتی اگر یک تیک چند ثانیه بپرد)
+    // any threshold we crossed from above or below (even if one tick skips several seconds)
     for (const t of CUE_THRESHOLDS) {
       if (prevRem > t && nextRem <= t) onCue(t);
     }
@@ -59,13 +59,13 @@ export function cueRemaining(
   return nextRem;
 }
 
-/** پخش نشانه‌های استاندارد ۱۰ / ۵ / ۰ */
+/** Play the standard 10 / 5 / 0 cues */
 export function playThresholdCue(rem: number): void {
   if (rem === 10 || rem === 5) beep(660, 0.16, 0.05);
   else if (rem === 0) beep(880, 0.3, 0.06);
 }
 
-/** آزمایش صدا از تنظیمات (ژست کاربر) */
+/** Test sound from the settings panel (user gesture) */
 export function playTestCue(): void {
   ensureAudio();
   beep(720, 0.18, 0.06);

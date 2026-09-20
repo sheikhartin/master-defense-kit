@@ -1,10 +1,10 @@
 /**
- * رفتار یکپارچه لایه‌های باز (پنجره، پنل، راهنما):
- *   ثبت در شمارنده لایه‌ها (سکوت‌کردن میان‌برهای پشت)، بستن با Escape،
- *   به‌دام‌انداختن Tab درون لایه و بازگرداندن فوکوس به جای قبلی هنگام بستن.
- *
- * این یعنی همه پنجره‌های برنامه از یک استاندارد دسترس‌پذیری پیروی می‌کنند و
- * کاربر صفحه‌کلیدی هرگز پشت یک پنجره باز گیر نمی‌کند.
+ * Unified behavior for open overlays (modal, panel, guide):
+ *   register in the overlay counter (so shortcuts behind stay silent), close on
+ *   Escape, trap Tab inside the overlay and restore focus to the previous
+ *   element when it closes.
+ * This means every modal in the app follows one accessibility standard and a
+ * keyboard user never gets stuck behind an open modal.
  */
 
 import { useEffect, useRef } from 'react';
@@ -61,7 +61,7 @@ export function useModalBehavior<T extends HTMLElement>(open: boolean, onClose: 
       }
     };
 
-    /* capture تا Escape پیش از هر شنونده سراسری دیگری مهار شود */
+    /* capture so Escape is intercepted before any other global listener */
     window.addEventListener('keydown', onKey, true);
     return () => {
       cancelAnimationFrame(raf);

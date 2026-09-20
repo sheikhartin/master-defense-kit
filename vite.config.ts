@@ -4,8 +4,8 @@ import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 /**
- * پیکربندی ساخت: کاملاً آفلاین.
- * هیچ CDN یا سرویس خارجی وجود ندارد؛ فقط دارایی‌های محلی (فونت، فرمول، تصویر).
+ * Build configuration: fully offline.
+ * There is no CDN and no external service; only local assets (font, equations, images).
  */
 export default defineConfig(() => {
   return {
@@ -31,7 +31,7 @@ export default defineConfig(() => {
           dir: 'rtl',
           display: 'standalone',
           orientation: 'portrait',
-          /* هم‌خوان با theme-color در index.html تا نوار مرورگر و سربرگ یکی باشند */
+          /* Kept in sync with theme-color in index.html so the browser bar and header match */
           theme_color: '#fcfaf3',
           background_color: '#f4f0e6',
           icons: [
@@ -51,7 +51,7 @@ export default defineConfig(() => {
     server: {
       host: '0.0.0.0',
       port: 3000,
-      // پذیرش میزبان‌های پیش‌نمایش دامنه e2b.app (فقط توسعه؛ هیچ درخواست بیرونی انجام نمی‌شود)
+      // Accept e2b.app preview hosts (development only; no external request is ever made)
       allowedHosts: ['.e2b.app'],
     },
     preview: {

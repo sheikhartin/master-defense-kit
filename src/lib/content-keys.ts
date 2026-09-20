@@ -1,7 +1,7 @@
 /**
- * سازندگان کلید localStorage برای اسلایدها و یادداشت‌ها.
- * کلیدهای جدید بر پایه id پایدار محتوا هستند؛ خواندن، کلیدهای قدیمی
- * مبتنی بر شماره / opt را به‌عنوان پشتیبان می‌پذیرد.
+ * Builders for localStorage keys of slides and notes.
+ * New keys are based on the stable content id; reads also accept the legacy
+ * number / opt based keys as a fallback.
  */
 
 import { readStore, writeStore } from './storage';
@@ -20,7 +20,7 @@ export function slideNoteKey(id: string) {
   return `slide-note:${id}`;
 }
 
-/** خواندن پرچم با پشتیبان کلید قدیمی */
+/** Read a flag with a legacy key fallback */
 export function readFlagWithLegacy(primary: string, legacy: string[]): boolean {
   const cur = readStore<boolean | null>(primary, null);
   if (cur !== null) return !!cur;
@@ -38,7 +38,7 @@ export function emptyPersonalNote(): PersonalNote {
   return { text: '', important: false, extras: [] };
 }
 
-/** پارس یادداشت شخصی: رشته قدیمی یا شیء جدید */
+/** Parse a personal note: legacy string or new object */
 export function parsePersonalNote(raw: unknown): PersonalNote {
   if (typeof raw === 'string') {
     return { text: raw, important: false, extras: [] };

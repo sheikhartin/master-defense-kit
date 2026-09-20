@@ -1,29 +1,29 @@
 @import "tailwindcss";
 
 /* ==========================================================================
-   بستار دفاع ارشد BCOA
-   سیستم طراحی: پس‌زمینه گرم و آرام، متن با کنتراست بالا، بدون هرگونه
-   وابستگی به فونت یا سرویس خارجی. همه قلم‌ها از درون برنامه بارگذاری می‌شوند.
+   BCOA Master's Defense Kit
+   Design system: warm calm background, high-contrast text, zero dependency
+   on external fonts or services. All fonts are bundled with the app.
    ========================================================================== */
 
 @theme {
-  /* پالت گرم و آرام: خنثی‌ها ثابت؛ تأکید (pine) در زمان اجرا با data-theme عوض می‌شود */
-  --color-paper: #f4f0e6;        /* پس‌زمینه اصلی: کرم ملایم */
-  --color-paper-deep: #ece6d6;   /* پس‌زمینه تیره‌تر */
-  --color-surface: #fcfaf3;      /* سطح کارت */
-  --color-surface-2: #f7f3e8;    /* سطح درون کارت */
-  --color-ink: #2b251c;          /* متن اصلی: قهوه‌ای سرمه‌ای گرم */
-  --color-ink-soft: #554d3e;     /* متن فرعی */
-  --color-muted: #7d7563;        /* برچسب‌های کم‌رنگ */
-  --color-line: #e2dac8;         /* خطوط جداکننده */
+  /* Warm calm palette: neutrals are fixed; the accent (pine) changes at runtime via data-theme */
+  --color-paper: #f4f0e6;        /* main background: soft cream */
+  --color-paper-deep: #ece6d6;   /* deeper background */
+  --color-surface: #fcfaf3;      /* card surface */
+  --color-surface-2: #f7f3e8;    /* surface inside a card */
+  --color-ink: #2b251c;          /* primary text: warm deep brown */
+  --color-ink-soft: #554d3e;     /* secondary text */
+  --color-muted: #7d7563;        /* faint labels */
+  --color-line: #e2dac8;         /* divider lines */
   --color-line-strong: #cfc5ab;
-  --color-pine: #1e5a49;         /* رنگ تأکید (پیش‌فرض سبز کاج؛ با پالت عوض می‌شود) */
+  --color-pine: #1e5a49;         /* accent color (default pine green; changes with the palette) */
   --color-pine-deep: #163f35;
   --color-pine-soft: #e6efe8;
   --color-pine-wash: #eef4ed;
-  --color-ochre: #9a7126;        /* طلایی ملایم برای برجسته‌سازی (ثابت در همه پالت‌ها) */
+  --color-ochre: #9a7126;        /* soft gold for emphasis (fixed in every palette) */
   --color-ochre-soft: #f2e7cc;
-  --color-clay: #a04a2c;         /* قرمز خاکی برای هشدارهای نرم (ثابت) */
+  --color-clay: #a04a2c;         /* clay red for soft warnings (fixed) */
   --color-clay-soft: #f6e3d9;
   --color-slate-warm: #ece7db;
 
@@ -32,13 +32,12 @@
   --shadow-soft: 0 1px 2px rgba(43, 37, 28, 0.04), 0 8px 24px rgba(43, 37, 28, 0.05);
   --shadow-lift: 0 2px 4px rgba(43, 37, 28, 0.05), 0 16px 40px rgba(43, 37, 28, 0.08);
 
-  /* درخشش آرام برای هاور: به‌جای جابه‌جایی، فقط هاله نور */
-  --shadow-glow-sm: 0 0 0 1px rgba(30, 90, 73, 0.12), 0 3px 12px rgba(30, 90, 73, 0.16);
-  --shadow-glow: 0 0 0 1px rgba(30, 90, 73, 0.12), 0 8px 22px rgba(30, 90, 73, 0.16),
-    0 14px 40px -12px rgba(30, 90, 73, 0.28);
+  /* Subtle neutral depth for hover: no colored glow, no movement, fixed in every palette */
+  --shadow-glow-sm: 0 1px 2px rgba(43, 37, 28, 0.06), 0 3px 10px rgba(43, 37, 28, 0.08);
+  --shadow-glow: 0 2px 4px rgba(43, 37, 28, 0.06), 0 10px 26px rgba(43, 37, 28, 0.1);
 }
 
-/* ---------- توکن‌های حرکت و پالت زمان‌اجرا ---------- */
+/* ---------- Motion and runtime palette tokens ---------- */
 
 :root {
   --ease-soft: cubic-bezier(0.25, 0.62, 0.22, 1);
@@ -47,7 +46,14 @@
   --t-med: 320ms;
   --t-slow: 560ms;
 
-  /* accent aliases (هم‌تراز با pine؛ از applyPalette به‌روز می‌شوند) */
+  /* Radius scale: slightly rounded, unified and constant.
+        Hard rule: no state rule (hover/active/focus) changes the radius. */
+  --r-control: 8px;  /* button, icon button, tab, input */
+  --r-item: 10px;    /* in-page blocks: panel, stat cell, highlight */
+  --r-card: 14px;    /* primary cards */
+  --r-overlay: 12px; /* menus and floating overlays */
+
+  /* accent aliases (kept in sync with pine; updated by applyPalette) */
   --color-accent: #1e5a49;
   --color-accent-deep: #163f35;
   --color-accent-soft: #e6efe8;
@@ -55,7 +61,7 @@
   --accent-rgb: 30, 90, 73;
 }
 
-/* پنج پالت حرفه‌ای: فقط تأکید عوض می‌شود؛ کاغذ/مرکب/ochre/clay ثابت می‌مانند */
+/* Five professional palettes: only the accent changes; paper/ink/ochre/clay stay fixed */
 [data-theme="green"] {
   --color-accent: #1e5a49;
   --color-accent-deep: #163f35;
@@ -92,16 +98,16 @@
   --accent-rgb: 139, 58, 50;
 }
 
-/* ---------- پایه ---------- */
+/* ---------- Base ---------- */
 
 /*
-  نکته مهم معماری CSS (ریشه مشکل فاصله‌گذاری سراسری):
-  در Tailwind نسخه ۴ همه کلاس‌های ابزاری داخل «@layer utilities» تولید می‌شوند و
-  طبق استاندارد Cascade Layers، هر قاعده بدون لایه بر همه قواعد لایه‌دار غلبه می‌کند.
-  بنابراین اگر انتخاب‌گرهای عنصری مثل «p { margin: 0 }» بدون لایه بمانند، همه
-  ابزارهای فاصله مانند mb-2 و mt-3 روی پاراگراف‌ها بی‌اثر می‌شوند و فاصله‌گذاری
-  کل وب‌سایت به هم می‌ریزد. برای همین، قواعد پایه در «@layer base» و کلاس‌های
-  مؤلفه‌ای در «@layer components» ثبت می‌شوند تا utilities همیشه حرف آخر را بزند.
+  Important CSS architecture note (the root cause of the global spacing bug):
+  in Tailwind v4 every utility class is generated inside "@layer utilities" and,
+  per the Cascade Layers spec, any unlayered rule beats every layered rule.
+  So if element selectors such as "p { margin: 0 }" stay unlayered, spacing
+  utilities like mb-2 and mt-3 have no effect on paragraphs and the spacing of
+  the whole site collapses. That is why base rules live in "@layer base" and
+  component classes in "@layer components", so utilities always win.
 */
 
 @layer base {
@@ -135,13 +141,13 @@ body {
   color: var(--color-ink);
 }
 
+/* The focus ring is additive only; it never changes the shape or corners of an element */
 :focus-visible {
   outline: 2px solid rgba(var(--accent-rgb), 0.55);
   outline-offset: 2px;
-  border-radius: 8px;
 }
 
-/* پس‌زمینه کاغذی خیلی ملایم برای عمق بدون شلوغی */
+/* Very soft paper background for depth without clutter */
 body::before {
   content: "";
   position: fixed;
@@ -177,51 +183,52 @@ p {
 }
 
 /*
-  آخرین خط دفاع چیدمان: ناحیه محتوای اصلی هرگز بیرون‌زدگی افقی را به
-  قاب صفحه منتقل نمی‌کند. اگر موردی از قواعد بالا جا بماند، داخل همین
-  ناحیه بریده می‌شود و کل صفحه افقاً نمی‌لغزد. سربرگ عمداً مستثنی است
-  تا منوهای کشویی‌اش (خروجی PDF و تنظیمات خواندن) بریده نشوند.
-  clip به‌جای hidden تا ظرف اسکرول تازه ساخته نشود و sticky سالم بماند.
-*/
+  Last line of layout defense: the main content area never hands horizontal
+  overflow to the page frame. If something slips past the rules above, it is
+  clipped inside this area and the page never scrolls sideways. The header is
+  deliberately exempt so its dropdown menus (PDF export and reading settings)
+  are not clipped. "clip" instead of "hidden" so no new scroll container is
+   created and sticky keeps working.
+ */
 main {
   overflow-x: clip;
 }
 
-} /* پایان @layer base */
+} /* end @layer base */
 
 /* ==========================================================================
-   ابزارهای اختصاصی (بدون وابستگی به کلاس‌های ابزاری سنگین)
-   همه کلاس‌های مؤلفه‌ای در «@layer components» ثبت می‌شوند تا کلاس‌های ابزاری
-   Tailwind (مثل h-7 یا hover:border-ochre/40) بتوانند در صورت نیاز آن‌ها را
-   لغو کنند؛ این همان ترتیب استاندارد لایه‌هاست: base، سپس components، سپس utilities.
+   project-specific utilities (no dependency on heavy utility classes)
+   every component class is registered in "@layer components" so Tailwind
+   utilities (such as h-7 or hover:border-ochre/40) can still override them
+   when needed; this is the standard layer order: base, then components, then utilities.
    ========================================================================== */
 
 @layer components {
 
-/* کارت پایه */
+/* Base card */
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-line);
-  border-radius: 20px;
+  border-radius: var(--r-card);
   box-shadow: var(--shadow-soft);
   transition:
     box-shadow var(--t-med) var(--ease-soft),
     border-color var(--t-med) var(--ease-soft);
 }
 
-/* سطح درون‌کارتی */
+/* In-card surface */
 .panel {
   background: var(--color-surface-2);
   border: 1px solid var(--color-line);
-  border-radius: 14px;
+  border-radius: var(--r-item);
 }
 
-/* همان خط دفاع افقی برای پابرگ (فرزند لایه‌دار بیرون‌ران ندارد) */
+/* Same horizontal overflow defense for the footer (no layered child escapes) */
 .site-footer {
   overflow-x: clip;
 }
 
-/* سربرگ چسبان: خط تأکید باریک زیر ناوبری */
+/* Sticky header: thin accent line under the navigation */
 .site-header {
   box-shadow: 0 1px 0 rgba(43, 37, 28, 0.04);
 }
@@ -256,7 +263,7 @@ main {
   line-height: 1.7;
 }
 
-/* ناوبری تب‌ها: قرص فعال واضح، هاور آرام */
+/* Tab navigation: clear active pill, calm hover */
 .tab-nav {
   display: flex;
   gap: 0.25rem;
@@ -272,7 +279,7 @@ main {
   align-items: center;
   gap: 0.4rem;
   flex-shrink: 0;
-  border-radius: 999px;
+  border-radius: var(--r-control);
   padding: 0.45rem 0.95rem;
   font-size: 0.875rem;
   font-weight: 700;
@@ -293,13 +300,13 @@ main {
 .tab-pill[aria-current="page"] {
   background: var(--color-pine);
   color: #fdfbf4;
-  box-shadow: 0 1px 2px rgba(var(--accent-rgb), 0.22), 0 6px 16px rgba(var(--accent-rgb), 0.16);
+  box-shadow: 0 1px 2px rgba(43, 37, 28, 0.1);
 }
 .tab-pill[aria-current="page"] .tab-pill-icon {
   color: rgba(253, 251, 244, 0.92);
 }
 
-/* ورود نرم صفحه هنگام تعویض تب */
+/* Soft pane entrance when switching tabs */
 .lab-pane {
   animation: lab-in 420ms var(--ease-out) both;
 }
@@ -308,7 +315,7 @@ main {
   to { opacity: 1; transform: none; }
 }
 
-/* نوار آمار فشرده روی نقشه راه */
+/* Compact stats strip on the roadmap */
 .stat-strip {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -318,7 +325,7 @@ main {
   .stat-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 .stat-cell {
-  border-radius: 14px;
+  border-radius: var(--r-item);
   border: 1px solid var(--color-line);
   background: var(--color-surface-2);
   padding: 0.75rem 0.9rem;
@@ -337,22 +344,22 @@ main {
   letter-spacing: -0.01em;
 }
 
-/* چپ‌به‌راست‌شده‌های امن برای متن فنی */
+/* Safe left-to-right isolates for technical text */
 .ltr {
   direction: ltr;
   unicode-bidi: isolate;
 }
 
-/* متن خواندنی: سطر بلند و فاصله‌گذاری قابل تنظیم کاربر.
-   اندازه با em است تا از درصدِ ظرف (تنظیم اندازه متن) پیروی کند و بزرگ/کوچک شود. */
+/* Reading text: long line and user-adjustable spacing.
+      Size is in em so it follows the container percentage (text size setting) and scales up and down. */
 .reading {
   line-height: var(--reading-lh, 2);
   font-size: 1.0625em;
 }
 
-/* ---------- تایپوگرافی ارقام و زمان ---------- */
+/* ---------- Digits and time typography ---------- */
 
-/* همه‌جا، مخصوصاً تایمرها: قلم فارسی برنامه + ارقام فارسی */
+/* Everywhere, especially timers: the app Persian font plus Persian digits */
 .timer-num {
   font-family: var(--font-sans);
   font-weight: 700;
@@ -368,18 +375,18 @@ main {
   font-weight: 700;
 }
 
-} /* پایان @layer components (بخش اول) */
+} /* end @layer components (part 1) */
 
-/* ---------- فرمول‌ها ---------- */
+/* ---------- Equations ---------- */
 
 /*
-  این قواعد عمداً بدون لایه می‌مانند: شیوه‌نامه katex.min.css از درون جاوااسکریپت
-  وارد می‌شود و بدون لایه است؛ اگر قواعد زیر داخل لایه بروند، قواعد کیتکس بر
-  آن‌ها غلبه می‌کنند و فاصله و اندازه فرمول‌ها به هم می‌ریزد.
+  These rules are deliberately left unlayered: the katex.min.css stylesheet is
+  injected from JavaScript and is itself unlayered; if the rules below were
+  layered, KaTeX rules would beat them and equation spacing and size would break.
 
-  ظرف فرمول همیشه چپ‌به‌راست است و هرگز از قاب بیرون نمی‌زند.
-  اگر در صفحه‌های بسیار باریک جا نشد، داخل خود ظرف اسکرول می‌شود
-  و هیچ اسکرول افقی سراسری ایجاد نمی‌کند.
+  The equation container is always left to right and never escapes the frame.
+  On very narrow screens it scrolls inside its own container and never creates
+  horizontal page scroll.
 */
 .tex-frame {
   direction: ltr;
@@ -406,7 +413,7 @@ main {
   unicode-bidi: isolate;
 }
 
-/* انتخاب‌گر با دقت بالاتر تا بر قاعده «font» خود کیتکس (که بعدتر بارگذاری می‌شود) غلبه کند */
+/* Higher-specificity selector to beat KaTeX's own "font" rule (loaded later) */
 .tex-frame .katex,
 .tex-standalone .katex,
 .tex-inline .katex {
@@ -417,7 +424,7 @@ main {
   white-space: normal;
 }
 
-/* فرمول داخل جمله فارسی: جداگانه و ایزوله */
+/* Equation inside a Persian sentence: separate and isolated */
 .tex-inline {
   direction: ltr;
   unicode-bidi: isolate;
@@ -426,7 +433,7 @@ main {
   white-space: nowrap;
 }
 
-/* ---------- دکمه‌ها ---------- */
+/* ---------- Buttons ---------- */
 
 @layer components {
 
@@ -435,13 +442,13 @@ main {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: 12px;
+  border-radius: var(--r-control);
   font-weight: 600;
   font-size: 0.9375rem;
   padding: 0.55rem 1.05rem;
   line-height: 1.7;
   border: 1px solid transparent;
-  /* فقط رنگ و هاله نور گذار می‌کنند؛ هیچ جابه‌جایی در کار نیست */
+  /* They transition color and depth only; no movement and no corner change */
   transition:
     background-color var(--t-med) var(--ease-soft),
     border-color var(--t-med) var(--ease-soft),
@@ -451,12 +458,12 @@ main {
   white-space: nowrap;
 }
 
-/* هاور پایدار: به‌جای بلندشدن، یک درخشش آرام */
+/* Stable hover: subtle neutral depth; shape and corners stay constant */
 .btn:hover {
   box-shadow: var(--shadow-glow-sm);
 }
 
-/* فشردن: بازخورد درونی بدون هیچ حرکتی */
+/* Press: inward feedback without any movement */
 .btn:active {
   box-shadow: inset 0 1px 3px rgba(43, 37, 28, 0.16);
 }
@@ -464,7 +471,7 @@ main {
 .btn-primary {
   background: var(--color-pine);
   color: #fdfbf4;
-  box-shadow: 0 1px 2px rgba(var(--accent-rgb), 0.25), 0 6px 16px rgba(var(--accent-rgb), 0.18);
+  box-shadow: 0 1px 2px rgba(43, 37, 28, 0.14);
 }
 .btn-primary:hover {
   background: var(--color-pine-deep);
@@ -503,18 +510,18 @@ main {
 .btn-sm {
   font-size: 0.8125rem;
   padding: 0.35rem 0.75rem;
-  border-radius: 10px;
+  border-radius: var(--r-control);
   gap: 0.35rem;
 }
 
-/* دکمه گرد کوچک برای نوار ابزار */
+/* Small square-ish button for toolbars */
 .icon-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 2.35rem;
   height: 2.35rem;
-  border-radius: 12px;
+  border-radius: var(--r-control);
   color: var(--color-ink-soft);
   border: 1px solid transparent;
   background: transparent;
@@ -531,7 +538,7 @@ main {
   box-shadow: var(--shadow-glow-sm);
 }
 
-/* ---------- حالت تمرکز ---------- */
+/* ---------- Focus mode ---------- */
 
 .focus-active .site-header,
 .focus-active .site-footer {
@@ -547,13 +554,13 @@ main {
   backdrop-filter: blur(8px);
   border: 1px solid var(--color-line);
   color: var(--color-ink-soft);
-  border-radius: 999px;
+  border-radius: var(--r-control);
   box-shadow: var(--shadow-lift);
 }
 
-/* ---------- پیمایش آرام: محو نرم، ورود پله‌ای ملایم، بی‌انیمیشن سنگین ---------- */
+/* ---------- Calm motion: soft fades, gentle staggered entrances, no heavy animation ---------- */
 
-/* محو و بالا آمدن بسیار ملایم برای ورود هر بلوک */
+/* Very gentle fade and rise for the entrance of each block */
 @keyframes fade-up {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: none; }
@@ -563,7 +570,7 @@ main {
   animation: fade-up var(--t-slow) var(--ease-out) both;
 }
 
-/* ورود پله‌ای آرام بخش‌های هر صفحه: یکی پس از دیگری، بدون عجله */
+/* Calm staggered entrance for the sections of each pane: one after another, unhurried */
 @keyframes rise-in {
   from { opacity: 0; transform: translateY(14px); }
   to { opacity: 1; transform: none; }
@@ -582,7 +589,7 @@ main {
 .stagger > *:nth-child(8) { animation-delay: 380ms; }
 .stagger > *:nth-child(n + 9) { animation-delay: 420ms; }
 
-/* پنل و پنجره: محو همراه با بزرگ‌شدن نرم */
+/* Panel and overlay: fade together with a gentle scale-up */
 @keyframes pop-in {
   from { opacity: 0; transform: translateY(8px) scale(0.985); }
   to { opacity: 1; transform: none; }
@@ -593,7 +600,7 @@ main {
   transform-origin: top left;
 }
 
-/* پس‌زمینه پنجره */
+/* Overlay backdrop */
 @keyframes overlay-fade {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -603,7 +610,7 @@ main {
   animation: overlay-fade var(--t-med) ease both;
 }
 
-/* تغییر محتوای اسلاید: محو ملایم به بالا */
+/* Slide content change: soft fade upward */
 @keyframes slide-swap {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: none; }
@@ -613,7 +620,7 @@ main {
   animation: slide-swap 460ms var(--ease-out) both;
 }
 
-/* جابه‌جایی وضعیت هشدار: نرم و یک‌نواخت */
+/* Alert state change: smooth and even */
 @keyframes swap-fade {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -623,7 +630,7 @@ main {
   animation: swap-fade 420ms ease both;
 }
 
-/* کارت‌هایی که نشانه‌ای از تعامل دارند: هاور فقط درخشش، بدون جابه‌جایی */
+/* Cards that hint interactivity: hover is depth only, no movement */
 .hover-card {
   transition:
     box-shadow 380ms var(--ease-out),
@@ -651,7 +658,7 @@ main {
   }
 }
 
-/* ---------- عناصر کوچک ---------- */
+/* ---------- Small elements ---------- */
 
 .chip {
   display: inline-flex;
@@ -679,24 +686,24 @@ main {
 .chip-clay { background: var(--color-clay-soft); color: var(--color-clay); border-color: rgba(160, 74, 44, 0.2); }
 .chip-mute { background: var(--color-surface-2); color: var(--color-muted); border-color: var(--color-line); }
 
-/* برجسته‌سازی نرم نکته‌های مهم (سازگاری عقب‌رو) */
+/* Soft emphasis for important notes (backward compatibility) */
 .hl-mark {
   background: linear-gradient(180deg, transparent 8%, rgba(220, 183, 94, 0.34) 8%, rgba(220, 183, 94, 0.34) 88%, transparent 88%);
   border-radius: 3px 0 0 3px;
 }
 
-/* هایلایت بلوکی پاراگراف / یادداشت مهم: پدینگ + گوشه کمی گرد */
+/* Paragraph block highlight / important note: padding plus slightly rounded corners */
 .hl-block {
   background: rgba(220, 183, 94, 0.26);
   border: 1px solid rgba(154, 113, 38, 0.26);
-  border-radius: 12px;
+  border-radius: var(--r-item);
   box-shadow: inset 0 0 0 1px rgba(252, 250, 243, 0.4);
   transition:
     background-color var(--t-med) var(--ease-soft),
     border-color var(--t-med) var(--ease-soft);
 }
 
-/* هایلایت نرم نکته‌ها */
+/* Soft highlight for notes */
 .note-marker {
   color: var(--color-muted);
   cursor: pointer;
@@ -706,7 +713,7 @@ main {
   color: var(--color-ink);
 }
 
-/* ---------- نوار پیشرفت ---------- */
+/* ---------- Progress bar ---------- */
 .progress-track {
   height: 7px;
   border-radius: 999px;
@@ -720,7 +727,7 @@ main {
   transition: width 600ms var(--ease-out);
 }
 
-/* ---------- دسترس‌پذیری: پنهان‌کردن فقط برای صفحه، در دسترس برای نقاله صفحه ---------- */
+/* ---------- Accessibility: visually hidden, available to screen readers ---------- */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -733,19 +740,19 @@ main {
   border: 0;
 }
 
-/* پنهان‌کردن نوار اسکرول افقی داخلی در جاهای تمیز */
+/* Hide the inner horizontal scrollbar where the surface should stay clean */
 .no-hbar::-webkit-scrollbar { display: none; }
 .no-hbar { scrollbar-width: none; }
 
-/* ---------- پایداری واکنش‌گرایی: ضد بیرون‌زدگی افقی ----------
-   سه ابزار مکمل برای این‌که هیچ محتوایی هرگز قاب را به‌هم نریزد:
-   ۱) .table-wrap: قاب لغزان برای جدول‌ها؛ جدول در صورت نیاز داخل قاب
-      خودش اسکرول می‌شود و هرگز صفحه را عریض نمی‌کند.
-   ۲) .chip-wrap: گونه برچسب ترکیبی که در صورت کمبود جا روی چند خط
-      می‌نشیند و از پهنای ظرفش بیرون نمی‌زند (برای برچسب‌هایی که
-      نماد + مقدار + شرح دارند).
-   ۳) .hbar: اسکرولر افقی داخلی با نوار نازک و مرئی تا قابلیت کشف
-      اسکرول حفظ شود (برخلاف .no-hbar که فقط برای ناوبریِ قابل‌حدس است). */
+/* ---------- Responsive stability: horizontal overflow defense ----------
+      Three complementary tools so no content ever breaks the frame:
+      1) .table-wrap: sliding frame for tables; the table scrolls inside the
+            frame when needed and never widens the page.
+      2) .chip-wrap: composite label flavour that wraps onto several lines when
+            space is short and never escapes its container width (for labels that
+            carry symbol plus value plus description).
+      3) .hbar: inner horizontal scroller with a thin visible bar so the scroll
+            affordance stays discoverable (unlike .no-hbar, only used where scrolling is obvious). */
 
 .table-wrap {
   max-width: 100%;
@@ -754,16 +761,16 @@ main {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: var(--color-line-strong) transparent;
-  /* قاب بیرونی جدول این‌جا کشیده می‌شود تا کادر جدول از هر چهار سمت
-     کامل و بسته دیده شود (گوشه‌های گرد هم‌خوان با سیستم طراحی) */
+  /* The outer table frame is drawn here so the table border looks complete
+        and closed on all four sides (rounded corners matching the design system) */
   border: 1px solid var(--color-line);
-  border-radius: 14px;
+  border-radius: 12px;
 }
 
 .chip-wrap {
   white-space: normal;
   max-width: 100%;
-  border-radius: 18px;
+  border-radius: 12px;
   padding-block: 0.3rem;
 }
 
@@ -776,12 +783,12 @@ main {
   scrollbar-color: var(--color-line-strong) transparent;
 }
 
-} /* پایان @layer components (بخش دوم) */
+} /* end @layer components (part 2) */
 
-/* ---------- چاپ: برگه تقلب کاغذی ----------
-   قواعد چاپ عمداً بدون لایه می‌مانند تا بر هر قاعده دیگری غلبه کنند. */
+/* ---------- Print: paper cheat sheet ----------
+      Print rules are deliberately left unlayered so they beat any other rule. */
 
-/* محتوای چاپی همیشه به‌صورت جداگانه در DOM سوار می‌شود و روی صفحه دیده نمی‌شود */
+/* Print content is always mounted separately in the DOM and never visible on screen */
 .print-root {
   display: none;
 }
@@ -813,7 +820,7 @@ main {
     direction: rtl;
   }
 
-  /* سربرگ سند */
+  /* Document header */
   .print-sheet .ps-header {
     display: flex;
     align-items: baseline;
@@ -843,11 +850,11 @@ main {
   .print-sheet .ps-side { font-size: 9px; text-align: left; color: #5a5342; margin: 0; }
   .print-sheet .ps-lead { font-weight: 700; color: #163f35; }
 
-  /* بلوک‌های محتوایی: هر بخش با فاصله روشن از بخش بعدی */
+  /* Content blocks: each section clearly separated from the next */
   .print-sheet .ps-block { margin: 0 0 6mm; }
   .print-sheet .page-break { break-before: page; }
 
-  /* فهرست‌ها */
+  /* Lists */
   .print-sheet ul.ps-list,
   .print-sheet ol.ps-list {
     margin: 0.8mm 0 1.5mm;
@@ -855,7 +862,7 @@ main {
   }
   .print-sheet .ps-list li { margin: 0.4mm 0; break-inside: avoid; }
 
-  /* چک‌لیست با مربع خالی برای تیک‌زدن روی کاغذ */
+  /* Checklist with an empty square to tick on paper */
   .print-sheet ul.ps-checklist {
     list-style: none;
     margin: 0.8mm 0 1.5mm;
@@ -878,7 +885,7 @@ main {
     border-radius: 0.7mm;
   }
 
-  /* جدول‌ها */
+  /* Tables */
   .print-sheet table { border-collapse: collapse; width: 100%; margin: 1.5mm 0 2.5mm; }
   .print-sheet td, .print-sheet th {
     border: 1px solid #c9c2b2;
@@ -891,7 +898,7 @@ main {
   .print-sheet tr { break-inside: avoid; }
   .print-sheet .ps-sym { direction: ltr; text-align: left; white-space: nowrap; }
 
-  /* فرمول‌ها */
+  /* Equations */
   .print-sheet .ps-formula {
     direction: ltr;
     text-align: center;
@@ -910,11 +917,11 @@ main {
   .print-sheet .katex { font-size: 1.12em; }
   .print-sheet .tex-frame { overflow: visible; padding: 0; }
 
-  /* روابط برگه تقلب: هر رابطه یک واحد جدانشدنی */
+  /* Cheat sheet relations: each relation is one unbreakable unit */
   .print-sheet .ps-eq { margin: 0 0 3.5mm; break-inside: avoid; }
   .print-sheet .ps-eq-title { font-weight: 700; margin: 0; color: #163f35; }
 
-  /* اسلایدها: عنوان با پنجره زمانی، متن گفتار با حاشیه راست */
+  /* Slides: title with its time window, speech text with a right border */
   .print-sheet .ps-slide { break-inside: avoid-page; margin: 0 0 4.5mm; }
   .print-sheet .ps-slide-title {
     display: flex;
@@ -942,7 +949,7 @@ main {
     border-right: 0.5mm solid #d8d0bd;
   }
 
-  /* پرسش و پاسخ */
+  /* Questions and answers */
   .print-sheet .ps-qa { margin: 0 0 3mm; break-inside: avoid; }
   .print-sheet .ps-qa-q { font-weight: 700; color: #163f35; margin: 0; }
   .print-sheet .ps-qa-a { margin: 0.5mm 0; }
@@ -961,14 +968,14 @@ main {
 
 
 
-/* ---------- حالت تمرکز: پنهان‌کردن عناصر فرعی ---------- */
+/* ---------- Focus mode: hiding secondary elements ---------- */
 .focus-active .focus-hidden {
   display: none !important;
 }
 
 @layer components {
 
-/* ---------- کلیدها و راهنما ---------- */
+/* ---------- Keys and guide ---------- */
 kbd {
   display: inline-block;
   min-width: 1.6em;
@@ -978,7 +985,7 @@ kbd {
   font-weight: 700;
   line-height: 1.9;
   padding: 0 0.45em;
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px solid var(--color-line-strong);
   border-bottom-width: 2px;
   background: var(--color-surface-2);
@@ -994,7 +1001,7 @@ kbd {
   gap: 0.3rem;
 }
 
-/* ---------- اسلایدشمار ---------- */
+/* ---------- Slide counter ---------- */
 .slide-dot {
   display: inline-flex;
   align-items: center;
@@ -1002,7 +1009,7 @@ kbd {
   min-width: 2.2rem;
   height: 2.2rem;
   padding: 0 0.4rem;
-  border-radius: 10px;
+  border-radius: var(--r-control);
   font-weight: 700;
   font-size: 0.85rem;
   color: var(--color-ink-soft);
@@ -1032,7 +1039,7 @@ kbd {
   color: var(--color-pine-deep);
 }
 
-/* ---------- فهرست ساده و بی‌نقطه ---------- */
+/* ---------- Plain list without bullets ---------- */
 .dot-list {
   list-style: none;
   margin: 0;
@@ -1054,16 +1061,16 @@ kbd {
   background: rgba(var(--accent-rgb), 0.45);
 }
 
-/* نشان برند: گوشه گرد + سایه نرم */
+/* Brand mark: same corner ratio as the generated icons (rx 120 of 512) plus a soft shadow */
 .brand-mark {
-  border-radius: 14px;
+  border-radius: 23.4%;
   overflow: hidden;
   box-shadow: var(--shadow-soft);
 }
 
-/* ---------- جدول ساده ----------
-   جدولهای داخل .table-wrap قاب بیرونی ندارند؛ قاب توسط خود لفاف کشیده
-   می‌شود تا خط پایانی سطر آخر هرگز گم نشود. تنها خطوط داخلی می‌مانند. */
+/* ---------- Plain table ----------
+      Tables inside .table-wrap have no outer frame; the wrapper draws it so the
+      closing line of the last row is never lost. Only inner lines remain. */
 .mini-table {
   width: 100%;
   border-collapse: collapse;
@@ -1086,12 +1093,12 @@ kbd {
 }
 
 /*
-  در داخل قاب‌لغزان: خطوط بیرونی سلول‌های لبه برداشته می‌شوند تا با قاب
-  گردِ لفاف دوبله نشوند؛ جدول فقط خط‌جداکننده‌های داخلی خود را حفظ می‌کند.
-  سمت راستِ اولین سلول هر سطر و سمت چپِ آخرین سلول (در بافت راست‌به‌چپ)
-  لبه‌های بیرونی جدول هستند. خط بالای سطر سربرگ هم بیرونی است، اما
-  خط بالای اولین سطر بدنه باید بماند تا از سربرگ جدا شود.
-*/
+  Inside the sliding frame, the outer borders of edge cells are removed so they do
+  not double up with the rounded wrapper frame; the table keeps only its inner
+  separators. In a right-to-left context the right side of the first cell of each
+  row and the left side of the last cell are the outer edges of the table. The top
+  line of the header row is outer too, but the top line of the first body row must
+stay so it separates from the header. */
 .table-wrap .mini-table > thead > tr > * {
   border-top: none;
 }
@@ -1102,4 +1109,4 @@ kbd {
   border-left: none;
 }
 
-} /* پایان @layer components (بخش سوم) */
+} /* end @layer components (part 3) */

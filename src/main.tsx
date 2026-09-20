@@ -1,7 +1,7 @@
 /**
- * نقطه ورود برنامه.
- * قلم فارسی Vazirmatn از بسته محلی @fontsource بارگذاری می‌شود؛
- * هیچ فونتی از اینترنت دریافت نمی‌شود.
+ * Application entry point.
+ * The Persian Vazirmatn font is loaded from the local @fontsource package;
+ * no font is ever fetched from the internet.
  */
 
 import { StrictMode } from 'react';
@@ -14,9 +14,9 @@ import './index.css';
 import App from './App';
 
 const rootEl = document.getElementById('root');
-if (!rootEl) throw new Error('عنصر ریشه پیدا نشد');
+if (!rootEl) throw new Error('Root element not found');
 
-/* در نسخه تولیدی، سرویس‌کارگر برای کار کاملاً آفلاین ثبت می‌شود */
+/* In the production build the service worker is registered for full offline use */
 if (import.meta.env.PROD) {
   void import('virtual:pwa-register').then(({ registerSW }) => {
     registerSW({ immediate: true });

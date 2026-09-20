@@ -1,6 +1,6 @@
 /**
- * برگه تقلب: روابط ریاضی کامل، مفاهیم پرکاربرد روز دفاع، ارقام و مرزهای ادعا.
- * همه فرمول‌ها از کش پیش‌رندر می‌آیند و باز شدن این بخش هیچ تأخیری ندارد.
+ * Cheat sheet: full math relations, concepts frequently used on defense day, key numbers and claim boundaries.
+ * All equations come from the pre-render cache, so this section opens with no delay.
  */
 
 import { BookOpen, Printer, ScrollText, ShieldCheck, Sigma } from 'lucide-react';
@@ -16,7 +16,7 @@ export default function CheatSheetLab() {
 
   return (
     <div className="stagger space-y-10 md:space-y-12">
-      {/* سربرگ */}
+      {/* Header */}
       <section className="card relative overflow-hidden p-7 md:p-9">
         <div className="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full bg-ochre-soft/60 blur-3xl" aria-hidden="true" />
         <div className="relative flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
@@ -40,7 +40,7 @@ export default function CheatSheetLab() {
         </div>
       </section>
 
-      {/* روابط ریاضی */}
+      {/* Math relations */}
       <section>
         <SectionHead
           index={1}
@@ -54,7 +54,7 @@ export default function CheatSheetLab() {
         </div>
       </section>
 
-      {/* مفاهیم پرکاربرد */}
+      {/* Frequently used concepts */}
       <section>
         <SectionHead
           index={2}
@@ -68,14 +68,14 @@ export default function CheatSheetLab() {
         </div>
       </section>
 
-      {/* ارقام و مرزها */}
+      {/* Key numbers and boundaries */}
       <section>
         <SectionHead index={3} title="ارقام و مرزهای ادعا" subtitle="فقط همین اعداد را با مکث بگو؛ فراتر از آن نرو" />
         <div className="mt-5 grid gap-x-5 gap-y-3 sm:grid-cols-2">
           {keyFacts.map((f) => (
             <div
               key={f.label}
-              className={`flex items-start gap-3 rounded-2xl border px-4 py-3 ${
+              className={`flex items-start gap-3 rounded-xl border px-4 py-3 ${
                 f.kind === 'bound' ? 'border-clay/25 bg-clay-soft/40' : 'border-line bg-surface-2/50'
               }`}
             >
@@ -89,12 +89,12 @@ export default function CheatSheetLab() {
         </div>
       </section>
 
-      {/* جدول‌های پشتیبان */}
+      {/* Backup tables */}
       <section>
         <SectionHead index={4} title="جدول‌های پشتیبان برای پرسش‌های دقیق" subtitle="این ارقام برای پرسش‌های ریز داوران است؛ نه برای اسلاید اصلی" />
-        {/* گرید جدول‌ها: ترکِ تک‌ستونه صریح (grid-cols-1) تا در صفحه‌های باریک
-            چیدمان بر اساس min-content محتوا منفجر نشود و هر کارت با min-w-0
-            بتواند کوچک‌تر از عریض‌ترین محتوایش شود. */}
+        {/* Tables grid: explicit single-column track (grid-cols-1) so the layout
+                never explodes from the min-content of the content on narrow screens and
+                each card with min-w-0 can shrink below its widest content. */}
         <div className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
           <div className="card min-w-0 p-6">
             <h3 className="mb-3 flex items-center gap-2 text-base font-extrabold text-ink">
@@ -178,14 +178,14 @@ export default function CheatSheetLab() {
 }
 
 /* ------------------------------------------------------------------ */
-/* کارت رابطه                                                           */
+/* Relation card                                                        */
 /* ------------------------------------------------------------------ */
 
 function EquationCard({ eq, n }: { eq: Equation; n: number }) {
   return (
     <article className="card overflow-hidden" id={`eq-${eq.id}`}>
       <div className="px-6 pb-5 pt-6 md:px-8">
-        {/* سربرگ کارت: عنوان فارسی و برچسب انگلیسی در جای درست خودش */}
+        {/* Card header: Persian title and English label each in its proper place */}
         <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
           <div className="flex min-w-0 items-center gap-3">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-pine/20 bg-pine-soft text-sm font-black text-pine-deep">
@@ -201,18 +201,18 @@ function EquationCard({ eq, n }: { eq: Equation; n: number }) {
           </div>
         </div>
 
-        {/* فرمول */}
-        <div className="mt-4 rounded-2xl border border-line bg-surface-2/60">
+        {/* Equation */}
+        <div className="mt-4 rounded-xl border border-line bg-surface-2/60">
           <TeX tex={eq.tex} display className="text-ink" />
         </div>
 
-        {/* مفهوم و راهنمای گفتن */}
+        {/* Concept and how to say it */}
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          <p className="rounded-2xl bg-pine-wash px-5 py-4 text-[0.98em] leading-[var(--reading-lh)] text-pine-deep">
+          <p className="rounded-xl bg-pine-wash px-5 py-4 text-[0.98em] leading-[var(--reading-lh)] text-pine-deep">
             <b className="mb-1 block text-sm font-extrabold">معنی رابطه</b>
             {eq.meaning}
           </p>
-          <div className="rounded-2xl border-r-4 border-ochre bg-ochre-soft/50 px-5 py-4">
+          <div className="rounded-xl border-r-4 border-ochre bg-ochre-soft/50 px-5 py-4">
             <p className="mb-1 flex items-center gap-1.5 text-sm font-extrabold text-ochre">
               <BookOpen className="h-4 w-4" />
               چطور به فارسی بگوییم
@@ -221,7 +221,7 @@ function EquationCard({ eq, n }: { eq: Equation; n: number }) {
           </div>
         </div>
 
-        {/* تشریح نمادها */}
+        {/* Symbol breakdown */}
         <div className="mt-4">
           <p className="mb-2 text-xs font-extrabold text-muted">تشریح نمادهای رابطه</p>
           <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
@@ -239,7 +239,7 @@ function EquationCard({ eq, n }: { eq: Equation; n: number }) {
           </div>
         </div>
 
-        {/* یادداشت شخصی و هایلایت */}
+        {/* Personal note and highlight */}
         <div className="mt-4 flex flex-col gap-3 border-t border-line pt-4 sm:flex-row sm:items-start">
           <div className="flex items-center gap-2">
             <MarkButton storageKey={`eq-hl:${eq.id}`} label="این رابطه مهم است" />
@@ -254,7 +254,7 @@ function EquationCard({ eq, n }: { eq: Equation; n: number }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* کارت مفهوم سه‌گانه: برچسب فارسی همیشه در جای درست و کامل نمایش داده می‌شود */
+/* Concept card: the Persian label is always shown complete and in its proper place */
 /* ------------------------------------------------------------------ */
 
 function ConceptCardView({ card }: { card: ConceptCard }) {

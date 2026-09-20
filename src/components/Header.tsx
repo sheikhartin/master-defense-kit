@@ -1,6 +1,6 @@
 /**
- * سربرگ سایت: برند، ناوبری پنج‌بخشی و کنترل‌های سراسری
- * (مقیاس متن، فاصله سطر، صدای هشدار، حالت تمرکز).
+ * Site header: brand, five-part navigation and global controls
+ * (text scale, line spacing, alert sound, focus mode).
  */
 
 import { useEffect, useState } from 'react';
@@ -36,7 +36,7 @@ const TABS: Array<{ id: TabId; label: string; hint: string; Icon: typeof Compass
   { id: 'checklist', label: 'چک‌لیست روز دفاع', hint: 'آمادگی و کنترل', Icon: ListChecks },
 ];
 
-/** گزینه‌های منوی خروجی PDF: کل وب‌سایت در صدر، سپس تک‌بخش‌ها */
+/** PDF export menu options: the whole site first, then single sections */
 const PDF_OPTIONS: Array<{ scope: PrintScope; label: string; hint: string; Icon: typeof Compass }> = [
   { scope: 'all', label: 'کل وب‌سایت', hint: 'همه بخش‌ها در یک سند تمیز', Icon: BookOpenText },
   { scope: 'roadmap', label: 'نقشه راه دفاع', hint: 'ساختار، زمان‌بندی و مرزهای ادعا', Icon: Compass },
@@ -50,11 +50,11 @@ export default function Header() {
   const app = useApp();
   const [panel, setPanel] = useState(false);
   const [pdfMenu, setPdfMenu] = useState(false);
-  /* رفتار یکپارچه لایه باز: Escape، به‌دام‌انداختن Tab و ثبت در شمارنده لایه‌ها */
+  /* Unified overlay behavior: Escape, Tab trapping and registering in the overlay counter */
   const panelRef = useModalBehavior<HTMLDivElement>(panel, () => setPanel(false));
   const pdfRef = useModalBehavior<HTMLDivElement>(pdfMenu, () => setPdfMenu(false));
 
-  /* بستن با کلیک بیرون پنل */
+  /* Close on a click outside the panel */
   useEffect(() => {
     if (!panel && !pdfMenu) return;
     const onDown = (e: MouseEvent) => {
@@ -68,14 +68,14 @@ export default function Header() {
 
   const startPdf = (scope: PrintScope) => {
     setPdfMenu(false);
-    /* اجازه بده منو اول بسته شود، سپس گفت‌وگوی چاپ باز شود */
+    /* Let the menu close first, then open the print dialog */
     requestAnimationFrame(() => app.openPrint(scope));
   };
 
   return (
     <header className="site-header sticky top-0 z-50 border-b border-line bg-surface/92 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl flex-col gap-2.5 px-4 pb-2.5 pt-3 md:px-6">
-        {/* ردیف بالا */}
+        {/* Top row */}
         <div className="flex items-center justify-between gap-3">
           <button
             type="button"
@@ -94,8 +94,8 @@ export default function Header() {
             </div>
           </button>
 
-          {/* کنترل‌های سراسری: لنگر منوها روی کل گروه است تا در صفحه‌های باریک
-              هرگز از لبه دید بیرون نزنند (به‌جای لنگر روی هر دکمه جداگانه) */}
+          {/* Global controls: the menu anchors sit on the whole group so on narrow screens
+                  they never poke past the viewport edge (instead of anchoring on each button) */}
           <div className="relative flex shrink-0 items-center gap-1">
             <div ref={pdfRef}>
               <button
@@ -114,7 +114,7 @@ export default function Header() {
                 <div
                   role="menu"
                   aria-label="دانلود PDF"
-                  className="pop-in absolute left-0 top-12 z-50 w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-line bg-surface p-2 shadow-lift"
+                  className="pop-in absolute left-0 top-12 z-50 w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-line bg-surface p-2 shadow-lift"
                 >
                   <p className="px-3 pb-1 pt-2 text-xs font-extrabold text-muted">
                     دانلود PDF تمیز و قابل چاپ
@@ -168,7 +168,7 @@ export default function Header() {
               </button>
 
               {panel && (
-                <div className="pop-in absolute left-0 top-12 z-50 w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-line bg-surface p-4 shadow-lift">
+                <div className="pop-in absolute left-0 top-12 z-50 w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-line bg-surface p-4 shadow-lift">
                   <div className="mb-3 flex items-center justify-between">
                     <h3 className="text-sm font-extrabold text-ink">تنظیمات خواندن</h3>
                     <button className="icon-btn h-7 w-7" onClick={() => setPanel(false)} aria-label="بستن">
@@ -307,7 +307,7 @@ export default function Header() {
           </div>
         </div>
 
-        {/* ناوبری */}
+        {/* Navigation */}
         <nav aria-label="بخش‌های برنامه" className="tab-nav -mx-1 px-1">
           {TABS.map(({ id, label, Icon }) => {
             const active = app.tab === id;

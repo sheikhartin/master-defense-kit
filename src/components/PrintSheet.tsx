@@ -1,14 +1,14 @@
 /**
- * نسخه چاپی / PDF وب‌سایت.
- * این مؤلفه فقط هنگام چاپ در DOM سوار می‌شود و روی صفحه دیده نمی‌شود.
+ * Printable / PDF version of the site.
+ * This component is only mounted in the DOM while printing and is never visible on screen.
  *
- * دامنه خروجی با PrintScope مشخص می‌شود:
- *   'all'       کل وب‌سایت (همه بخش‌ها پشت سر هم با شکست صفحه تمیز)
- *   'roadmap'   نقشه راه دفاع
- *   'deck'      متن کامل همه اسلایدهای ارائه
- *   'cheat'     برگه تقلب و فرمول‌ها
- *   'qa'        بانک پرسش داور
- *   'checklist' چک‌لیست‌های روز دفاع
+ * The output scope is defined by PrintScope:
+ *   'all'       whole site (every section back to back with clean page breaks)
+ *   'roadmap'   defense roadmap
+ *   'deck'      full text of every slide
+ *   'cheat'     cheat sheet and equations
+ *   'qa'        examiner question bank
+ *   'checklist' defense day checklists
  */
 
 import { chapters, SAFETY_BUFFER, meta } from '../data/deck';
@@ -82,7 +82,7 @@ export default function PrintSheet({ scope = 'cheat' }: { scope?: PrintScope }) 
 }
 
 /* ------------------------------------------------------------------ */
-/* نقشه راه دفاع                                                       */
+/* Defense roadmap                                                     */
 /* ------------------------------------------------------------------ */
 
 function RoadmapPrint() {
@@ -225,7 +225,7 @@ function RoadmapPrint() {
 }
 
 /* ------------------------------------------------------------------ */
-/* متن کامل ارائه (همه اسلایدها)                                         */
+/* Full deck text (every slide)                                          */
 /* ------------------------------------------------------------------ */
 
 function DeckPrint({ pageBreak }: { pageBreak: boolean }) {
@@ -314,7 +314,7 @@ function DeckPrint({ pageBreak }: { pageBreak: boolean }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* برگه تقلب                                                           */
+/* Cheat sheet                                                         */
 /* ------------------------------------------------------------------ */
 
 function CheatPrint({ pageBreak }: { pageBreak: boolean }) {
@@ -466,7 +466,7 @@ function CheatPrint({ pageBreak }: { pageBreak: boolean }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* بانک پرسش داور                                                      */
+/* Examiner question bank                                              */
 /* ------------------------------------------------------------------ */
 
 function QaPrint({ pageBreak }: { pageBreak: boolean }) {
@@ -513,7 +513,7 @@ function QaPrint({ pageBreak }: { pageBreak: boolean }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* چک‌لیست روز دفاع                                                     */
+/* Defense day checklist                                                */
 /* ------------------------------------------------------------------ */
 
 function ChecklistPrint({ pageBreak }: { pageBreak: boolean }) {

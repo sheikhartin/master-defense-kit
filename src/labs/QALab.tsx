@@ -1,6 +1,6 @@
 /**
- * پرسش‌های داور: بانک پرسش با پاسخ‌های پیشنهادی، فیلتر دسته‌بندی،
- * شبیه‌ساز پرسش تصادفی و یادداشت شخصی برای هر پرسش.
+ * Examiner questions: question bank with suggested answers, category filter,
+ * random question drill and a personal note for every question.
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -27,7 +27,7 @@ export default function QALab() {
 
   return (
     <div className="stagger space-y-10 md:space-y-12">
-      {/* سربرگ */}
+      {/* Header */}
       <section className="card relative overflow-hidden p-7 md:p-9">
         <div
           className="pointer-events-none absolute -left-16 -top-16 h-56 w-56 rounded-full bg-pine-soft/55 blur-3xl"
@@ -46,16 +46,16 @@ export default function QALab() {
           بعد پاسخ پیشنهادی را باز کن و آن را با ساختار «ادعا، دلیل، شاهد» مقایسه کن.
         </p>
 
-        {/* ساختار پاسخ و پرسش خارج از پایان‌نامه (ترک تک‌ستونه صریح برای پایداری) */}
+        {/* Answer structure and out-of-scope question (explicit single-column track for stability) */}
         <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <div className="min-w-0 rounded-2xl border-r-4 border-pine bg-pine-wash px-5 py-4">
+          <div className="min-w-0 rounded-xl border-r-4 border-pine bg-pine-wash px-5 py-4">
             <h3 className="mb-2 flex items-center gap-1.5 text-sm font-extrabold text-pine-deep">
               <Sparkles className="h-4 w-4" />
               {answerPattern.title}
             </h3>
             <p className="text-[0.95em] leading-[var(--reading-lh)] text-pine-deep">{answerPattern.example}</p>
           </div>
-          <div className="min-w-0 rounded-2xl border border-line bg-surface-2/50 px-5 py-4">
+          <div className="min-w-0 rounded-xl border border-line bg-surface-2/50 px-5 py-4">
             <h3 className="mb-2 flex items-center gap-1.5 text-sm font-extrabold text-ink">
               <ShieldCheck className="h-4 w-4 text-ochre" />
               سؤال خارج از پایان‌نامه
@@ -70,10 +70,10 @@ export default function QALab() {
         </div>
       </section>
 
-      {/* شبیه‌ساز پرسش تصادفی */}
+      {/* Random question drill */}
       <DrillZone />
 
-      {/* فیلتر دسته‌بندی */}
+      {/* Category filter */}
       <section>
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs font-extrabold text-muted">فیلتر دسته:</span>
@@ -90,7 +90,7 @@ export default function QALab() {
         </div>
       </section>
 
-      {/* پرسش‌های اصلی */}
+      {/* Main questions */}
       <section>
         <SectionHead index={1} title="پرسش‌های اصلی داور" subtitle="به ترتیب سناریو، هفده پرسش پرتکرار" />
         <div key={`main-${cat}`} className="fade-up mt-5 space-y-4">
@@ -100,7 +100,7 @@ export default function QALab() {
         </div>
       </section>
 
-      {/* پرسش‌های سخت‌تر */}
+      {/* Harder questions */}
       {hardList.length > 0 && (
         <section>
           <SectionHead index={2} title="پرسش‌های سخت‌تر و دفاعی‌تر" subtitle="برای روزهایی که آمادگی کامل می‌خواهی" />
@@ -145,7 +145,7 @@ function QaCard({ item }: { item: QaItem }) {
 
         {open && (
           <div className="fade-up mt-4 space-y-3 border-t border-line pt-4">
-            <p className="rounded-2xl bg-surface-2/70 px-5 py-4 text-[1em] leading-[var(--reading-lh)] text-ink">
+            <p className="rounded-xl bg-surface-2/70 px-5 py-4 text-[1em] leading-[var(--reading-lh)] text-ink">
               {item.answer}
             </p>
             {item.keySentence && (
@@ -211,7 +211,7 @@ function DrillZone() {
     setRevealed(false);
   };
 
-  /* میان‌برهای شبیه‌ساز: N پرسش بعدی، Enter پاسخ، R چینش تازه */
+  /* Drill shortcuts: N next question, Enter reveal answer, R reshuffle */
   const kb = useRef({ next, reshuffle, setRevealed, enabled: app.shortcutsOn });
   useEffect(() => {
     kb.current = { next, reshuffle, setRevealed, enabled: app.shortcutsOn };
@@ -262,7 +262,7 @@ function DrillZone() {
 
           {revealed ? (
             <div className="fade-up mt-4">
-              <p className="rounded-2xl bg-pine-wash px-5 py-4 text-[1em] leading-[var(--reading-lh)] text-pine-deep">
+              <p className="rounded-xl bg-pine-wash px-5 py-4 text-[1em] leading-[var(--reading-lh)] text-pine-deep">
                 {current.a}
               </p>
               <div className="mt-4 flex flex-wrap gap-2">

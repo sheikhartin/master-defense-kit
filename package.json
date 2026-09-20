@@ -3,7 +3,7 @@
   "private": true,
   "version": "2.0.0",
   "type": "module",
-  "description": "تمرین گام‌به‌گام و کاملاً آفلاین جلسه دفاع پایان‌نامه کارشناسی ارشد (BCOA)",
+  "description": "Step-by-step, fully offline Master's thesis defense practice kit (BCOA)",
   "scripts": {
     "content": "node scripts/compile-content.mjs",
     "predev": "node scripts/compile-content.mjs",

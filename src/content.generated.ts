@@ -3,7 +3,7 @@
  * Source of truth: content/
  * contentHash: 11835d52cb386289
  * talkTotalSec: 1155 (20 slides)
- * Generated: 2026-09-20T04:57:29.164Z
+ * Generated: 2026-09-20T06:45:40.334Z
  */
 
 import type {

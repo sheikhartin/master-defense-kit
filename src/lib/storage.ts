@@ -1,7 +1,7 @@
 /**
- * ذخیره‌سازی امن در حافظه محلی مرورگر.
- * همه داده‌های کاربر (یادداشت‌ها، هایلایت‌ها، پیشرفت تمرین و تنظیمات)
- * فقط در localStorage همین دستگاه می‌ماند و هرگز به جایی ارسال نمی‌شود.
+ * Safe storage in the browser local storage.
+ * All user data (notes, highlights, practice progress and settings)
+ * stays in localStorage on this device only and is never sent anywhere.
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -22,7 +22,7 @@ export function writeStore<T>(key: string, value: T): void {
   try {
     window.localStorage.setItem(PREFIX + key, JSON.stringify(value));
   } catch {
-    /* حافظه پر یا در دسترس نبود؛ سکوت می‌کنیم تا جریان تمرین نشکند */
+    /* storage full or unavailable; stay silent so the practice flow is not interrupted */
   }
 }
 
@@ -30,11 +30,11 @@ export function removeStore(key: string): void {
   try {
     window.localStorage.removeItem(PREFIX + key);
   } catch {
-    /* نادیده */
+    /* ignored */
   }
 }
 
-/** همان useState با آینه‌سازی خودکار در localStorage */
+/** Same as useState with automatic mirroring into localStorage */
 export function useStoredState<T>(key: string, initial: T) {
   const [value, setValue] = useState<T>(() => readStore(key, initial));
 
@@ -52,7 +52,7 @@ export function useStoredState<T>(key: string, initial: T) {
   return [value, set] as const;
 }
 
-/** یادداشت کوتاه متنی با ذخیره خودکار (دِبَونس) */
+/** Short text note with automatic (debounced) saving */
 export function useStoredNote(key: string) {
   const [text, setText] = useState<string>(() => readStore(key, ''));
   const timer = useRef<number | undefined>(undefined);
@@ -75,7 +75,7 @@ export function useStoredNote(key: string) {
   return [text, setNote] as const;
 }
 
-/** علامت هایلایت نرم برای کلیدهای محتوا */
+/** Soft highlight flag for content keys */
 export function useStoredFlag(key: string) {
   const [on, setOn] = useStoredState<boolean>(key, false);
   const toggle = useCallback(() => setOn((v) => !v), [setOn]);

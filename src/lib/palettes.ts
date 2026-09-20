@@ -1,27 +1,27 @@
 /**
- * پالت‌های حرفه‌ای رابط: خنثی‌های مشترک (کاغذ کرم) + رنگ تأکید متغیر.
- * ochre (اهمیت) و clay (هشدار) در همه پالت‌ها ثابت می‌مانند.
+ * Professional UI palettes: shared neutrals (cream paper) plus a variable accent color.
+ * ochre (importance) and clay (warning) stay fixed in every palette.
  *
- * هنگام اعمال پالت، فاوآیکون تب مرورگر هم با brandSvg هم‌رنگ می‌شود.
- * آیکون‌های نصب PWA (PNG/ICO در public/) سبز پیش‌فرض می‌مانند مگر کاربر
- * برنامه را دوباره نصب کند؛ محدودیت پلتفرم است، نه محدودیت رابط.
+ * Palettes only change UI colors (buttons, navigation, progress, ambient tint).
+ * The logo (header/footer mark, tab favicon, install icons) is always the fixed
+ * black mark with a gold shield and cream microphone and deliberately does not
+ * change with the palette (decision D13 in docs/PLAN.md).
  */
 
 import type { PaletteId } from '../types';
-import { brandSvg, BRAND_COLORS } from './brand.mjs';
 
 export interface PaletteDef {
   id: PaletteId;
-  /** برچسب فارسی */
+  /** Persian label */
   label: string;
-  /** برچسب انگلیسی کوتاه */
+  /** Short English label */
   en: string;
-  /** رنگ تأکید اصلی (پس‌زمینه نشان برند و دکمه‌های اصلی) */
+  /** Primary UI accent color (primary buttons, navigation, progress; not the logo) */
   accent: string;
   accentDeep: string;
   accentSoft: string;
   accentWash: string;
-  /** RGB برای سایه‌های درخشش */
+  /** RGB for soft UI glows (ambient blur, focus ring, progress bar) */
   accentRgb: string;
 }
 
@@ -84,31 +84,7 @@ export function paletteOf(id: PaletteId): PaletteDef {
   return PALETTES.find((p) => p.id === id) ?? PALETTES[0];
 }
 
-/** به‌روزرسانی فاوآیکون SVG تب مرورگر با رنگ پالت فعال */
-function applyFavicon(accent: string): void {
-  if (typeof document === 'undefined') return;
-  try {
-    const svg = brandSvg({
-      tile: accent,
-      stroke: BRAND_COLORS.cream,
-      pivot: BRAND_COLORS.ochre,
-    });
-    const href = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
-    let link = document.querySelector<HTMLLinkElement>('link[data-dynamic-favicon="1"]');
-    if (!link) {
-      link = document.createElement('link');
-      link.rel = 'icon';
-      link.type = 'image/svg+xml';
-      link.setAttribute('data-dynamic-favicon', '1');
-      document.head.appendChild(link);
-    }
-    link.href = href;
-  } catch {
-    /* اگر مرورگر data-URL را نپذیرد، فاوآیکون ثابت public/icon.svg می‌ماند */
-  }
-}
-
-/** اعمال توکن‌های پالت روی ریشه سند + فاوآیکون تب */
+/** Apply palette tokens to the document root (UI colors only; the logo is fixed) */
 export function applyPalette(id: PaletteId): void {
   const p = paletteOf(id);
   const root = document.documentElement;
@@ -118,18 +94,10 @@ export function applyPalette(id: PaletteId): void {
   root.style.setProperty('--color-accent-soft', p.accentSoft);
   root.style.setProperty('--color-accent-wash', p.accentWash);
   root.style.setProperty('--accent-rgb', p.accentRgb);
-  /* سازگاری با توکن‌های تاریخی pine = accent */
+  /* Compatibility with the historic pine = accent tokens */
   root.style.setProperty('--color-pine', p.accent);
   root.style.setProperty('--color-pine-deep', p.accentDeep);
   root.style.setProperty('--color-pine-soft', p.accentSoft);
   root.style.setProperty('--color-pine-wash', p.accentWash);
-  root.style.setProperty(
-    '--shadow-glow-sm',
-    `0 0 0 1px rgba(${p.accentRgb}, 0.12), 0 3px 12px rgba(${p.accentRgb}, 0.16)`,
-  );
-  root.style.setProperty(
-    '--shadow-glow',
-    `0 0 0 1px rgba(${p.accentRgb}, 0.12), 0 8px 22px rgba(${p.accentRgb}, 0.16), 0 14px 40px -12px rgba(${p.accentRgb}, 0.28)`,
-  );
-  applyFavicon(p.accent);
+  /* Hover shadows stay neutral and fixed in CSS; the logo and shadows never change with the palette */
 }

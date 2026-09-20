@@ -1,14 +1,15 @@
 /**
- * ابزارهای خالص صفحه‌کلید (بدون React) تا همه قلاب‌ها از یک قاعده پیروی کنند.
+ * Pure keyboard helpers (no React) so every hook follows one rule.
  *
- * چرا e.code به‌جای e.key؟ این برنامه فارسی است و بسیاری از کاربران کیبورد
- * فارسی فعال دارند؛ در چیدمان فارسی، فشردن همان کلید فیزیکی «R» حرف دیگری
- * تولید می‌کند و میان‌برهای تک‌حرفی قبلی عملاً کار نمی‌کردند. e.code به
- * «موقعیت فیزیکی» کلید اشاره دارد و مستقل از چیدمان زبان است؛ پس میان‌برها
- * هم روی کیبورد فارسی و هم انگلیسی دقیقاً یکسان عمل می‌کنند.
+ * Why e.code instead of e.key? This app is Persian and many users have a
+ * Persian keyboard layout active; on a Persian layout the same physical "R"
+ * key produces a different letter, so single-letter shortcuts simply did not
+ * work. e.code refers to the physical position of the key and is independent
+ * of the active language layout, so shortcuts behave identically on Persian
+ * and English keyboards.
  */
 
-/** خلاصه رویداد کلید برای تطبیق */
+/** Key event summary for matching */
 export interface KeySnapshot {
   code: string;
   key: string;
@@ -31,7 +32,7 @@ export function snapshot(e: KeyboardEvent): KeySnapshot {
   };
 }
 
-/** آیا رویداد از یک ورودی متنی می‌آید؟ در این حالت میان‌برها باید سکوت کنند. */
+/** Does the event come from a text input? If so, shortcuts must stay silent. */
 export function isEditableTarget(e: KeyboardEvent): boolean {
   const t = e.target as HTMLElement | null;
   if (!t) return false;
@@ -44,7 +45,7 @@ export function isEditableTarget(e: KeyboardEvent): boolean {
   );
 }
 
-/** آیا رویداد از یک عنصر تعاملی می‌آید که رفتار بومی Space/Enter دارد؟ */
+/** Does the event come from an interactive element with native Space/Enter behavior? */
 export function isInteractiveTarget(e: KeyboardEvent): boolean {
   const t = e.target as HTMLElement | null;
   if (!t) return false;
@@ -63,15 +64,16 @@ export function isInteractiveTarget(e: KeyboardEvent): boolean {
   );
 }
 
-/** آیا کلید، ترکیب «فقط یک نویسه» است (مشمول WCAG 2.1.4)؟ */
+/** Is the key a single-character combination (subject to WCAG 2.1.4)? */
 export function isCharacterOnly(k: KeySnapshot): boolean {
   if (k.ctrl || k.alt || k.meta) return false;
-  // نویسه‌های قابل چاپ بدون مادیفایر غیر از Shift
+  // printable characters without a modifier other than Shift
   return k.key.length === 1 && !k.repeat ? true : k.key.length === 1;
 }
 
-/** نگاشت ارقام بالای کیبورد به شماره اسلاید: ۰ یعنی ۱۰ و با Shift یعنی ۱۱ تا ۲۰؛
- *  پرش نهایی در مصرف‌کننده به اسلایدهای موجود در چیدمان فعلی محدود می‌شود. */
+/** Map the number row to slide numbers: 0 means 10 and with Shift it means 11 to 20;
+ *  the final jump is clamped by the consumer to slides available in the current plan.
+ */
 export function digitFromCode(code: string, shift: boolean): number | null {
   const m = /^Digit(\d)$/.exec(code);
   if (!m) return null;
@@ -80,7 +82,7 @@ export function digitFromCode(code: string, shift: boolean): number | null {
   return shift ? base + 10 : base;
 }
 
-/** برچسب خوانا برای راهنما */
+/** Human readable label for the guide */
 export function labelFor(code: string, shift = false): string {
   const map: Record<string, string> = {
     ArrowLeft: 'کلید چپ',

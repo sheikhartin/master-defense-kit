@@ -1,6 +1,6 @@
 /**
- * پوسته برنامه: سرویس‌دهنده بافت، سربرگ، ناوبری پنج‌بخشی،
- * حالت تمرکز، چاپ برگه تقلب و اعمال مقیاس خواندن سراسری.
+ * App shell: context provider, header, five-part navigation,
+ * focus mode, cheat-sheet printing and applying the global reading scale.
  */
 
 import { useEffect, type ComponentType } from 'react';
@@ -20,7 +20,7 @@ import { warmTex } from './lib/tex';
 import { coreEquations } from './data/cheat';
 import { slides } from './data/deck';
 
-/** پیش‌گرم‌کردن کش فرمول‌ها در آغاز برنامه: باز شدن برگه تقلب بدون تأخیر */
+/** Warm the equation cache at app start so the cheat sheet opens instantly */
 function warmFormulaCache() {
   const list: Array<{ tex: string; display?: boolean }> = [];
   for (const eq of coreEquations) {
@@ -35,7 +35,7 @@ function Shell() {
   const app = useApp();
   useGlobalShortcuts();
 
-  /* چاپ / خروجی PDF */
+  /* Print / PDF export */
   useEffect(() => {
     if (!app.printScope) return;
     document.body.classList.add('printing');
@@ -76,7 +76,7 @@ function Shell() {
           </div>
         </main>
 
-        {/* پابرگ: نشانه برند و دسترسی سریع به راهنمای کلیدها */}
+        {/* Footer: brand mark and quick access to the key guide */}
         <footer className="site-footer border-t border-line bg-surface/80 backdrop-blur-sm">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4 md:px-6">
             <p className="flex items-center gap-2.5 text-xs font-bold text-muted">
@@ -95,10 +95,10 @@ function Shell() {
         </footer>
       </div>
 
-      {/* راهنمای سراسری کلیدها */}
+      {/* Global key guide */}
       {app.guideOpen && <ShortcutGuide />}
 
-      {/* خروج از حالت تمرکز */}
+      {/* Exit focus mode */}
       {app.focus && (
         <button
           type="button"
@@ -111,7 +111,7 @@ function Shell() {
         </button>
       )}
 
-      {/* محتوای چاپی (روی صفحه پنهان است) */}
+      {/* Print content (hidden on screen) */}
       {app.printScope && <PrintSheet scope={app.printScope} />}
     </>
   );

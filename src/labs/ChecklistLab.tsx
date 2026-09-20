@@ -1,6 +1,6 @@
 /**
- * چک‌لیست روز دفاع: تیک‌زدن تعاملی با ذخیره در حافظه محلی
- * و کارت‌های «بگو، نگو» برای کنترل لحن.
+ * Defense day checklist: interactive ticking saved in local storage
+ * plus the do and don't cards for tone control.
  */
 
 import { Check, ShieldAlert, ShieldCheck, Square } from 'lucide-react';
@@ -37,12 +37,12 @@ export default function ChecklistLab() {
           <GroupCard key={g.id} group={g} order={gi + 1} />
         ))}
 
-        {/* کارت لحن */}
+        {/* Tone card */}
         <section className="card self-start p-6 md:p-7 lg:col-span-2">
           <SectionHead title="بگو یا نگو" subtitle="شش جفت پرتکرار؛ لحن دفاع با همین تفاوت‌ها ساخته می‌شود" />
           <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
             {doDonts.map((d, i) => (
-              <div key={i} className="overflow-hidden rounded-2xl border border-line">
+              <div key={i} className="overflow-hidden rounded-xl border border-line">
                 <div className="flex items-center gap-2 border-b border-line bg-clay-soft/40 px-4 py-2.5">
                   <ShieldAlert className="h-4 w-4 text-clay" />
                   <span className="text-xs font-extrabold text-clay">نگو</span>

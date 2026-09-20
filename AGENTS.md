@@ -87,6 +87,32 @@ make a change pass; fix the change instead.
 12. **Audio cues work.** Soft beeps at 10 / 5 / 0 seconds remaining when
  audible is on, driven from the timer interval via `src/lib/audio.ts`
  (not a dead `useEffect` on a stable ref).
+13. **The logo is one fixed, palette-independent mark everywhere (D13).**
+ Black background `#000000` + gold shield `#c9a14b` + cream microphone
+ `#f4f0e6` (`APP_ICON` in `src/lib/brand.mjs`). It is used identically by
+ `BrandMark` (header/footer), the tab favicon, and all `public/` install
+ icons. Never recolor the logo, the tab favicon, or the shadow tokens from a
+ palette; never add a palette argument to the icon build.
+14. **One plan file (D11).** `docs/PLAN.md` is the single living plan and
+ milestone file; update it in place. Never create versioned plan file names
+ (no `PLAN-v4.md`); history belongs in its change log.
+15. **Corners are slightly rounded, consistent, and constant (D14).** Radii
+ come from the scale in `:root` (`--r-control: 8px`, `--r-item: 10px`,
+ `--r-card: 14px`, `--r-overlay: 12px`). **No state rule (`:hover`,
+ `:active`, `:focus`, `:focus-visible`) may set `border-radius`** — corners
+ never change across states. Hover/active feedback is a neutral shadow +
+ color change only (no translate, no colored glow). `verify` scans state
+ rules and fails on any `border-radius` inside them.
+16. **All code comments are in English (D15).** Every comment, JSDoc block,
+ CSS/HTML comment and developer-facing message (test assertion labels,
+ build-script `console.log`, thrown `Error` messages) is written in English,
+ so the codebase is readable for a global audience. This does **not** apply
+ to: user-visible UI strings (labels, `aria-label`, `title`, placeholders),
+ user-facing app metadata (PWA manifest `name`/`short_name`/`description`,
+ `index.html` meta/title/noscript, `metadata.json`), or anything under
+ `content/` and `src/content.generated.ts` — all of those stay Persian.
+ `verify` (§18) walks comment text in `src/`, `scripts/` and `tests/` and
+ fails if Persian characters appear inside a comment.
 
 ---
 
@@ -138,11 +164,11 @@ src/lib/
  palettes.ts five professional palettes + applyPalette()
  content-keys.ts storage key builders + legacy fallbacks
  app-context.tsx tab, typography, audible, palette, focus, print
- brand.mjs brand geometry (icons stay default green)
+ brand.mjs brand geometry + fixed APP_ICON palette (global black logo)
  storage.ts / persian.ts / tex.tsx / keys.ts / ui-bus.ts / use-*.ts
 
 tests/verify-all.cjs dependency-free invariant suite
-docs/PLAN-v3.md architecture plan
+docs/PLAN.md living plan & milestones (single stable file, D11)
 ```
 
 ### Data flow
@@ -206,8 +232,13 @@ Full human guide: `content/README.md`.
 - **Palette:** `pref:palette` ∈ `green|blue|orange|purple|red`.
  `applyPalette()` sets `data-theme` and `--color-accent*` (and aliases
  `--color-pine*` for existing utilities). Ochre (important) and clay (danger)
- stay fixed across themes. BrandMark fill uses `var(--color-accent)`.
- PWA install icons remain default green unless regenerated. The **browser tab favicon** (SVG) updates live with the active palette via `brandSvg()` + a dynamic `link[rel=icon]` in `applyPalette()`. Installed PWA home-screen icons are OS-cached and do not recolor until reinstall.
+ stay fixed across themes. **The logo is palette-independent everywhere
+ (D13):** the header/footer `BrandMark`, the browser-tab favicon, and all
+ `public/` install icons are always the same fixed mark — black background
+ `#000000` + gold shield `#c9a14b` + cream microphone `#f4f0e6` (`APP_ICON`
+ in `brand.mjs`). `applyPalette()` never touches the logo, the tab favicon,
+ or the shadow tokens; palettes recolor only UI accents (buttons, nav,
+ progress, ambient tint).
 - **Typography:** `readingStyle()` → `%` font-size + `--reading-lh`.
 - **Overlays:** `useModalBehavior`; global shortcuts silent while layers open.
 - **Slide numbering:** positional 1…N in the single full deck.
@@ -298,7 +329,9 @@ All slides print in order; no "optional backup" appendix.
 
 - `vite-plugin-pwa`, `registerType: 'autoUpdate'`, SW only in PROD
 - `theme_color` / meta `theme-color` = `#fcfaf3` (cream, palette-independent)
-- Icons from `npm run icons` / `brand.mjs`
+- Icons from `npm run icons` / `brand.mjs` — the one fixed global logo
+ (shield and voice: gold shield + cream mic on **black**), never palette-tinted
+- After a geometry change: `npm run icons` + bump `?v=` in `index.html`
 - Dev/preview: `0.0.0.0:3000`, allow `.e2b.app`
 - Cloudflare: `wrangler.jsonc` → `./dist`
 
@@ -343,6 +376,15 @@ When you add a structural rule, add a numbered section in the same commit.
 13. Bare `grid` without `grid-cols-*`.
 14. Hand-editing `src/content.generated.ts` or shipping stale hash.
 15. Forgetting English `estimatedTime` on new slides.
+16. Recoloring the logo (or tab favicon / shadow tokens) from a palette —
+ the logo is the one fixed black mark everywhere (D13).
+17. Setting `border-radius` inside a `:hover`/`:active`/`:focus` rule —
+ corners are constant; use the `--r-*` scale (D14).
+18. Writing a code comment, test label or build message in Persian (D15) —
+ only UI strings, app metadata and `content/` stay Persian. `verify` §18
+ fails on any Persian text inside a comment.
+19. Translating Persian UI strings while writing English comments: UI labels
+ are data for the tests and stay exactly as they are.
 
 ---
 
