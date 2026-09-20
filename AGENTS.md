@@ -87,14 +87,22 @@ make a change pass; fix the change instead.
 12. **Audio cues work.** Soft beeps at 10 / 5 / 0 seconds remaining when
  audible is on, driven from the timer interval via `src/lib/audio.ts`
  (not a dead `useEffect` on a stable ref).
-13. **Global install icon is palette-independent (D10).** All `public/`
- icons are built by `npm run icons` from the fixed `APP_ICON` palette in
- `src/lib/brand.mjs` (deep pine background `#163f35`, gold shield `#c9a14b`,
- cream microphone `#f4f0e6`). Palettes recolor only the in-app mark tile and
- the live tab favicon. Never add a palette argument to the icon build.
+13. **The logo is one fixed, palette-independent mark everywhere (D13).**
+ Black background `#000000` + gold shield `#c9a14b` + cream microphone
+ `#f4f0e6` (`APP_ICON` in `src/lib/brand.mjs`). It is used identically by
+ `BrandMark` (header/footer), the tab favicon, and all `public/` install
+ icons. Never recolor the logo, the tab favicon, or the shadow tokens from a
+ palette; never add a palette argument to the icon build.
 14. **One plan file (D11).** `docs/PLAN.md` is the single living plan and
  milestone file; update it in place. Never create versioned plan file names
  (no `PLAN-v4.md`); history belongs in its change log.
+15. **Corners are slightly rounded, consistent, and constant (D14).** Radii
+ come from the scale in `:root` (`--r-control: 8px`, `--r-item: 10px`,
+ `--r-card: 14px`, `--r-overlay: 12px`). **No state rule (`:hover`,
+ `:active`, `:focus`, `:focus-visible`) may set `border-radius`** — corners
+ never change across states. Hover/active feedback is a neutral shadow +
+ color change only (no translate, no colored glow). `verify` scans state
+ rules and fails on any `border-radius` inside them.
 
 ---
 
@@ -146,7 +154,7 @@ src/lib/
  palettes.ts five professional palettes + applyPalette()
  content-keys.ts storage key builders + legacy fallbacks
  app-context.tsx tab, typography, audible, palette, focus, print
- brand.mjs brand geometry + fixed APP_ICON palette (global install icons)
+ brand.mjs brand geometry + fixed APP_ICON palette (global black logo)
  storage.ts / persian.ts / tex.tsx / keys.ts / ui-bus.ts / use-*.ts
 
 tests/verify-all.cjs dependency-free invariant suite
@@ -214,13 +222,13 @@ Full human guide: `content/README.md`.
 - **Palette:** `pref:palette` ∈ `green|blue|orange|purple|red`.
  `applyPalette()` sets `data-theme` and `--color-accent*` (and aliases
  `--color-pine*` for existing utilities). Ochre (important) and clay (danger)
- stay fixed across themes. BrandMark tile uses `var(--color-accent)`; the
- gold shield + cream microphone marks are palette-independent constants
- (`APP_ICON`). **Installed icons** (all `public/` assets) are always the fixed
- global mark (deep pine `#163f35` + gold `#c9a14b` + cream `#f4f0e6`) and are
- never palette-tinted (D10). The **browser tab favicon** (SVG) updates live:
- only the tile follows the palette via `brandSvg()` + a dynamic
- `link[rel=icon]` in `applyPalette()`.
+ stay fixed across themes. **The logo is palette-independent everywhere
+ (D13):** the header/footer `BrandMark`, the browser-tab favicon, and all
+ `public/` install icons are always the same fixed mark — black background
+ `#000000` + gold shield `#c9a14b` + cream microphone `#f4f0e6` (`APP_ICON`
+ in `brand.mjs`). `applyPalette()` never touches the logo, the tab favicon,
+ or the shadow tokens; palettes recolor only UI accents (buttons, nav,
+ progress, ambient tint).
 - **Typography:** `readingStyle()` → `%` font-size + `--reading-lh`.
 - **Overlays:** `useModalBehavior`; global shortcuts silent while layers open.
 - **Slide numbering:** positional 1…N in the single full deck.
@@ -311,8 +319,8 @@ All slides print in order; no "optional backup" appendix.
 
 - `vite-plugin-pwa`, `registerType: 'autoUpdate'`, SW only in PROD
 - `theme_color` / meta `theme-color` = `#fcfaf3` (cream, palette-independent)
-- Icons from `npm run icons` / `brand.mjs` — fixed global `APP_ICON` design
- (shield and voice: gold shield + cream mic on deep pine), never palette-tinted
+- Icons from `npm run icons` / `brand.mjs` — the one fixed global logo
+ (shield and voice: gold shield + cream mic on **black**), never palette-tinted
 - After a geometry change: `npm run icons` + bump `?v=` in `index.html`
 - Dev/preview: `0.0.0.0:3000`, allow `.e2b.app`
 - Cloudflare: `wrangler.jsonc` → `./dist`
@@ -358,6 +366,10 @@ When you add a structural rule, add a numbered section in the same commit.
 13. Bare `grid` without `grid-cols-*`.
 14. Hand-editing `src/content.generated.ts` or shipping stale hash.
 15. Forgetting English `estimatedTime` on new slides.
+16. Recoloring the logo (or tab favicon / shadow tokens) from a palette —
+ the logo is the one fixed black mark everywhere (D13).
+17. Setting `border-radius` inside a `:hover`/`:active`/`:focus` rule —
+ corners are constant; use the `--r-*` scale (D14).
 
 ---
 

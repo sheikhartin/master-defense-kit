@@ -6,7 +6,7 @@
 > file name. Update this file in place whenever a milestone ships or a decision
 > changes.
 
-**Status:** M0–M6 shipped · M8 (global brand icon) shipped 2026-09-20 · M9 (content format) proposed, awaiting approval
+**Status:** M0–M6 shipped · M8 (global brand icon) shipped 2026-09-20 (refined to fixed black logo, D13) · M10 (UI/UX professional pass) shipped 2026-09-20 · M9 (content format) proposed, awaiting approval
 **Principle:** plan thoroughly first; implement only after explicit approval of a milestone.
 **Definition of done per milestone:** `npm run lint` + `npm run verify` + `npm run build` clean.
 
@@ -39,8 +39,9 @@ Full working rules: `AGENTS.md` (single source of truth for invariants).
 | M5 | `AGENTS.md` + README excellence | Done | |
 | M6 | Hardening & regression net (`tests/verify-all.cjs`) | Done | |
 | M7 | Future ideas (parked) | Parked | Pack import (zip → same folder shape), multi-pack switcher, coach vs examinee mode, spaced-repetition Q&A. Do not half-build these. |
-| M8 | Global brand icon (fixed, palette-independent) | Done (2026-09-20) | See §5 |
+| M8 | Global brand icon (fixed, palette-independent) | Done (2026-09-20) | See §5; refined to the fixed black logo by D13 the same day |
 | M9 | Content format hardening | **Proposed (2026-09-20), awaiting approval** | See §4 |
+| M10 | UI/UX professional pass: fixed black logo everywhere + constant slightly-rounded radii | Done (2026-09-20) | See §6 |
 
 ---
 
@@ -77,6 +78,22 @@ Full working rules: `AGENTS.md` (single source of truth for invariants).
  hybrid: Markdown + front matter for prose, YAML for compact structured data;
  no MDX/JSON/third format. Hardening phases M9.1–M9.3 in §4. **Pending
  approval.**
+- **D13 (2026-09-20) — Fixed black logo, everywhere.** The user rejected any
+ palette-driven logo recoloring: the project logo must be one standard mark
+ that never changes. Final form: **black background `#000000` + gold shield
+ `#c9a14b` + cream microphone `#f4f0e6`**, identical in the app header/footer,
+ the browser-tab favicon, and all install icons. The dynamic tab favicon and
+ the in-app accent tile were removed; `applyPalette()` no longer touches the
+ logo, favicon, or shadow tokens. Supersedes D10's "in-app tile follows the
+ palette" part.
+- **D14 (2026-09-20) — Professional UI pass: constant, slightly-rounded
+ radii.** Buttons/cards were "too round" and state rules (notably
+ `:focus-visible` forcing `border-radius: 8px`) visibly changed corners on
+ focus. New contract: radius scale `--r-control: 8px`, `--r-item: 10px`,
+ `--r-card: 14px`, `--r-overlay: 12px`; **no `:hover`/`:active`/`:focus`
+ rule may set `border-radius`**; hover/active = subtle neutral shadow + color
+ shift (colored glow shadows removed); `verify` scans state rules and fails on
+ any radius change.
 
 ---
 
@@ -152,25 +169,51 @@ optional.
 
 ## 5. M8 — global brand icon (shipped 2026-09-20)
 
-**Decision (D10):** the installed app icon is a fixed, standard, global logo.
+**Decision (D10, refined by D13):** the app icon is one fixed, standard,
+global logo — identical everywhere, never palette-tinted.
 
 - **Concept:** "shield and voice" — a **gold shield** with a **cream
- microphone** on a **deep-pine background tile**.
-- **Fixed palette** `APP_ICON` in `src/lib/brand.mjs`:
- bg `#163f35` (deepest pine of the default palette, fixed), shield `#c9a14b`
- (brand gold), mic `#f4f0e6` (cream paper).
+ microphone** on a **black background** (D13: the user asked for a fixed
+ black logo that never changes with the palette).
+- **Fixed palette** `APP_ICON` in `src/lib/brand.mjs`: bg `#000000`,
+ shield `#c9a14b` (brand gold), mic `#f4f0e6` (cream paper).
 - **Scope:** `public/icon.svg`, `favicon.ico`, `apple-touch-icon.png`,
  `pwa-192x192.png`, `pwa-512x512.png`, `pwa-maskable-512.png` — all regenerated
- by `npm run icons` from `APP_ICON`; **no palette input, ever**.
-- **In-app only:** the header/footer `BrandMark` tile and the live browser-tab
- favicon follow the active palette (same geometry; gold shield + cream mic stay
- constant).
-- `verify` now asserts the fixed palette in `brand.mjs`, the builder, and
- `public/icon.svg`.
+ by `npm run icons` from `APP_ICON`; **no palette input, ever**. The in-app
+ `BrandMark` and the static tab favicon use the same mark (the dynamic
+ palette-tinted favicon was removed).
+- `verify` asserts the fixed palette in `brand.mjs`, the builder,
+ `BrandMark`, and `public/icon.svg`.
 
 ---
 
-## 6. Open technical notes (non-blocking)
+## 6. M10 — UI/UX professional pass (shipped 2026-09-20)
+
+**Decisions (D13 + D14).** The user asked for a more professional UI: the
+logo must never change with the palette (fixed black), and buttons must keep
+slightly-rounded, *constant* corners — no element may change its roundness on
+hover/active/focus.
+
+- **Fixed black logo everywhere** (see §5): header/footer mark, tab favicon,
+ install icons. Palettes now recolor only UI accents.
+- **Radius scale** in `:root`: `--r-control: 8px` (buttons, icon buttons,
+ tabs, inputs), `--r-item: 10px` (inner blocks), `--r-card: 14px` (cards),
+ `--r-overlay: 12px` (floating menus). 16px content blocks (`rounded-2xl`)
+ normalized to 12px; pill radii removed from tabs/icon buttons/focus-exit
+ (chips/eyebrows/progress keep pill shape — they are labels, not controls).
+- **State contract:** `:focus-visible` no longer overrides `border-radius`
+ (the old 8px override was the main cause of the "corners change" effect);
+ no `:hover`/`:active`/`:focus` rule may set a radius. Hover/active feedback
+ = subtle **neutral** shadow + color shift; the old palette-colored glow
+ shadows are gone (`--shadow-glow*` tokens are now neutral ink shadows).
+- `BrandMark` CSS radius aligned to the icon's own corner ratio (23.4%) so
+ the in-app mark matches the install icons exactly.
+- `verify` now fails on any `border-radius` inside a state rule and asserts
+ the radius scale + fixed black logo.
+
+---
+
+## 7. Open technical notes (non-blocking)
 
 - If brand geometry changes again: `npm run icons` + bump `?v=` in
  `index.html` + commit regenerated `public/` assets.
@@ -188,4 +231,5 @@ optional.
 | Date | Change |
 |------|--------|
 | 2026-09-19 | Plan v3 drafted (then `docs/PLAN-v3.md`); C1–C14 approved; M1–M6 implemented |
-| 2026-09-20 | Renamed to single living `docs/PLAN.md` (D11); M8 global brand icon shipped (D10); M9 content-format proposal added (D12 pending approval) |
+| 2026-09-20 (a) | Renamed to single living `docs/PLAN.md` (D11); M8 global brand icon shipped (D10); M9 content-format proposal added (D12 pending approval) |
+| 2026-09-20 (b) | M10 professional UI pass (D13 + D14): logo fixed to black everywhere, dynamic favicon removed, radius scale introduced, state rules forbidden from changing corners, neutral hover shadows |

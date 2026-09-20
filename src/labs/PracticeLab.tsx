@@ -532,7 +532,7 @@ export default function PracticeLab() {
           <div className="grid grid-cols-1 gap-0 lg:grid-cols-[minmax(0,1fr)_300px]">
             <div className="min-w-0 space-y-7 px-6 py-6 md:px-8">
               {slide.tex.length > 0 && (
-                <div className="rounded-2xl border border-line bg-surface-2/70 p-2">
+                <div className="rounded-xl border border-line bg-surface-2/70 p-2">
                   {slide.tex.map((f, i) => (
                     <figure key={i} className="px-2 py-2 text-center">
                       <TeX tex={f.tex} display />
@@ -578,7 +578,7 @@ export default function PracticeLab() {
               </div>
 
               {slide.phrase && (
-                <blockquote className="hl-block rounded-2xl px-5 py-4 text-[1.05em] font-extrabold leading-[var(--reading-lh)] text-ink">
+                <blockquote className="hl-block rounded-xl px-5 py-4 text-[1.05em] font-extrabold leading-[var(--reading-lh)] text-ink">
                   {slide.phrase}
                 </blockquote>
               )}

@@ -288,9 +288,17 @@ for (const id of ['green', 'blue', 'orange', 'purple', 'red']) {
 }
 assert(read('src/lib/app-context.tsx').includes('pref:palette'), 'ذخیره پالت در localStorage');
 assert(read('src/components/Header.tsx').includes('PALETTES'), 'انتخاب‌گر پالت در تنظیمات');
-assert(read('src/components/BrandMark.tsx').includes('--color-accent'), 'نشان برند از accent پالت پیروی می‌کند');
-assert(read('src/lib/palettes.ts').includes('brandSvg') && read('src/lib/palettes.ts').includes('data-dynamic-favicon'), 'فاوآیکون تب با پالت به‌صورت پویا به‌روز می‌شود');
-assert(read('src/lib/brand.mjs').includes('function brandSvg') || read('src/lib/brand.mjs').includes('export function brandSvg'), 'brandSvg در brand.mjs برای نشان پویا موجود است');
+assert(
+  read('src/components/BrandMark.tsx').includes('APP_ICON.bg') &&
+    !read('src/components/BrandMark.tsx').includes('--color-accent'),
+  'لوگو داخل برنامه ثابت است و با پالت تغییر رنگ نمی‌کند (D13)',
+);
+assert(
+  !read('src/lib/palettes.ts').includes('data-dynamic-favicon') &&
+    !read('src/lib/palettes.ts').includes('applyFavicon'),
+  'فاوآیکون پویای وابسته به پالت حذف شده است؛ لوگو در همه‌جا ثابت است',
+);
+assert(read('src/lib/brand.mjs').includes('function brandSvg') || read('src/lib/brand.mjs').includes('export function brandSvg'), 'brandSvg در brand.mjs برای سازنده آیکون موجود است');
 
 assert(read('src/components/Header.tsx').includes('playTestCue'), 'دکمه آزمایش صدا در تنظیمات');
 
@@ -300,8 +308,24 @@ assert(read('src/components/Header.tsx').includes('playTestCue'), 'دکمه آز
 const cssText = read('src/index.css');
 assert(!/translateY\(-/.test(cssText), 'هیچ هاور یا حالتی عنصر را به بالا هل نمی‌دهد (بدون لرزش)');
 assert(!cssText.includes('pulse-soft') && !/animation:[^;]*infinite/.test(cssText), 'هیچ انیمیشن چشمک بی‌پایان وجود ندارد');
-assert(/hover[\s\S]{0,120}box-shadow: var\(--shadow-glow/.test(cssText), 'هاور با درخشش آرام (گلو) بیان می‌شود نه جابه‌جایی');
+assert(/hover[\s\S]{0,120}box-shadow: var\(--shadow-glow/.test(cssText), 'هاور با عمق ملایم و خنثی بیان می‌شود نه جابه‌جایی');
 assert(/\.hl-block\s*\{/.test(cssText), 'کلاس hl-block برای هایلایت پاراگراف تعریف شده است');
+
+/* مقیاس گوشه‌ها: کمی گرد، یکپارچه و در هیچ حالتی عوض نمی‌شوند */
+assert(cssText.includes('--r-control: 8px'), 'مقیاس گوشه‌های کمی‌گرد (8/10/14/12) در ریشه تعریف شده است');
+assert(/\.btn\s*\{[^}]*border-radius: var\(--r-control\)/s.test(cssText), 'دکمه‌ها از گوشه‌ی کمی‌گرد ثابت استفاده می‌کنند');
+{
+  let stateRadius = [];
+  const stateRuleRe = /:(?:hover|active|focus(?:-visible)?)\s*\{([^}]*)\}/g;
+  let sm;
+  while ((sm = stateRuleRe.exec(cssText)) !== null) {
+    if (sm[1].includes('border-radius')) stateRadius.push(sm[0].slice(0, 48).replace(/\s+/g, ' '));
+  }
+  assert(
+    stateRadius.length === 0,
+    `هیچ قاعده‌ی حالتی (hover/active/focus) radius عوض نمی‌کند (${stateRadius.join(' | ') || 'صفر مورد'})`,
+  );
+}
 
 /* ------------------------------------------------------------------ */
 /* ۱۰) نشان برند یکپارچه                                                */
@@ -319,10 +343,10 @@ for (const rel of [
 assert(read('public/icon.svg').includes('M 162 108'), 'فاوآیکون برداری از همان هندسه برند ساخته شده');
 const brandMjsNow = read('src/lib/brand.mjs');
 assert(brandMjsNow.includes('APP_ICON'), 'پالت ثابت و سراسری آیکون نصب (APP_ICON) در brand.mjs تعریف شده است');
-assert(brandMjsNow.includes('#c9a14b') && brandMjsNow.includes('#163f35'), 'نشان ثابت: سپر طلایی روی پس‌زمینه سبز تیره');
+assert(brandMjsNow.includes('#c9a14b') && brandMjsNow.includes('#000000'), 'لوگو ثابت: سپر طلایی روی پس‌زمینه مشکی');
 assert(
-  read('public/icon.svg').includes('#c9a14b') && read('public/icon.svg').includes('#163f35'),
-  'آیکون نصب سراسری (سپر طلایی + سبز تیره) مستقل از پالت‌های برنامه است',
+  read('public/icon.svg').includes('#c9a14b') && read('public/icon.svg').includes('#000000'),
+  'آیکون سراسری (سپر طلایی + مشکی) در همه نسخه‌ها یکسان و مستقل از پالت است',
 );
 assert(read('scripts/build-brand.mjs').includes('APP_ICON'), 'سازنده آیکون از پالت ثابت APP_ICON استفاده می‌کند');
 assert(read('src/components/Header.tsx').includes('BrandMark'), 'سربرگ از نشان مشترک برند استفاده می‌کند');

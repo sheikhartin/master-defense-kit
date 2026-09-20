@@ -114,7 +114,7 @@ export default function Header() {
                 <div
                   role="menu"
                   aria-label="دانلود PDF"
-                  className="pop-in absolute left-0 top-12 z-50 w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-line bg-surface p-2 shadow-lift"
+                  className="pop-in absolute left-0 top-12 z-50 w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-line bg-surface p-2 shadow-lift"
                 >
                   <p className="px-3 pb-1 pt-2 text-xs font-extrabold text-muted">
                     دانلود PDF تمیز و قابل چاپ
@@ -168,7 +168,7 @@ export default function Header() {
               </button>
 
               {panel && (
-                <div className="pop-in absolute left-0 top-12 z-50 w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-line bg-surface p-4 shadow-lift">
+                <div className="pop-in absolute left-0 top-12 z-50 w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-line bg-surface p-4 shadow-lift">
                   <div className="mb-3 flex items-center justify-between">
                     <h3 className="text-sm font-extrabold text-ink">تنظیمات خواندن</h3>
                     <button className="icon-btn h-7 w-7" onClick={() => setPanel(false)} aria-label="بستن">

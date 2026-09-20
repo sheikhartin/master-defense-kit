@@ -32,10 +32,9 @@
   --shadow-soft: 0 1px 2px rgba(43, 37, 28, 0.04), 0 8px 24px rgba(43, 37, 28, 0.05);
   --shadow-lift: 0 2px 4px rgba(43, 37, 28, 0.05), 0 16px 40px rgba(43, 37, 28, 0.08);
 
-  /* درخشش آرام برای هاور: به‌جای جابه‌جایی، فقط هاله نور */
-  --shadow-glow-sm: 0 0 0 1px rgba(30, 90, 73, 0.12), 0 3px 12px rgba(30, 90, 73, 0.16);
-  --shadow-glow: 0 0 0 1px rgba(30, 90, 73, 0.12), 0 8px 22px rgba(30, 90, 73, 0.16),
-    0 14px 40px -12px rgba(30, 90, 73, 0.28);
+  /* عمق ملایم و خنثی برای هاور: بدون هاله رنگی، بدون جابه‌جایی، ثابت در همه پالت‌ها */
+  --shadow-glow-sm: 0 1px 2px rgba(43, 37, 28, 0.06), 0 3px 10px rgba(43, 37, 28, 0.08);
+  --shadow-glow: 0 2px 4px rgba(43, 37, 28, 0.06), 0 10px 26px rgba(43, 37, 28, 0.1);
 }
 
 /* ---------- توکن‌های حرکت و پالت زمان‌اجرا ---------- */
@@ -46,6 +45,13 @@
   --t-fast: 200ms;
   --t-med: 320ms;
   --t-slow: 560ms;
+
+  /* مقیاس گوشه‌ها: کمی گرد، یکپارچه و ثابت.
+     قانون سفت‌وفصل: هیچ قاعده‌ی حالتی (hover/active/focus) radius عوض نمی‌کند. */
+  --r-control: 8px;  /* دکمه، دکمه‌آیکون، تب، ورودی */
+  --r-item: 10px;    /* بلوک‌های درون‌صفحه: پنل، سلول آماری، هایلایت */
+  --r-card: 14px;    /* کارت‌های اصلی */
+  --r-overlay: 12px; /* منو و پنجره‌های شناور */
 
   /* accent aliases (هم‌تراز با pine؛ از applyPalette به‌روز می‌شوند) */
   --color-accent: #1e5a49;
@@ -135,10 +141,10 @@ body {
   color: var(--color-ink);
 }
 
+/* حلقه تمرکز فقط اضافه می‌شود؛ هیچ‌وقت شکل یا گوشه‌ی عنصر را عوض نمی‌کند */
 :focus-visible {
   outline: 2px solid rgba(var(--accent-rgb), 0.55);
   outline-offset: 2px;
-  border-radius: 8px;
 }
 
 /* پس‌زمینه کاغذی خیلی ملایم برای عمق بدون شلوغی */
@@ -202,7 +208,7 @@ main {
 .card {
   background: var(--color-surface);
   border: 1px solid var(--color-line);
-  border-radius: 20px;
+  border-radius: var(--r-card);
   box-shadow: var(--shadow-soft);
   transition:
     box-shadow var(--t-med) var(--ease-soft),
@@ -213,7 +219,7 @@ main {
 .panel {
   background: var(--color-surface-2);
   border: 1px solid var(--color-line);
-  border-radius: 14px;
+  border-radius: var(--r-item);
 }
 
 /* همان خط دفاع افقی برای پابرگ (فرزند لایه‌دار بیرون‌ران ندارد) */
@@ -272,7 +278,7 @@ main {
   align-items: center;
   gap: 0.4rem;
   flex-shrink: 0;
-  border-radius: 999px;
+  border-radius: var(--r-control);
   padding: 0.45rem 0.95rem;
   font-size: 0.875rem;
   font-weight: 700;
@@ -293,7 +299,7 @@ main {
 .tab-pill[aria-current="page"] {
   background: var(--color-pine);
   color: #fdfbf4;
-  box-shadow: 0 1px 2px rgba(var(--accent-rgb), 0.22), 0 6px 16px rgba(var(--accent-rgb), 0.16);
+  box-shadow: 0 1px 2px rgba(43, 37, 28, 0.1);
 }
 .tab-pill[aria-current="page"] .tab-pill-icon {
   color: rgba(253, 251, 244, 0.92);
@@ -318,7 +324,7 @@ main {
   .stat-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 .stat-cell {
-  border-radius: 14px;
+  border-radius: var(--r-item);
   border: 1px solid var(--color-line);
   background: var(--color-surface-2);
   padding: 0.75rem 0.9rem;
@@ -435,13 +441,13 @@ main {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border-radius: 12px;
+  border-radius: var(--r-control);
   font-weight: 600;
   font-size: 0.9375rem;
   padding: 0.55rem 1.05rem;
   line-height: 1.7;
   border: 1px solid transparent;
-  /* فقط رنگ و هاله نور گذار می‌کنند؛ هیچ جابه‌جایی در کار نیست */
+  /* فقط رنگ و عمق گذار می‌کنند؛ هیچ جابه‌جایی و هیچ تغییر گوشه‌ای در کار نیست */
   transition:
     background-color var(--t-med) var(--ease-soft),
     border-color var(--t-med) var(--ease-soft),
@@ -451,7 +457,7 @@ main {
   white-space: nowrap;
 }
 
-/* هاور پایدار: به‌جای بلندشدن، یک درخشش آرام */
+/* هاور پایدار: عمق خنثی و ملایم؛ شکل و گوشه‌ها ثابت می‌مانند */
 .btn:hover {
   box-shadow: var(--shadow-glow-sm);
 }
@@ -464,7 +470,7 @@ main {
 .btn-primary {
   background: var(--color-pine);
   color: #fdfbf4;
-  box-shadow: 0 1px 2px rgba(var(--accent-rgb), 0.25), 0 6px 16px rgba(var(--accent-rgb), 0.18);
+  box-shadow: 0 1px 2px rgba(43, 37, 28, 0.14);
 }
 .btn-primary:hover {
   background: var(--color-pine-deep);
@@ -503,18 +509,18 @@ main {
 .btn-sm {
   font-size: 0.8125rem;
   padding: 0.35rem 0.75rem;
-  border-radius: 10px;
+  border-radius: var(--r-control);
   gap: 0.35rem;
 }
 
-/* دکمه گرد کوچک برای نوار ابزار */
+/* دکمه کوچک مربع‌مانند برای نوار ابزار */
 .icon-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 2.35rem;
   height: 2.35rem;
-  border-radius: 12px;
+  border-radius: var(--r-control);
   color: var(--color-ink-soft);
   border: 1px solid transparent;
   background: transparent;
@@ -547,7 +553,7 @@ main {
   backdrop-filter: blur(8px);
   border: 1px solid var(--color-line);
   color: var(--color-ink-soft);
-  border-radius: 999px;
+  border-radius: var(--r-control);
   box-shadow: var(--shadow-lift);
 }
 
@@ -689,7 +695,7 @@ main {
 .hl-block {
   background: rgba(220, 183, 94, 0.26);
   border: 1px solid rgba(154, 113, 38, 0.26);
-  border-radius: 12px;
+  border-radius: var(--r-item);
   box-shadow: inset 0 0 0 1px rgba(252, 250, 243, 0.4);
   transition:
     background-color var(--t-med) var(--ease-soft),
@@ -757,13 +763,13 @@ main {
   /* قاب بیرونی جدول این‌جا کشیده می‌شود تا کادر جدول از هر چهار سمت
      کامل و بسته دیده شود (گوشه‌های گرد هم‌خوان با سیستم طراحی) */
   border: 1px solid var(--color-line);
-  border-radius: 14px;
+  border-radius: 12px;
 }
 
 .chip-wrap {
   white-space: normal;
   max-width: 100%;
-  border-radius: 18px;
+  border-radius: 12px;
   padding-block: 0.3rem;
 }
 
@@ -978,7 +984,7 @@ kbd {
   font-weight: 700;
   line-height: 1.9;
   padding: 0 0.45em;
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px solid var(--color-line-strong);
   border-bottom-width: 2px;
   background: var(--color-surface-2);
@@ -1002,7 +1008,7 @@ kbd {
   min-width: 2.2rem;
   height: 2.2rem;
   padding: 0 0.4rem;
-  border-radius: 10px;
+  border-radius: var(--r-control);
   font-weight: 700;
   font-size: 0.85rem;
   color: var(--color-ink-soft);
@@ -1054,9 +1060,9 @@ kbd {
   background: rgba(var(--accent-rgb), 0.45);
 }
 
-/* نشان برند: گوشه گرد + سایه نرم */
+/* نشان برند: همان نسبت گوشه‌ی آیکون‌های ساخته‌شده (rx 120 در 512) + سایه نرم */
 .brand-mark {
-  border-radius: 14px;
+  border-radius: 23.4%;
   overflow: hidden;
   box-shadow: var(--shadow-soft);
 }

@@ -48,14 +48,14 @@ export default function QALab() {
 
         {/* ساختار پاسخ و پرسش خارج از پایان‌نامه (ترک تک‌ستونه صریح برای پایداری) */}
         <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <div className="min-w-0 rounded-2xl border-r-4 border-pine bg-pine-wash px-5 py-4">
+          <div className="min-w-0 rounded-xl border-r-4 border-pine bg-pine-wash px-5 py-4">
             <h3 className="mb-2 flex items-center gap-1.5 text-sm font-extrabold text-pine-deep">
               <Sparkles className="h-4 w-4" />
               {answerPattern.title}
             </h3>
             <p className="text-[0.95em] leading-[var(--reading-lh)] text-pine-deep">{answerPattern.example}</p>
           </div>
-          <div className="min-w-0 rounded-2xl border border-line bg-surface-2/50 px-5 py-4">
+          <div className="min-w-0 rounded-xl border border-line bg-surface-2/50 px-5 py-4">
             <h3 className="mb-2 flex items-center gap-1.5 text-sm font-extrabold text-ink">
               <ShieldCheck className="h-4 w-4 text-ochre" />
               سؤال خارج از پایان‌نامه
@@ -145,7 +145,7 @@ function QaCard({ item }: { item: QaItem }) {
 
         {open && (
           <div className="fade-up mt-4 space-y-3 border-t border-line pt-4">
-            <p className="rounded-2xl bg-surface-2/70 px-5 py-4 text-[1em] leading-[var(--reading-lh)] text-ink">
+            <p className="rounded-xl bg-surface-2/70 px-5 py-4 text-[1em] leading-[var(--reading-lh)] text-ink">
               {item.answer}
             </p>
             {item.keySentence && (
@@ -262,7 +262,7 @@ function DrillZone() {
 
           {revealed ? (
             <div className="fade-up mt-4">
-              <p className="rounded-2xl bg-pine-wash px-5 py-4 text-[1em] leading-[var(--reading-lh)] text-pine-deep">
+              <p className="rounded-xl bg-pine-wash px-5 py-4 text-[1em] leading-[var(--reading-lh)] text-pine-deep">
                 {current.a}
               </p>
               <div className="mt-4 flex flex-wrap gap-2">

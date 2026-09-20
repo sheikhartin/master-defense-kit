@@ -51,7 +51,7 @@ function Keys({ keys }: { keys: string[] }) {
 
 function Section({ title, active, rows }: { title: string; active?: boolean; rows: Row[] }) {
   return (
-    <section className={`rounded-2xl border p-4 ${active ? 'border-pine/40 bg-pine-wash/60' : 'border-line bg-surface-2/40'}`}>
+    <section className={`rounded-xl border p-4 ${active ? 'border-pine/40 bg-pine-wash/60' : 'border-line bg-surface-2/40'}`}>
       <h4 className="mb-2 text-xs font-extrabold text-ink">{title}</h4>
       <ul className="space-y-2">
         {rows.map((r) => (

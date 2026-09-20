@@ -75,7 +75,7 @@ export default function CheatSheetLab() {
           {keyFacts.map((f) => (
             <div
               key={f.label}
-              className={`flex items-start gap-3 rounded-2xl border px-4 py-3 ${
+              className={`flex items-start gap-3 rounded-xl border px-4 py-3 ${
                 f.kind === 'bound' ? 'border-clay/25 bg-clay-soft/40' : 'border-line bg-surface-2/50'
               }`}
             >
@@ -202,17 +202,17 @@ function EquationCard({ eq, n }: { eq: Equation; n: number }) {
         </div>
 
         {/* فرمول */}
-        <div className="mt-4 rounded-2xl border border-line bg-surface-2/60">
+        <div className="mt-4 rounded-xl border border-line bg-surface-2/60">
           <TeX tex={eq.tex} display className="text-ink" />
         </div>
 
         {/* مفهوم و راهنمای گفتن */}
         <div className="mt-4 grid gap-4 lg:grid-cols-2">
-          <p className="rounded-2xl bg-pine-wash px-5 py-4 text-[0.98em] leading-[var(--reading-lh)] text-pine-deep">
+          <p className="rounded-xl bg-pine-wash px-5 py-4 text-[0.98em] leading-[var(--reading-lh)] text-pine-deep">
             <b className="mb-1 block text-sm font-extrabold">معنی رابطه</b>
             {eq.meaning}
           </p>
-          <div className="rounded-2xl border-r-4 border-ochre bg-ochre-soft/50 px-5 py-4">
+          <div className="rounded-xl border-r-4 border-ochre bg-ochre-soft/50 px-5 py-4">
             <p className="mb-1 flex items-center gap-1.5 text-sm font-extrabold text-ochre">
               <BookOpen className="h-4 w-4" />
               چطور به فارسی بگوییم

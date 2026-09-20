@@ -82,7 +82,7 @@ export default function HomeLab() {
             </div>
           </div>
 
-          <blockquote className="mt-5 max-w-3xl rounded-2xl border-r-4 border-ochre bg-ochre-soft/60 px-5 py-4 leading-[var(--reading-lh)] text-ink-soft">
+          <blockquote className="mt-5 max-w-3xl rounded-xl border-r-4 border-ochre bg-ochre-soft/60 px-5 py-4 leading-[var(--reading-lh)] text-ink-soft">
             <span className="font-extrabold text-ochre">اصل حاکم: </span>
             {governingPrinciple}
           </blockquote>
@@ -143,7 +143,7 @@ export default function HomeLab() {
             <div key={ch.id} className="card hover-card p-5 md:p-6">
               <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
                 <div className="flex min-w-0 flex-1 gap-4">
-                  <span className="mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-pine text-base font-black text-surface shadow-soft">
+                  <span className="mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-pine text-base font-black text-surface shadow-soft">
                     {ch.num}
                   </span>
                   <div className="min-w-0 flex-1">
@@ -197,7 +197,7 @@ export default function HomeLab() {
           ))}
         </div>
 
-        <p className="mt-4 flex items-start gap-2 rounded-2xl border border-dashed border-line-strong bg-surface-2/50 px-4 py-3 text-[0.82rem] leading-6 text-muted">
+        <p className="mt-4 flex items-start gap-2 rounded-xl border border-dashed border-line-strong bg-surface-2/50 px-4 py-3 text-[0.82rem] leading-6 text-muted">
           <Target className="mt-1 h-4 w-4 shrink-0 text-ochre" />
           <span>
             همه {toPersianDigits(meta.slideCount)} اسلاید در مسیر اصلی تمرین قرار دارند. مجموع گفتار{' '}
