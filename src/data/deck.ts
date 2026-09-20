@@ -1,6 +1,6 @@
 /**
- * سازگاری عقب‌رو: محتوای ارائه از content/ کامپایل می‌شود.
- * این ماژول فقط خروجی تولیدشده را دوباره صادر می‌کند.
+ * Backward compatibility: the deck content is compiled from content/.
+ * This module only re-exports the generated output.
  */
 export {
   chapters,

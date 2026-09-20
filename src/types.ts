@@ -1,56 +1,56 @@
 /**
- * انواع داده بستار دفاع
- * محتوا از فایل‌های بیرونی content/ می‌آید و هنگام ساخت به
- * src/content.generated.ts تبدیل می‌شود؛ این فایل فقط قراردادها را نگه می‌دارد.
+ * Data types for the defense kit.
+ * Content comes from the external content/ files and is compiled into
+ * src/content.generated.ts at build time; this file only keeps the contracts.
  */
 
-/** بخش‌های رسمی ارائه (فهرست هشت‌بخشی) */
+/** Official talk chapters (the eight-part list) */
 export interface Chapter {
-  /** شناسه پایدار */
+  /** Stable id */
   id: string;
-  /** شماره بخش: «۰۱» تا «۰۸» یا «شروع» برای اسلایدهای آغازین */
+  /** Chapter number: "01" to "08", or the start marker for opening slides */
   num: string;
   title: string;
-  /** توضیح کوتاه محتوایی */
+  /** Short content description */
   summary: string;
-  /** ایندکس‌های اسلایدهای این بخش در آرایه slides */
+  /** Indices of this chapter's slides in the slides array */
   slideRange: [number, number];
-  /** هدف کلیدی بخش */
+  /** Key goal of the chapter */
   goal?: string;
 }
 
 export interface SlideFormula {
   tex: string;
-  /** برچسب کوتاه فارسی کنار فرمول (اختیاری) */
+  /** Short label next to the equation (optional) */
   caption?: string;
 }
 
 export interface DeckSlide {
-  /** شناسه پایدار محتوایی (برای کلیدهای localStorage) */
+  /** Stable content id (used for localStorage keys) */
   id: string;
-  /** شماره اسلاید در ترتیب ارائه (۱-پایه، موقعیتی) */
+  /** Slide number in talk order (1-based, positional) */
   num: number;
-  /** عنوان فارسی روی اسلاید */
+  /** Persian title shown on the slide */
   title: string;
-  /** شناسه بخش (فهرست هشت‌بخشی) */
+  /** Chapter id (the eight-part list) */
   chapterId: string;
-  /** مدت زمان استاندارد به ثانیه (از durationSec فایل اسلاید) */
+  /** Standard duration in seconds (from durationSec in the slide file) */
   duration: number;
-  /** برچسب انگلیسی مدت برای نویسندگان محتوا (مثلاً "1 min 40 sec") */
+  /** English duration label for content authors (for example "1 min 40 sec") */
   estimatedTime?: string;
-  /** هدف اسلاید از سناریو */
+  /** Slide goal from the scenario */
   goal?: string;
-  /** محتوای پیشنهادی روی اسلاید: فهرست کوتاه */
+  /** Suggested on-slide content: a short list */
   visual: string[];
-  /** فرمول‌های نمایشی اسلاید (رندر کیتکس، فقط ASCII) */
+  /** Display equations of the slide (KaTeX rendering, ASCII only) */
   tex: SlideFormula[];
-  /** متن گفتاری کامل (پاراگراف‌ها از سناریو) */
+  /** Full speech text (paragraphs from the scenario) */
   speech: string[];
-  /** جمله کلیدی برای حفظ */
+  /** Key sentence to memorize */
   phrase?: string;
-  /** یادداشت‌های مربی / نکات اجرایی */
+  /** Coach notes / delivery tips */
   notes: string[];
-  /** جمله انتقال به اسلاید بعد */
+  /** Transition sentence into the next slide */
   transition?: string;
 }
 
@@ -59,9 +59,9 @@ export interface QaItem {
   category: QaCategory;
   question: string;
   answer: string;
-  /** نکته استراتژیک تکمیلی */
+  /** Additional strategic note */
   tip?: string;
-  /** جمله کلیدی که حتماً باید گفته شود */
+  /** Key sentence that must be said */
   keySentence?: string;
 }
 
@@ -77,50 +77,50 @@ export type QaCategory =
   | 'محدودیت';
 
 export interface EquationParam {
-  /** نماد ریاضی (فقط ASCII، داخل LaTeX) */
+  /** Math symbol (ASCII only, inside LaTeX) */
   sym: string;
-  /** نام فارسی پارامتر */
+  /** Persian parameter name */
   name: string;
-  /** توضیح خوانا و بی‌نیاز از گفتن نماد */
+  /** Readable description that avoids pronouncing the symbol */
   desc: string;
 }
 
 export interface Equation {
   id: string;
-  /** عنوان فارسی رابطه */
+  /** Persian title of the relation */
   title: string;
-  /** عنوان انگلیسی کوتاه (در کنار عنوان فارسی) */
+  /** Short English title (shown next to the Persian title) */
   en: string;
-  /** عبارت LaTeX کامل (فقط ASCII) */
+  /** Full LaTeX expression (ASCII only) */
   tex: string;
-  /** رابطه داخل جمله یا بلوک */
+  /** Relation inline or as a block */
   display: boolean;
-  /** منبع: نسخه پایان‌نامه یا مقاله */
+  /** Source: thesis or paper version */
   ref: string;
-  /** توضیح مفهومی فارسی */
+  /** Persian conceptual explanation */
   meaning: string;
-  /** راهنمای گفتن رابطه به زبان فارسی، بدون روخوانی نمادها */
+  /** Guidance on saying the relation in Persian without reading the symbols */
   verbal: string;
-  /** تشریح پارامترها */
+  /** Parameter breakdown */
   params: EquationParam[];
 }
 
 export interface ConceptCard {
   id: string;
-  /** برچسب اصلی کارت، دقیق و فارسی */
+  /** Main card label, precise and Persian */
   label: string;
-  /** عنوان فرعی فارسی */
+  /** Persian subtitle */
   heading: string;
-  /** نام لاتین (در محل درست خودش، چپ‌به‌راست، هرگز در بالای کارت وسط‌چین نمی‌شود) */
+  /** Latin name (in its own place, left to right, never centered on top of the card) */
   en: string;
   tone: 'pine' | 'ochre' | 'clay';
   body: string[];
 }
 
 export interface FactRow {
-  /** برچسب فارسی */
+  /** Persian label */
   label: string;
-  /** ارزش یا متن اصلی */
+  /** Value or main text */
   value: string;
   kind: 'rel' | 'num' | 'bound';
 }
@@ -136,10 +136,10 @@ export interface DoDont {
   good: string;
 }
 
-/** پالت‌های حرفه‌ای رابط */
+/** Professional UI palettes */
 export type PaletteId = 'green' | 'blue' | 'orange' | 'purple' | 'red';
 
-/** یادداشت شخصی با پرچم اهمیت و خطوط کلیدی */
+/** Personal note with an importance flag and key lines */
 export interface PersonalNote {
   text: string;
   important: boolean;

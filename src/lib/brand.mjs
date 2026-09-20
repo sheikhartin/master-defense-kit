@@ -1,54 +1,54 @@
 /**
- * نشان برند «بستار دفاع ارشد BCOA» - تنها منبع حقیقت.
+ * Brand mark for the BCOA Master's Defense Kit - the single source of truth.
  *
- * این فایل عمداً JavaScript ساده (بدون TypeScript) است تا هم برنامه
- * بتواند آن را وارد کند (src/components/BrandMark.tsx) و هم اسکریپت ساخت
- * آیکون در نود (scripts/build-brand.mjs). یعنی فاوآیکون، آیکون نصب،
- * آیکون iOS و نشان داخل سربرگ، همگی از یک هندسه ساخته می‌شوند و هرگز
- * از هم جدا نمی‌افتند.
+ * This file is deliberately plain JavaScript (no TypeScript) so both the app
+ * can import it (src/components/BrandMark.tsx) and the icon build script can
+ * use it in Node (scripts/build-brand.mjs). That means the favicon, the install
+ * icons, the iOS icon and the in-app header mark are all built from one
+ * geometry and can never drift apart.
  *
- * مفهوم نشان: «سپر و صدا».
- * سپر -> نماد دفاع (جلسه دفاع پایان‌نامه) و اطمینان
- * میکروفون -> گفتار دفاع؛ بیان و صدا
+ * Mark concept: "shield and voice".
+ * shield -> symbol of defense (a thesis defense) and confidence
+ * microphone -> the spoken defense; voice and delivery
  *
- * دو کاربرد نشان:
- * 1) آیکون‌های نصب (PWA، iOS، favicon) از پالت ثابت و سراسری APP_ICON
- *    ساخته می‌شوند: پس‌زمینه مشکی + سپر طلایی + میکروفون کرم. این
- *    آیکون‌ها عمداً با پالت‌های برنامه تغییر نمی‌کنند (تصمیم D10 در
- *    docs/PLAN.md) چون آیکون نصب‌شده روی دستگاه نادر تغییر می‌کند و باید
- *    یک نشان استاندارد و شناخته‌شده باشد.
- * 2) نشان داخل برنامه (سربرگ و پابرگ) و فاوآیکون تب، دقیقاً همین نشان
- *    ثابت سیاه هستند. لوگو در هیچ‌جا با پالت‌های برنامه تغییر رنگ نمی‌دهد
- *    (تصمیم D13 در docs/PLAN.md)؛ پالت‌ها فقط رنگ‌های رابط (دکمه، ناوبری،
- *    پیشرفت) را عوض می‌کنند.
+ * Two uses of the mark:
+ * 1) Install icons (PWA, iOS, favicon) are built from the fixed global
+ *    APP_ICON palette: black background + gold shield + cream microphone.
+ *    These icons deliberately do not change with the app palettes
+ *    (decision D13 in docs/PLAN.md) because the installed icon rarely changes
+ *    and must be a standard, recognizable logo.
+ * 2) The in-app mark (header and footer) and the tab favicon are exactly this
+ *    same fixed black mark. The logo never changes color with the app palettes
+ *    (decision D13 in docs/PLAN.md); palettes only change UI colors (buttons,
+ *    navigation, progress).
  *
- * اندازه نوری (optical size): در اندازه‌های خیلی کوچک (۱۶ و ۳۲ پیکسل)
- * ضخامت خط‌ها کمی بیشتر می‌شود تا نشان در تب مرورگر محو نشود؛ شکل هندسی
- * دقیقاً همان است و فقط وزن قلم تغییر می‌کند.
+ * Optical size: at very small sizes (16 and 32 pixels) the stroke weight grows
+ * slightly so the mark does not blur away in a browser tab; the geometry is
+ * exactly the same and only the stroke weight changes.
  */
 
-/** رنگ‌های برند؛ دقیقاً همان توکن‌های رنگ سیستم طراحی در src/index.css */
+/** Brand colors; exactly the design-system color tokens from src/index.css */
 export const BRAND_COLORS = {
-  pine: '#1e5a49', // سبز کاج: کاشی پیش‌فرض نشان داخل برنامه
-  gold: '#c9a14b', // طلایی برند: سپر (ثابت در همه نسخه‌های نشان)
-  cream: '#f4f0e6', // کرم: میکروفون (رنگ کاغذ برنامه)
+  pine: '#1e5a49', // pine green: default tile of the in-app mark
+  gold: '#c9a14b', // brand gold: the shield (fixed in every version of the mark)
+  cream: '#f4f0e6', // cream: the microphone (the app paper color)
 };
 
-/** پالت ثابت لوگو؛ یک نشان سراسری که در هیچ‌جا تغییر نمی‌کند */
+/** Fixed logo palette; one global mark that never changes anywhere */
 export const APP_ICON = {
-  bg: '#000000', // مشکی: پس‌زمینه ثابت لوگو (نصب، تب، سربرگ)
+  bg: '#000000', // black: the fixed logo background (install, tab, header)
   shield: BRAND_COLORS.gold,
   mic: BRAND_COLORS.cream,
 };
 
-/** نام‌های نمایشی (برای manifest و متادیتا) */
+/** Display names (for the manifest and metadata) */
 export const BRAND_NAME = {
   full: 'بستار دفاع ارشد BCOA',
   short: 'بستار دفاع',
 };
 
 /**
- * هندسه نشان در دستگاه مختصات ۵۱۲×۵۱۲.
+ * Mark geometry in a 512x512 coordinate system.
  * @typedef {{
  * tile: number,
  * radius: number,
@@ -58,12 +58,12 @@ export const BRAND_NAME = {
  * }} BrandGeometry
  */
 
-/** هندسه پایه (اندازه‌های بزرگ: ۴۸ پیکسل به بالا و نسخه برداری) */
+/** Base geometry (large sizes: 48 pixels and up, plus the vector version) */
 const BASE = {
   tile: 512,
   radius: 120,
 
-  /* سپر: دو گوشه گرد در بالا، دو بازوی straight و انحنای همگرا به سمت نقطه پایین */
+  /* Shield: two rounded corners on top, two straight arms and a curve converging to the bottom point */
   shield:
     'M 162 108 H 350 A 26 26 0 0 1 376 134 V 250 ' +
     'C 376 322 324 372 256 404 ' +
@@ -71,7 +71,7 @@ const BASE = {
     'A 26 26 0 0 1 162 108 Z',
   shieldWidth: 32,
 
-  /* میکروفون: کپسول (خط عمودی با سر گرد)، دانه، دنده و پایه؛ مرکزنگاری نوری داخل سپر */
+  /* Microphone: capsule (vertical line with a round head), head, ribs and base; optically centered inside the shield */
   mic: [
     { d: 'M 256 182 V 226', width: 54 },
     { d: 'M 204 218 C 204 270 228 296 256 296 C 284 296 308 270 308 218', width: 24 },
@@ -81,8 +81,8 @@ const BASE = {
 };
 
 /**
- * نسخه فشرده نوری برای ۱۶ و ۳۲ پیکسل: همان هندسه با وزن خط بیشتر
- * تا میکروفون در تب مرورگر به لکه تبدیل نشود.
+ * Optically compact version for 16 and 32 pixels: same geometry with a heavier
+ * stroke weight so the microphone does not turn into a blob in a browser tab.
  */
 const COMPACT = {
   ...BASE,
@@ -96,20 +96,20 @@ const COMPACT = {
 };
 
 /**
- * هندسه مناسب یک اندازه مشخص.
- * @param {number} size پیکسل
+ * Geometry suited to one specific size.
+ * @param {number} size pixels
  * @returns {BrandGeometry}
  */
 export function brandGeometry(size) {
   return size <= 32 ? COMPACT : BASE;
 }
 
-/** ضریب کوچک‌کردن نشان برای آیکون maskable (منطقه امن ۸۰٪) */
+/** Scale factor for the maskable icon (80% safe area) */
 export const MASKABLE_SCALE = 0.78;
 
 /**
- * SVG نشان با رنگ پس‌زمینه قابل تنظیم (برای فاوآیکون پویا و پیش‌نمایش).
- * پیش‌فرض: پالت ثابت آیکون نصب (APP_ICON).
+ * Mark SVG with a configurable background color (for previews and tooling).
+ * Default: the fixed install-icon palette (APP_ICON).
  * @param {{ tile?: string, shield?: string, mic?: string, size?: number }} [opts]
  * @returns {string}
  */

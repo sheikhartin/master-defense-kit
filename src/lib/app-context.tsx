@@ -1,6 +1,6 @@
 /**
- * بافت سراسری برنامه: تنظیمات تایپوگرافی، پالت رنگ، حالت تمرکز، وضعیت چاپ و پیمایش.
- * همه این تنظیمات (جز حالت تمرکز) در localStorage نگهداری می‌شوند.
+ * Global app context: typography settings, color palette, focus mode, print state and navigation.
+ * All of these (except focus mode) are persisted in localStorage.
  */
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
@@ -10,10 +10,10 @@ import type { PaletteId } from '../types';
 
 export type TabId = 'home' | 'practice' | 'cheat' | 'qa' | 'checklist';
 
-/** دامنه خروجی PDF: یکی از بخش‌ها یا کل وب‌سایت */
+/** PDF export scope: one section or the whole site */
 export type PrintScope = 'all' | 'roadmap' | 'deck' | 'cheat' | 'qa' | 'checklist';
 
-/** نگاشت هر تب به دامنه چاپی متناظر آن */
+/** Maps each tab to its matching print scope */
 export const printScopeOfTab: Record<TabId, PrintScope> = {
   home: 'roadmap',
   practice: 'deck',
@@ -25,37 +25,37 @@ export const printScopeOfTab: Record<TabId, PrintScope> = {
 interface AppState {
   tab: TabId;
   go: (tab: TabId, slideIndex?: number) => void;
-  /** درخواست شروع تمرین از اسلاید خاص (شماره صفر یعنی از اول) */
+  /** Request to start practice at a specific slide (zero means from the start) */
   pendingStart: { slide: number; stamp: number } | null;
   consumeStart: () => void;
 
-  /** تایپوگرافی سراسری خواندن */
+  /** Global reading typography */
   textScale: number;
   setTextScale: (v: number) => void;
   lineHeight: number;
   setLineHeight: (v: number) => void;
 
-  /** هشدار شنیداری نرم (اختیاری) */
+  /** Soft audible alert (optional) */
   audible: boolean;
   setAudible: (v: boolean) => void;
 
-  /** پالت رنگ حرفه‌ای */
+  /** Professional color palette */
   palette: PaletteId;
   setPalette: (v: PaletteId) => void;
 
-  /** حالت تمرکز */
+  /** Focus mode */
   focus: boolean;
   setFocus: (v: boolean) => void;
 
-  /** میان‌برهای تک‌کلیدی (WCAG 2.1.4: کاربر می‌تواند خاموش کند) */
+  /** Single-key shortcuts (WCAG 2.1.4: the user can turn them off) */
   shortcutsOn: boolean;
   setShortcutsOn: (v: boolean) => void;
 
-  /** راهنمای سراسری کلیدها */
+  /** Global key guide */
   guideOpen: boolean;
   setGuideOpen: (v: boolean) => void;
 
-  /** خروجی چاپی / PDF: دامنه فعال یا null یعنی بسته */
+  /** Print / PDF output: the active scope, or null when closed */
   printScope: PrintScope | null;
   openPrint: (scope?: PrintScope) => void;
   closePrint: () => void;
@@ -99,7 +99,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const openPrint = useCallback((scope: PrintScope = 'cheat') => setPrintScope(scope), []);
   const closePrint = useCallback(() => setPrintScope(null), []);
 
-  // اعمال پالت هنگام بارگذاری و تغییر
+  // Apply the palette on load and on change
   useEffect(() => {
     applyPalette(palette);
   }, [palette]);
@@ -153,7 +153,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     ],
   );
 
-  // همگام‌سازی کلاس حالت تمرکز روی body
+  // Sync the focus-mode class on body
   useEffect(() => {
     document.body.classList.toggle('focus-active', focus);
     return () => document.body.classList.remove('focus-active');
@@ -164,13 +164,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
 export function useApp(): AppState {
   const ctx = useContext(Ctx);
-  if (!ctx) throw new Error('AppProvider یافت نشد');
+  if (!ctx) throw new Error('AppProvider not found');
   return ctx;
 }
 
-/** ذخیره آخرین جایگاه تمرین برای «ادامه از همان‌جا» */
+/** Persist the last practice position so practice can resume */
 export interface SessionMarker {
-  slide: number; // ایندکس صفر-پایه
+  slide: number; // zero-based index
   totalSeconds: number;
   slideSeconds: number;
   running: boolean;
@@ -182,7 +182,7 @@ export function rememberSession(marker: SessionMarker): void {
 }
 
 /**
- * اعمال مقیاس قلم و فاصله سطر روی یک ناحیه.
+ * Apply the font scale and line spacing to one region.
  */
 export function readingStyle(scale: number, lineHeight: number): React.CSSProperties {
   return {

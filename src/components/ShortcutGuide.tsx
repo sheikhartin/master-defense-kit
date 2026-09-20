@@ -1,7 +1,7 @@
 /**
- * راهنمای سراسری کلیدها (کلید H یا ?).
- * یک پنجره دسترس‌پذیر با به‌دام‌انداختن فوکوس؛ میان‌برهای هر بخش را بر پایه
- * تب فعلی برجسته می‌کند تا کاربر بداند همین حالا چه کلیدهایی فعال‌اند.
+ * Global key guide (H or ? key).
+ * An accessible modal with focus trapping; it highlights the shortcuts of each
+ * section based on the current tab so the user knows which keys are active right now.
  */
 
 import { useEffect } from 'react';
@@ -70,8 +70,8 @@ export default function ShortcutGuide() {
   const ref = useModalBehavior<HTMLDivElement>(true, () => app.setGuideOpen(false));
   const tab: TabId = app.tab;
 
-  /* همان کلید بازکردن (H یا ?) آن را می‌بندد؛ چون هنگام بازبودن، میان‌بر
-     سراسری سکوت می‌کند تا چیزی پشت پنجره فعال نشود. */
+  /* The same key that opens it (H or ?) closes it, because while it is open the
+        global shortcut stays silent so nothing behind the modal is triggered. */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const k = snapshot(e);

@@ -1,9 +1,10 @@
 /**
- * شمارنده سبک «لایه‌های باز» (پنجره‌ها و پنل‌ها).
+ * Lightweight counter of open overlays (modals and panels).
  *
- * وقتی حتی یک لایه باز است، میان‌برهای سراسری و تک‌کلیدی باید سکوت کنند تا
- * چیزی پشت پنجره ناخواسته فعال نشود؛ فقط Escape مسئول بستن لایه است.
- * هر پنجره/پنل با قلاب useOverlay باز و بسته شدن خود را اعلام می‌کند.
+ * When even one overlay is open, global and single-key shortcuts must stay
+ * silent so nothing behind the modal is triggered by accident; only Escape
+ * is responsible for closing the overlay. Every modal/panel announces its
+ * open and closed state through the useOverlay hook.
  */
 
 let openLayers = 0;

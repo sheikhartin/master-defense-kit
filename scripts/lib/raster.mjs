@@ -1,17 +1,17 @@
 /**
- * رسترکننده کوچک و کاملاً بدون وابستگی برای نشان برند.
+ * Small, completely dependency-free rasterizer for the brand mark.
  *
- * چرا دستی؟ این پروژه عمداً هیچ وابستگی بومی یا سرویس بیرونی ندارد و
- * اسکریپت ساخت آیکون هم باید مثل خود برنامه آفلاین کار کند. این ماژول
- * مسیرهای SVG را به چندخطی تبدیل می‌کند و با «فاصله علامت‌دار» و
- * پادخراستگی (anti-aliasing) یک‌پیکسلی رستر می‌زند؛ سپس PNG و ICO می‌سازد.
+ * Why hand-rolled? This project deliberately has no native dependency and no
+ * external service, and the icon build script must run offline just like the
+ * app itself. This module turns SVG paths into polylines and rasterizes with
+ * signed distance and one-pixel anti-aliasing; then it writes PNG and ICO.
  *
- * همه محاسبات در دستگاه مختصات ۵۱۲×۵۱۲ نشان انجام می‌شود و فقط در آخرین
- * گام به پیکسل دستگاه نگاشت می‌شود، تا خروجی در هر اندازه‌ای دقیق باشد.
+ * All math happens in the 512x512 mark coordinate system and is mapped to
+ * device pixels only in the last step, so the output is accurate at any size.
  */
 
 /* ------------------------------------------------------------------ */
-/* ۱) تجزیه مسیر SVG                                                   */
+/* 1) SVG path parsing                                                 */
 /* ------------------------------------------------------------------ */
 
 const NUM = /-?\d*\.?\d+(?:e[-+]?\d+)?/gi;
@@ -25,7 +25,7 @@ function numbers(chunk) {
 }
 
 /**
- * تبدیل رشته مسیر به فهرست زیرمسیرها.
+ * Turn a path string into a list of subpaths.
  * @param {string} d
  * @returns {{ points: Array<[number, number]>, closed: boolean }[]}
  */
@@ -147,7 +147,7 @@ function quad(p0, p1, p2, steps = 16) {
   return out;
 }
 
-/** تبدیل کمان SVG (پارامترهای انتهایی) به نقطه‌ها: پیاده‌سازی استاندارد W3C */
+/** Convert an SVG arc (endpoint parameters) to points: standard W3C implementation */
 function arc(p0, rxIn, ryIn, rotDeg, largeArc, sweep, p1, steps = 24) {
   let rx = Math.abs(rxIn);
   let ry = Math.abs(ryIn);
@@ -198,7 +198,7 @@ function arc(p0, rxIn, ryIn, rotDeg, largeArc, sweep, p1, steps = 24) {
 }
 
 /* ------------------------------------------------------------------ */
-/* ۲) شکل‌ها و فاصله علامت‌دار                                         */
+/* 2) Shapes and signed distance                                       */
 /* ------------------------------------------------------------------ */
 
 /** @typedef {{kind:'bg', color:string}} BgShape */
@@ -240,7 +240,7 @@ function distRoundRect(px, py, size, radius) {
 }
 
 /**
- * فاصله علامت‌دار به یک شکل (واحد: واحد نشان). مقدار منفی یعنی داخل شکل.
+ * Signed distance to a shape (unit: mark units). A negative value means inside the shape.
  * @param {Shape} shape
  */
 function signedDistance(shape, x, y) {
@@ -249,9 +249,9 @@ function signedDistance(shape, x, y) {
   return distSubs(x, y, shape.subs) - shape.width / 2;
 }
 
-/** پوشش یک نمونه (پیکسل دستگاه) برای یک شکل */
+/** Coverage of one sample (device pixel) for one shape */
 function coverage(shape, dx, dy, scale, off) {
-  /* پس‌زمینه یکدست: کل بوم دستگاه را می‌پوشاند (برای آیکون maskable و iOS) */
+  /* Flat background: covers the whole device canvas (for the maskable and iOS icons) */
   if (shape.kind === 'bg') return 1;
   const sx = (dx - off) / scale;
   const sy = (dy - off) / scale;
@@ -270,10 +270,10 @@ function hexToRgb(hex) {
 }
 
 /**
- * رسترکردن فهرست شکل‌ها در اندازه مشخص.
+ * Rasterize a list of shapes at one size.
  * @param {number} size
- * @param {Shape[]} shapes به ترتیب نقاشی (اولی زیر همه)
- * @param {{source?: number, scale?: number}} [opts] source اندازه دستگاه مختصات، scale ضریب کوچک‌کردن نشان
+ * @param {Shape[]} shapes in paint order (the first one is at the bottom)
+ * @param {{source?: number, scale?: number}} [opts] source = device size, scale = mark downscale factor
  * @returns {{width:number, height:number, data:Uint8Array}}
  */
 export function rasterize(size, shapes, opts = {}) {
@@ -295,7 +295,7 @@ export function rasterize(size, shapes, opts = {}) {
       for (const { shape, rgb } of prepared) {
         let a = coverage(shape, px, py, scale, off);
         if (a <= 0) continue;
-        /* پیکسل‌های لبه با ۹ نمونه باز هم نرم‌تر می‌شوند */
+        /* Edge pixels get even smoother with 9 samples */
         if (a < 1) {
           let sum = 0;
           for (let sy = 0; sy < 3; sy++) {
@@ -306,7 +306,7 @@ export function rasterize(size, shapes, opts = {}) {
           a = sum / 9;
           if (a <= 0) continue;
         }
-        /* ترکیب «روی هم» با آلفای پیش‌ضرب‌شده */
+        /* "Over" compositing with premultiplied alpha */
         const inv = 1 - a;
         dr = rgb[0] * a + dr * inv;
         dg = rgb[1] * a + dg * inv;
@@ -325,7 +325,7 @@ export function rasterize(size, shapes, opts = {}) {
 }
 
 /* ------------------------------------------------------------------ */
-/* ۳) کدگذاری PNG و ICO                                               */
+/* 3) PNG and ICO encoding                                            */
 /* ------------------------------------------------------------------ */
 
 import { deflateSync } from 'node:zlib';
@@ -361,13 +361,13 @@ export function encodePNG(img) {
   const stride = width * 4;
   const raw = Buffer.alloc((stride + 1) * height);
   for (let y = 0; y < height; y++) {
-    raw[y * (stride + 1)] = 0; // فیلتر None
+    raw[y * (stride + 1)] = 0; // filter None
     Buffer.from(data.buffer, data.byteOffset + y * stride, stride).copy(raw, y * (stride + 1) + 1);
   }
   const ihdr = Buffer.alloc(13);
   ihdr.writeUInt32BE(width, 0);
   ihdr.writeUInt32BE(height, 4);
-  ihdr[8] = 8; // ژرفای بیت
+  ihdr[8] = 8; // bit depth
   ihdr[9] = 6; // RGBA
   return Buffer.concat([
     Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
@@ -377,7 +377,7 @@ export function encodePNG(img) {
   ]);
 }
 
-/** ساخت favicon.ico چنداندازه‌ای از روی PNGها (قالب PNG درون ICO، پشتیبانی ویندوز ویستا به بعد) */
+/** Build a multi-size favicon.ico from the PNGs (PNG inside ICO, supported since Windows Vista) */
 export function encodeICO(pngs) {
   const count = pngs.length;
   const header = Buffer.alloc(6);

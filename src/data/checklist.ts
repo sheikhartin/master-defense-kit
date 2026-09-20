@@ -1,5 +1,5 @@
 /**
- * سازگاری عقب‌رو: چک‌لیست‌ها از content/checklist/* می‌آید.
+ * Backward compatibility: checklists come from content/checklist/*.
  */
 export {
   checklistGroups,

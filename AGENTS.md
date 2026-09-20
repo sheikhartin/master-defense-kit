@@ -103,6 +103,16 @@ make a change pass; fix the change instead.
  never change across states. Hover/active feedback is a neutral shadow +
  color change only (no translate, no colored glow). `verify` scans state
  rules and fails on any `border-radius` inside them.
+16. **All code comments are in English (D15).** Every comment, JSDoc block,
+ CSS/HTML comment and developer-facing message (test assertion labels,
+ build-script `console.log`, thrown `Error` messages) is written in English,
+ so the codebase is readable for a global audience. This does **not** apply
+ to: user-visible UI strings (labels, `aria-label`, `title`, placeholders),
+ user-facing app metadata (PWA manifest `name`/`short_name`/`description`,
+ `index.html` meta/title/noscript, `metadata.json`), or anything under
+ `content/` and `src/content.generated.ts` — all of those stay Persian.
+ `verify` (§18) walks comment text in `src/`, `scripts/` and `tests/` and
+ fails if Persian characters appear inside a comment.
 
 ---
 
@@ -370,6 +380,11 @@ When you add a structural rule, add a numbered section in the same commit.
  the logo is the one fixed black mark everywhere (D13).
 17. Setting `border-radius` inside a `:hover`/`:active`/`:focus` rule —
  corners are constant; use the `--r-*` scale (D14).
+18. Writing a code comment, test label or build message in Persian (D15) —
+ only UI strings, app metadata and `content/` stay Persian. `verify` §18
+ fails on any Persian text inside a comment.
+19. Translating Persian UI strings while writing English comments: UI labels
+ are data for the tests and stay exactly as they are.
 
 ---
 

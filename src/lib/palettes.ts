@@ -1,27 +1,27 @@
 /**
- * پالت‌های حرفه‌ای رابط: خنثی‌های مشترک (کاغذ کرم) + رنگ تأکید متغیر.
- * ochre (اهمیت) و clay (هشدار) در همه پالت‌ها ثابت می‌مانند.
+ * Professional UI palettes: shared neutrals (cream paper) plus a variable accent color.
+ * ochre (importance) and clay (warning) stay fixed in every palette.
  *
- * پالت‌ها فقط رنگ‌های رابط (دکمه، ناوبری، پیشرفت، هاله محیطی) را عوض می‌کنند.
- * لوگو (نشان سربرگ/پابرگ، فاوآیکون تب، آیکون‌های نصب) همیشه نشان ثابت
- * مشکی با سپر طلایی و میکروفون کرم است و عمداً با پالت تغییر نمی‌کند
- * (تصمیم D13 در docs/PLAN.md).
+ * Palettes only change UI colors (buttons, navigation, progress, ambient tint).
+ * The logo (header/footer mark, tab favicon, install icons) is always the fixed
+ * black mark with a gold shield and cream microphone and deliberately does not
+ * change with the palette (decision D13 in docs/PLAN.md).
  */
 
 import type { PaletteId } from '../types';
 
 export interface PaletteDef {
   id: PaletteId;
-  /** برچسب فارسی */
+  /** Persian label */
   label: string;
-  /** برچسب انگلیسی کوتاه */
+  /** Short English label */
   en: string;
-  /** رنگ تأکید اصلی رابط (دکمه‌های اصلی، ناوبری، پیشرفت؛ نه لوگو) */
+  /** Primary UI accent color (primary buttons, navigation, progress; not the logo) */
   accent: string;
   accentDeep: string;
   accentSoft: string;
   accentWash: string;
-  /** RGB برای هاله‌های ملایم رابط (مرورگر محیطی، حلقه تمرکز، نوار پیشرفت) */
+  /** RGB for soft UI glows (ambient blur, focus ring, progress bar) */
   accentRgb: string;
 }
 
@@ -84,7 +84,7 @@ export function paletteOf(id: PaletteId): PaletteDef {
   return PALETTES.find((p) => p.id === id) ?? PALETTES[0];
 }
 
-/** اعمال توکن‌های پالت روی ریشه سند (فقط رنگ‌های رابط؛ لوگو ثابت است) */
+/** Apply palette tokens to the document root (UI colors only; the logo is fixed) */
 export function applyPalette(id: PaletteId): void {
   const p = paletteOf(id);
   const root = document.documentElement;
@@ -94,10 +94,10 @@ export function applyPalette(id: PaletteId): void {
   root.style.setProperty('--color-accent-soft', p.accentSoft);
   root.style.setProperty('--color-accent-wash', p.accentWash);
   root.style.setProperty('--accent-rgb', p.accentRgb);
-  /* سازگاری با توکن‌های تاریخی pine = accent */
+  /* Compatibility with the historic pine = accent tokens */
   root.style.setProperty('--color-pine', p.accent);
   root.style.setProperty('--color-pine-deep', p.accentDeep);
   root.style.setProperty('--color-pine-soft', p.accentSoft);
   root.style.setProperty('--color-pine-wash', p.accentWash);
-  /* سایه‌های هاور در CSS خنثی و ثابت می‌مانند؛ لوگو و سایه‌ها با پالت عوض نمی‌شوند */
+  /* Hover shadows stay neutral and fixed in CSS; the logo and shadows never change with the palette */
 }

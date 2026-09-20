@@ -1,7 +1,7 @@
 /**
- * جلسه تمرینی: شبیه‌سازی زمان‌دار ارائه با توقف هم‌زمان هر دو تایمر،
- * هشدار نرم پایان زمان، شروع از هر اسلاید، ادامه از آخرین جایگاه،
- * یادداشت شخصی و هایلایت نکته‌ها و پشتیبانی کامل صفحه‌کلید.
+ * Practice session: timed rehearsal with both timers stopping together,
+ * soft end-of-time alerts, start from any slide, resume from the last position,
+ * personal notes and note highlights, plus full keyboard support.
  */
 
 import {
@@ -56,7 +56,7 @@ export default function PracticeLab() {
   const plan = useMemo(() => planSlides(), []);
   const talkTotal = useMemo(() => totalTalk(), []);
 
-  /* وضعیت تایمر: یک منبع حقیقت واحد */
+  /* Timer state: one single source of truth */
   const timer = useRef({ total: 0, slide: 0 });
   const [, setVer] = useState(0);
   const bump = useCallback(() => setVer((v) => v + 1), []);
@@ -83,7 +83,7 @@ export default function PracticeLab() {
     planRef.current = plan;
   }, [plan]);
 
-  /* شروع از اسلاید درخواستی (از نقشه راه) */
+  /* Start from the requested slide (from the roadmap) */
   useEffect(() => {
     if (!app.pendingStart) return;
     const idx = Math.max(0, Math.min(app.pendingStart.slide, plan.length - 1));
@@ -97,7 +97,7 @@ export default function PracticeLab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [app.pendingStart]);
 
-  /* ادامه از آخرین جایگاه ذخیره‌شده */
+  /* Resume from the last saved position */
   useEffect(() => {
     if (app.pendingStart) return;
     const m = readStore<{
@@ -119,7 +119,7 @@ export default function PracticeLab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* تیک تایمر + هشدار صوتی لبه (۱۰ / ۵ / ۰) داخل همان حلقه */
+  /* Timer tick plus edge audio cues (10 / 5 / 0) inside the same loop */
   useEffect(() => {
     if (!running) return;
     let last = performance.now();
@@ -141,7 +141,7 @@ export default function PracticeLab() {
     return () => window.clearInterval(id);
   }, [running, bump]);
 
-  /* ذخیره جایگاه برای ادامه بعدی */
+  /* Save the position for the next resume */
   useEffect(() => {
     if (running) {
       const id = window.setInterval(() => saveMarker(), 4000);
@@ -314,7 +314,7 @@ export default function PracticeLab() {
 
   return (
     <div className="space-y-5 md:space-y-6">
-      {/* نوار وضعیت و تایمر */}
+      {/* Status bar and timers */}
       <section className="card overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-4">
           <div className="flex min-w-0 flex-wrap items-center gap-2">
@@ -455,7 +455,7 @@ export default function PracticeLab() {
         </div>
       </section>
 
-      {/* نوار پیشرفت کل جلسه */}
+      {/* Whole-session progress bar */}
       <section className="card px-5 py-4">
         <div className="mb-2 flex items-center justify-between gap-3 text-xs font-bold text-muted">
           <span>پیشرفت کل جلسه</span>
@@ -481,7 +481,7 @@ export default function PracticeLab() {
         </div>
       </section>
 
-      {/* ناوبری سریع اسلایدها (بدون متن آموزشی دائمی) */}
+      {/* Quick slide navigation (no permanent instruction text) */}
       <section className="card focus-hidden px-4 py-4 sm:px-5" aria-label="ناوبری اسلایدها">
         <p className="mb-2.5 text-[0.7rem] font-bold text-muted">اسلایدها</p>
         <div className="hbar flex min-w-0 gap-1.5 overflow-x-auto px-0.5 pb-1.5 pt-0.5">
@@ -499,7 +499,7 @@ export default function PracticeLab() {
         </div>
       </section>
 
-      {/* کارت اسلاید */}
+      {/* Slide card */}
       <article className="card overflow-hidden">
         <div key={slideKey} className="slide-enter">
           <div className="border-b border-line px-6 py-5 md:px-8">
@@ -620,7 +620,7 @@ export default function PracticeLab() {
   );
 }
 
-/* ---------- اجزای داخلی ---------- */
+/* ---------- Internal components ---------- */
 
 function SpeechLine({
   para,

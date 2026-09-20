@@ -1,15 +1,15 @@
 /**
- * میان‌برهای سراسری که در همه تب‌ها کار می‌کنند:
- *   راهنما (H / ؟)، حالت تمرکز (F)، صدا (M)، بستن (Esc)،
- *   پرش به بخش‌ها (Alt + ۱ تا ۵)، خروجی PDF بخش فعلی (Alt + P)
- *   و خروجی PDF کل وب‌سایت (Alt + Shift + P).
+ * Global shortcuts that work in every tab:
+ *   guide (H / ?), focus mode (F), sound (M), close (Esc),
+ *   jump to a section (Alt + 1 to 5), export the current section as PDF
+ *   (Alt + P) and export the whole site as PDF (Alt + Shift + P).
  *
- * قواعد دقت:
- *   تطبیق با e.code (مستقل از چیدمان فارسی/انگلیسی)، نادیده‌گرفتن وقتی یک
- *   لایه باز است یا کاربر در ورودی متنی تایپ می‌کند، و نادیده‌گرفتن
- *   Ctrl/Meta تا با میان‌برهای مرورگر (مثل Ctrl+P برای چاپ) تداخل نشود.
- *   میان‌برهای تک‌کلیدی فقط وقتی کاربر آن‌ها را فعال نگه داشته باشد کار می‌کنند
- *   (دسترس‌پذیری WCAG 2.1.4)؛ ترکیب‌های Alt همیشه فعال‌اند.
+ * Precision rules:
+ *   match on e.code (independent of the Persian/English layout), ignore while an
+ *   overlay is open or the user is typing in a text input, and ignore
+ *   Ctrl/Meta so browser shortcuts (such as Ctrl+P for print) are not hijacked.
+ *   Single-key shortcuts only work while the user keeps them enabled
+ *   (WCAG 2.1.4 accessibility); Alt combinations are always active.
  */
 
 import { useEffect, useRef } from 'react';
@@ -31,10 +31,10 @@ export function useGlobalShortcuts() {
       const a = appRef.current;
       const k = snapshot(e);
 
-      if (overlaysOpen()) return; // لایه باز: فقط Escape که خود لایه می‌بندد
-      if (isEditableTarget(e)) return; // تایپ در یادداشت/ورودی: سکوت
+      if (overlaysOpen()) return; // overlay open: only Escape, which the overlay itself handles
+      if (isEditableTarget(e)) return; // typing in a note/input: stay silent
 
-      // ترکیب‌های Alt (خارج از دامنه تک‌کلیدی WCAG) همیشه فعال‌اند
+      // Alt combinations are always active (outside the scope of the WCAG single-key rule)
       if (k.alt && !k.ctrl && !k.meta) {
         const m = /^Digit([1-5])$/.exec(k.code);
         if (m) {
@@ -44,13 +44,13 @@ export function useGlobalShortcuts() {
         }
         if (k.code === 'KeyP') {
           e.preventDefault();
-          /* Alt + P: خروجی PDF بخش فعلی؛ Alt + Shift + P: کل وب‌سایت */
+          /* Alt + P: PDF of the current section; Alt + Shift + P: the whole site */
           a.openPrint(k.shift ? 'all' : printScopeOfTab[a.tab]);
           return;
         }
         return;
       }
-      // هر مادیفایر دیگر (Ctrl/Cmd) یعنی میان‌بر مرورگر؛ دست نزن
+      // any other modifier (Ctrl/Cmd) means a browser shortcut; leave it alone
       if (k.ctrl || k.meta || k.alt) return;
 
       if (k.code === 'Escape') {
@@ -58,7 +58,7 @@ export function useGlobalShortcuts() {
         return;
       }
 
-      // میان‌برهای تک‌کلیدی، فقط با رضایت کاربر
+      // single-key shortcuts, only with user consent
       if (!a.shortcutsOn) return;
       if (k.code === 'KeyF' && !k.repeat) {
         a.setFocus(!a.focus);

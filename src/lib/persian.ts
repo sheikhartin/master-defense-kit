@@ -1,18 +1,18 @@
 /**
- * ابزارهای زبانی فارسی
- * نکته: هرگز ارقام یا حروف فارسی را داخل عبارت‌های LaTeX وارد نکنید؛
- * همه عبارت‌های ریاضی باید فقط نویسه‌های ASCII داشته باشند (در tests بررسی می‌شود).
+ * Persian language helpers
+ * Note: never put Persian digits or letters inside LaTeX expressions;
+ * every math expression must contain ASCII characters only (enforced by the tests).
  */
 
 const PERSIAN_DIGITS = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
 
-/** تبدیل ارقام انگلیسی به فارسی */
+/** Convert English digits to Persian */
 export function toPersianDigits(value: number | string | null | undefined): string {
   if (value === undefined || value === null || value === '') return '';
   return String(value).replace(/[0-9]/g, (w) => PERSIAN_DIGITS[Number(w)]);
 }
 
-/** قالب‌بندی ثانیه به «دقیقه:ثانیه» با ارقام فارسی؛ ۶۵ به «۰۱:۰۵» */
+/** Format seconds as "minute:second" with Persian digits; 65 becomes "01:05" */
 export function formatClock(seconds: number): string {
   const s = Math.max(0, Math.floor(seconds));
   const m = Math.floor(s / 60);
@@ -24,34 +24,34 @@ export function formatClock(seconds: number): string {
   );
 }
 
-/** قالب‌بندی دقیقه:ثانیه برای زمان‌های برنامه‌ریزی مثل «۰۹:۳۰ تا ۱۰:۱۵» */
+/** Format minute:second for scheduled times such as "09:30 to 10:15" */
 export function clockOf(totalSeconds: number): string {
   return formatClock(totalSeconds);
 }
 
-/** «از روی ثانیه کل، بازه پنجره اسلاید» */
+/** "Slide time window from the total seconds" */
 export function windowLabel(fromSeconds: number, toSeconds: number): string {
   return `${clockOf(fromSeconds)} تا ${clockOf(toSeconds)}`;
 }
 
-/** تبدیل عددی مانند ۱٫۰۹ (با ممیز فارسی یا انگلیسی) به ۱/۰۹ برای نمایش */
+/** Turn a number like 1.09 (Persian or English decimal mark) into 1/09 for display */
 export function faNumber(value: number | string, decimals?: number): string {
   const n = typeof value === 'number' ? value : Number(String(value).replace(/٫/g, '.'));
   const fixed = decimals !== undefined ? n.toFixed(decimals) : String(n);
   return toPersianDigits(fixed.replace(/\./g, '٫'));
 }
 
-/** درصد با ارقام فارسی: ۹۶.7 -> ۹۶٫۷٪ */
+/** Percentage with Persian digits: 96.7 becomes 96.7 percent */
 export function faPercent(value: string | number): string {
   return faNumber(value, 1).replace(/٫0$/, '') + '٪';
 }
 
-/** حذف خط‌های فاصله (en dash و em dash) از متن‌های واسط کاربر */
+/** Strip en dash and em dash characters from user-facing text */
 export function cleanText(text: string): string {
   return text.replace(/[\u2013\u2014]/g, ' ');
 }
 
-/** آیا رشته فقط نویسه‌های ASCII (مناسب LaTeX) دارد؟ */
+/** Does the string contain ASCII characters only (suitable for LaTeX)? */
 export function isAsciiOnly(text: string): boolean {
   return /^[\x20-\x7E]+$/.test(text.trim());
 }

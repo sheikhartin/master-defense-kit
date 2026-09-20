@@ -1,6 +1,6 @@
 /**
- * اجزای کوچک و مشترک رابط کاربر: سربرگ بخش، جعبه یادداشت شخصی،
- * دکمه هایلایت نرم و برچسب‌ها.
+ * Small shared UI parts: section head, personal note box,
+ * soft highlight button and chips.
  */
 
 import { useCallback, useEffect, useState } from 'react';
@@ -11,7 +11,7 @@ import { emptyPersonalNote, parsePersonalNote, slideNoteKey } from '../lib/conte
 import type { PersonalNote } from '../types';
 import type { ReactNode } from 'react';
 
-/** سربرگ یک بخش با شماره فارسی */
+/** Section head with a Persian numeral */
 export function SectionHead({
   index,
   title,
@@ -36,14 +36,14 @@ export function SectionHead({
   );
 }
 
-/** جعبه یادداشت شخصی با پرچم اهمیت و خطوط کلیدی ستاره‌پذیر */
+/** Personal note box with an importance flag and starrable key lines */
 export function NoteBox({
   storageKey,
   legacyKeys = [],
   compact = false,
 }: {
   storageKey: string;
-  /** کلیدهای قدیمی برای مهاجرت */
+  /** Legacy keys for migration */
   legacyKeys?: string[];
   compact?: boolean;
 }) {
@@ -169,7 +169,7 @@ export function NoteBox({
   );
 }
 
-/** هایلایت نرم یک نکته */
+/** Soft highlight for a note */
 export function MarkButton({
   storageKey,
   label = 'نکته مهم',
@@ -200,7 +200,7 @@ export function MarkButton({
   );
 }
 
-/** برچسب رنگی */
+/** Colored chip */
 export function Tag({ tone, children }: { tone: 'pine' | 'ochre' | 'clay' | 'mute'; children: ReactNode }) {
   const cls = {
     pine: 'chip-pine',
@@ -212,7 +212,7 @@ export function Tag({ tone, children }: { tone: 'pine' | 'ochre' | 'clay' | 'mut
 }
 
 /**
- * بازه زمانی فارسی مثل «۰۹:۳۰ تا ۱۰:۱۵».
+ * Persian time range, for example from 09:30 to 10:15 (rendered with Persian digits).
  */
 export function TimeRange({ from, to, className = '' }: { from: number; to: number; className?: string }) {
   return (
@@ -224,10 +224,10 @@ export function TimeRange({ from, to, className = '' }: { from: number; to: numb
   );
 }
 
-/** سازنده کلید یادداشت اسلاید (کمک به مصرف‌کنندگان) */
+/** Slide note key builder (helper for consumers) */
 export { slideNoteKey };
 
-/** هوک ساده برای همگام‌سازی کلید storage هنگام تعویض اسلاید */
+/** Small hook to sync the storage key when the slide changes */
 export function usePersonalNote(storageKey: string, legacyKeys: string[] = []) {
   const [note, setNote] = useState<PersonalNote>(() => emptyPersonalNote());
   useEffect(() => {

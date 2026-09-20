@@ -1,5 +1,5 @@
 /**
- * سازگاری عقب‌رو: پرسش‌های داور از content/qa/* می‌آید.
+ * Backward compatibility: examiner questions come from content/qa/*.
  */
 export {
   qaMain,

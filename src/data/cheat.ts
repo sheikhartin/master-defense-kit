@@ -1,5 +1,5 @@
 /**
- * سازگاری عقب‌رو: برگه تقلب از content/cheat/* می‌آید.
+ * Backward compatibility: the cheat sheet comes from content/cheat/*.
  */
 export {
   coreEquations,

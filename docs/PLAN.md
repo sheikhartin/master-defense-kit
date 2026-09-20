@@ -94,6 +94,16 @@ Full working rules: `AGENTS.md` (single source of truth for invariants).
  rule may set `border-radius`**; hover/active = subtle neutral shadow + color
  shift (colored glow shadows removed); `verify` scans state rules and fails on
  any radius change.
+- **D15 (2026-09-20) — English code comments; Persian UI and content.**
+ Requested so the codebase is readable for a global audience. Every code
+ comment, JSDoc block, CSS/HTML comment and developer-facing message (test
+ labels, build-script output, thrown errors) is English. Deliberately **not**
+ translated: user-visible UI strings, app metadata (PWA manifest,
+ `index.html` meta/title/noscript, `metadata.json`, `package.json`
+ description is English), and everything under `content/` and
+ `src/content.generated.ts`. `verify` §18 fails if Persian appears inside a
+ comment. The Persian README stays Persian (it is product documentation for
+ Persian users); an English README can be added on request.
 
 ---
 
@@ -233,3 +243,4 @@ hover/active/focus.
 | 2026-09-19 | Plan v3 drafted (then `docs/PLAN-v3.md`); C1–C14 approved; M1–M6 implemented |
 | 2026-09-20 (a) | Renamed to single living `docs/PLAN.md` (D11); M8 global brand icon shipped (D10); M9 content-format proposal added (D12 pending approval) |
 | 2026-09-20 (b) | M10 professional UI pass (D13 + D14): logo fixed to black everywhere, dynamic favicon removed, radius scale introduced, state rules forbidden from changing corners, neutral hover shadows |
+| 2026-09-20 (c) | D15: every code comment, JSDoc block and developer-facing message translated to English (src, scripts, tests, configs); UI strings, app metadata and `content/` intentionally stay Persian; `verify` §18 added as a permanent guard |

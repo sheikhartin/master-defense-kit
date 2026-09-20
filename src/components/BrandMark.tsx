@@ -1,7 +1,7 @@
 /**
- * نشان برند داخل برنامه (سربرگ و پابرگ).
- * لوگو در همه‌جا یک نشان ثابت است: پس‌زمینه مشکی + سپر طلایی + میکروفون کرم.
- * با پالت‌های برنامه تغییر نمی‌کند (تصمیم D13 در docs/PLAN.md).
+ * In-app brand mark (header and footer).
+ * The logo is one fixed mark everywhere: black background + gold shield + cream microphone.
+ * It does not change with the app palettes (decision D13 in docs/PLAN.md).
  */
 
 import { APP_ICON, BRAND_NAME, brandGeometry } from '../lib/brand.mjs';

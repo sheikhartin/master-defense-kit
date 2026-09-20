@@ -1,6 +1,6 @@
 /**
- * نقشه راه دفاع: معرفی کوتاه، ادامه تمرین و نمای کامل ساختار نهایی.
- * این صفحه عمداً کم‌عنصر است: فقط راهنمای جلسه، نه تکرار محتوای برگه تقلب.
+ * Defense roadmap: short intro, resume practice and the full final structure.
+ * This page is deliberately sparse: only the session guide, not a repeat of the cheat sheet.
  */
 
 import { useMemo, useState } from 'react';
