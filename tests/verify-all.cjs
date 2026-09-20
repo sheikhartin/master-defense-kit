@@ -317,6 +317,14 @@ for (const rel of [
   assert(fs.existsSync(path.join(ROOT, rel)), `وجود فایل آیکون ${rel}`);
 }
 assert(read('public/icon.svg').includes('M 162 108'), 'فاوآیکون برداری از همان هندسه برند ساخته شده');
+const brandMjsNow = read('src/lib/brand.mjs');
+assert(brandMjsNow.includes('APP_ICON'), 'پالت ثابت و سراسری آیکون نصب (APP_ICON) در brand.mjs تعریف شده است');
+assert(brandMjsNow.includes('#c9a14b') && brandMjsNow.includes('#163f35'), 'نشان ثابت: سپر طلایی روی پس‌زمینه سبز تیره');
+assert(
+  read('public/icon.svg').includes('#c9a14b') && read('public/icon.svg').includes('#163f35'),
+  'آیکون نصب سراسری (سپر طلایی + سبز تیره) مستقل از پالت‌های برنامه است',
+);
+assert(read('scripts/build-brand.mjs').includes('APP_ICON'), 'سازنده آیکون از پالت ثابت APP_ICON استفاده می‌کند');
 assert(read('src/components/Header.tsx').includes('BrandMark'), 'سربرگ از نشان مشترک برند استفاده می‌کند');
 assert(read('src/App.tsx').includes('BrandMark'), 'پابرگ از نشان مشترک برند استفاده می‌کند');
 assert(

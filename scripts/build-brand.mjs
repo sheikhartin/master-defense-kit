@@ -2,6 +2,12 @@
  * ساخت همه آیکون‌های برنامه از یک منبع واحد.
  * اجرا: npm run icons
  *
+ * نشان: «سپر و صدا» - سپر طلایی با میکروفون کرم روی پس‌زمینه سبز تیره.
+ * آیکون‌های نصب (همه فایل‌های public/ پایین) همیشه پالت ثابت و سراسری
+ * APP_ICON را نگه می‌دارند و با پالت‌های برنامه عوض نمی‌شوند (تصمیم D10
+ * در docs/PLAN.md). فقط نشان داخل برنامه و فاوآیکون زنده تب رنگ پالت را
+ * دنبال می‌کنند.
+ *
  * خروجی‌ها (همه در public/ و همه محلی):
  *   icon.svg                 نشان برداری برای فاوآیکون مرورگرهای جدید
  *   favicon.ico              نسخه ۱۶ و ۳۲ و ۴۸ برای مرورگرهای قدیمی و نوار ویندوز
@@ -18,7 +24,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { BRAND_COLORS, BRAND_NAME, MASKABLE_SCALE, brandGeometry, brandSvg } from '../src/lib/brand.mjs';
+import { APP_ICON, MASKABLE_SCALE, brandGeometry, brandSvg } from '../src/lib/brand.mjs';
 import { encodeICO, encodePNG, parsePath, rasterize } from './lib/raster.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -33,22 +39,26 @@ function markShapes(size) {
       kind: 'stroke',
       subs: parsePath(g.shield),
       width: g.shieldWidth,
-      color: BRAND_COLORS.cream,
+      color: APP_ICON.shield,
     },
-    { kind: 'stroke', subs: parsePath(g.hands), width: g.handsWidth, color: BRAND_COLORS.cream },
-    ...(g.pivot ? [{ kind: 'disc', cx: g.pivot.cx, cy: g.pivot.cy, r: g.pivot.r, color: BRAND_COLORS.ochre }] : []),
+    ...g.mic.map((p) => ({
+      kind: 'stroke',
+      subs: parsePath(p.d),
+      width: p.width,
+      color: APP_ICON.mic,
+    })),
   ];
 }
 
 /** نشان روی کاشی گرد (برای فاوآیکون و آیکون نصب با گوشه‌های شفاف) */
 function tileShapes(size) {
   const g = brandGeometry(size);
-  return [{ kind: 'tile', size: g.tile, radius: g.radius, color: BRAND_COLORS.pine }, ...markShapes(size)];
+  return [{ kind: 'tile', size: g.tile, radius: g.radius, color: APP_ICON.bg }, ...markShapes(size)];
 }
 
 /** نشان روی پس‌زمینه یکدست و بدون گوشه گرد (maskable و iOS) */
 function bleedShapes(size) {
-  return [{ kind: 'bg', color: BRAND_COLORS.pine }, ...markShapes(size)];
+  return [{ kind: 'bg', color: APP_ICON.bg }, ...markShapes(size)];
 }
 
 function pngFor(size, opts = {}) {
@@ -60,10 +70,10 @@ function pngFor(size, opts = {}) {
 /* ------------------------------------------------------------------ */
 
 function buildSvg() {
-  /* نسخه نصب‌شده همیشه سبز پیش‌فرض است؛ رنگ پویای تب از brandSvg در زمان اجرا می‌آید */
+  /* آیکون نصب همیشه نسخه ثابت و سراسری است؛ رنگ پویای تب از brandSvg در زمان اجرا می‌آید */
   return (
     `<!-- این فایل با «npm run icons» از src/lib/brand.mjs ساخته می‌شود؛ دستی ویرایش نشود -->\n` +
-    brandSvg({ tile: BRAND_COLORS.pine }) +
+    brandSvg({ tile: APP_ICON.bg }) +
     '\n'
   );
 }

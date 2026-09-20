@@ -4,31 +4,46 @@
  * این فایل عمداً JavaScript ساده (بدون TypeScript) است تا هم برنامه
  * بتواند آن را وارد کند (src/components/BrandMark.tsx) و هم اسکریپت ساخت
  * آیکون در نود (scripts/build-brand.mjs). یعنی فاوآیکون، آیکون نصب،
- * آیکون iOS و نشان داخل سربرگ، همگی از یک هندسه و یک پالت ساخته می‌شوند
- * و هرگز از هم جدا نمی‌افتند.
+ * آیکون iOS و نشان داخل سربرگ، همگی از یک هندسه ساخته می‌شوند و هرگز
+ * از هم جدا نمی‌افتند.
  *
- * مفهوم نشان: «سپر زمان».
+ * مفهوم نشان: «سپر و صدا».
  * سپر -> نماد دفاع (جلسه دفاع پایان‌نامه) و اطمینان
- * عقربه -> تمرین زمان‌دار؛ دو عقربه از یک محور، یکی به سمت دوازده و دیگری
- * به سمت چهار که در اندازه‌های کوچک به شکل تیک آماده‌بودن خوانده می‌شود
- * نقطه -> محور تایمر، با رنگ طلایی «نکته مهم» در پالت برنامه
+ * میکروفون -> گفتار دفاع؛ بیان و صدا
+ *
+ * دو کاربرد نشان:
+ * 1) آیکون‌های نصب (PWA، iOS، favicon) از پالت ثابت و سراسری APP_ICON
+ *    ساخته می‌شوند: پس‌زمینه سبز تیره + سپر طلایی + میکروفون کرم. این
+ *    آیکون‌ها عمداً با پالت‌های برنامه تغییر نمی‌کنند (تصمیم D10 در
+ *    docs/PLAN.md) چون آیکون نصب‌شده روی دستگاه نادر تغییر می‌کند و باید
+ *    یک نشان استاندارد و شناخته‌شده باشد.
+ * 2) نشان داخل برنامه (سربرگ/پابرگ) و فاوآیکون زنده تب، همان هندسه را
+ *    با کاشی رنگ پالت فعال نشان می‌دهند؛ سپر طلایی و میکروفون کرم در
+ *    هر دو کاربرد ثابت می‌مانند.
  *
  * اندازه نوری (optical size): در اندازه‌های خیلی کوچک (۱۶ و ۳۲ پیکسل)
  * ضخامت خط‌ها کمی بیشتر می‌شود تا نشان در تب مرورگر محو نشود؛ شکل هندسی
  * دقیقاً همان است و فقط وزن قلم تغییر می‌کند.
  */
 
-/** پالت نشان؛ دقیقاً همان توکن‌های رنگ سیستم طراحی در src/index.css */
+/** رنگ‌های برند؛ دقیقاً همان توکن‌های رنگ سیستم طراحی در src/index.css */
 export const BRAND_COLORS = {
-  pine: '#1e5a49', // سبز کاج: پس‌زمینه نشان (پیش‌فرض)
-  cream: '#f4f0e6', // کرم: خطوط نشان (رنگ کاغذ برنامه)
-  ochre: '#c9a14b', // طلایی ملایم: محور تایمر
+  pine: '#1e5a49', // سبز کاج: کاشی پیش‌فرض نشان داخل برنامه
+  gold: '#c9a14b', // طلایی برند: سپر (ثابت در همه نسخه‌های نشان)
+  cream: '#f4f0e6', // کرم: میکروفون (رنگ کاغذ برنامه)
+};
+
+/** پالت ثابت آیکون‌های نصب؛ کاملاً مستقل از پالت‌های برنامه */
+export const APP_ICON = {
+  bg: '#163f35', // سبز تیره: پس‌زمینه ثابت (عمیق‌ترین سبز پالت پیش‌فرض)
+  shield: BRAND_COLORS.gold,
+  mic: BRAND_COLORS.cream,
 };
 
 /** نام‌های نمایشی (برای manifest و متادیتا) */
 export const BRAND_NAME = {
- full: 'بستار دفاع ارشد BCOA',
- short: 'بستار دفاع',
+  full: 'بستار دفاع ارشد BCOA',
+  short: 'بستار دفاع',
 };
 
 /**
@@ -38,42 +53,45 @@ export const BRAND_NAME = {
  * radius: number,
  * shield: string,
  * shieldWidth: number,
- * hands: string,
- * handsWidth: number,
- * pivot: { cx: number, cy: number, r: number } | null,
+ * mic: Array<{ d: string, width: number }>,
  * }} BrandGeometry
  */
 
 /** هندسه پایه (اندازه‌های بزرگ: ۴۸ پیکسل به بالا و نسخه برداری) */
 const BASE = {
- tile: 512,
- radius: 120,
+  tile: 512,
+  radius: 120,
 
- /* سپر: دو گوشه گرد در بالا، دو بازوی straight و انحنای همگرا به سمت نقطه پایین */
- shield:
- 'M 162 108 H 350 A 26 26 0 0 1 376 134 V 250 ' +
- 'C 376 322 324 372 256 404 ' +
- 'C 188 372 136 322 136 250 V 134 ' +
- 'A 26 26 0 0 1 162 108 Z',
- shieldWidth: 32,
+  /* سپر: دو گوشه گرد در بالا، دو بازوی straight و انحنای همگرا به سمت نقطه پایین */
+  shield:
+    'M 162 108 H 350 A 26 26 0 0 1 376 134 V 250 ' +
+    'C 376 322 324 372 256 404 ' +
+    'C 188 372 136 322 136 250 V 134 ' +
+    'A 26 26 0 0 1 162 108 Z',
+  shieldWidth: 32,
 
- /* دو عقربه از یک محور: عمودی به بالا و مورب به پایین‌راست */
- hands: 'M 256 250 V 176 M 256 250 L 316 302',
- handsWidth: 30,
-
- /* محور تایمر */
- pivot: { cx: 256, cy: 250, r: 19 },
+  /* میکروفون: کپسول (خط عمودی با سر گرد = کپسول توخالی)، دانه، دنده و پایه */
+  mic: [
+    { d: 'M 256 176 V 220', width: 54 },
+    { d: 'M 204 212 C 204 264 228 290 256 290 C 284 290 308 264 308 212', width: 24 },
+    { d: 'M 256 290 V 322', width: 24 },
+    { d: 'M 228 322 H 284', width: 24 },
+  ],
 };
 
 /**
- * نسخه فشرده نوری برای ۱۶ و ۳۲ پیکسل: همان هندسه با وزن خط بیشتر و بدون
- * نقطه محور (که در این اندازه به عقربه‌ها می‌چسبد و لکه می‌شود).
+ * نسخه فشرده نوری برای ۱۶ و ۳۲ پیکسل: همان هندسه با وزن خط بیشتر
+ * تا میکروفون در تب مرورگر به لکه تبدیل نشود.
  */
 const COMPACT = {
- ...BASE,
- shieldWidth: 46,
- handsWidth: 42,
- pivot: null,
+  ...BASE,
+  shieldWidth: 46,
+  mic: [
+    { d: 'M 256 176 V 220', width: 66 },
+    { d: 'M 198 210 C 198 268 226 292 256 292 C 286 292 314 268 314 210', width: 36 },
+    { d: 'M 256 292 V 320', width: 36 },
+    { d: 'M 224 320 H 288', width: 36 },
+  ],
 };
 
 /**
@@ -82,7 +100,7 @@ const COMPACT = {
  * @returns {BrandGeometry}
  */
 export function brandGeometry(size) {
- return size <= 32 ? COMPACT : BASE;
+  return size <= 32 ? COMPACT : BASE;
 }
 
 /** ضریب کوچک‌کردن نشان برای آیکون maskable (منطقه امن ۸۰٪) */
@@ -90,27 +108,30 @@ export const MASKABLE_SCALE = 0.78;
 
 /**
  * SVG نشان با رنگ پس‌زمینه قابل تنظیم (برای فاوآیکون پویا و پیش‌نمایش).
- * @param {{ tile?: string, stroke?: string, pivot?: string, size?: number }} [opts]
+ * پیش‌فرض: پالت ثابت آیکون نصب (APP_ICON).
+ * @param {{ tile?: string, shield?: string, mic?: string, size?: number }} [opts]
  * @returns {string}
  */
 export function brandSvg(opts = {}) {
   const size = opts.size ?? 512;
   const g = brandGeometry(size);
-  const tile = opts.tile ?? BRAND_COLORS.pine;
-  const stroke = opts.stroke ?? BRAND_COLORS.cream;
-  const pivot = opts.pivot ?? BRAND_COLORS.ochre;
-  const pivotEl = g.pivot
-    ? `<circle cx="${g.pivot.cx}" cy="${g.pivot.cy}" r="${g.pivot.r}" fill="${pivot}"/>`
-    : '';
+  const tile = opts.tile ?? APP_ICON.bg;
+  const shield = opts.shield ?? APP_ICON.shield;
+  const mic = opts.mic ?? APP_ICON.mic;
+  const micEls = g.mic
+    .map(
+      (p) =>
+        `<path d="${p.d}" fill="none" stroke="${mic}" stroke-width="${p.width}" stroke-linecap="round"/>`,
+    )
+    .join('');
   return (
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="bcoa-title">` +
     `<title id="bcoa-title">${BRAND_NAME.full}</title>` +
     `<rect width="512" height="512" rx="${g.radius}" fill="${tile}"/>` +
-    `<path d="${g.shield}" fill="none" stroke="${stroke}" stroke-width="${g.shieldWidth}" stroke-linejoin="round"/>` +
-    `<path d="${g.hands}" fill="none" stroke="${stroke}" stroke-width="${g.handsWidth}" stroke-linecap="round"/>` +
-    pivotEl +
+    `<path d="${g.shield}" fill="none" stroke="${shield}" stroke-width="${g.shieldWidth}" stroke-linejoin="round"/>` +
+    micEls +
     `</svg>`
   );
 }
 
-export default { BRAND_COLORS, BRAND_NAME, brandGeometry, MASKABLE_SCALE, brandSvg };
+export default { BRAND_COLORS, BRAND_NAME, APP_ICON, brandGeometry, MASKABLE_SCALE, brandSvg };

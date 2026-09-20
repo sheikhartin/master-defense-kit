@@ -87,6 +87,14 @@ make a change pass; fix the change instead.
 12. **Audio cues work.** Soft beeps at 10 / 5 / 0 seconds remaining when
  audible is on, driven from the timer interval via `src/lib/audio.ts`
  (not a dead `useEffect` on a stable ref).
+13. **Global install icon is palette-independent (D10).** All `public/`
+ icons are built by `npm run icons` from the fixed `APP_ICON` palette in
+ `src/lib/brand.mjs` (deep pine background `#163f35`, gold shield `#c9a14b`,
+ cream microphone `#f4f0e6`). Palettes recolor only the in-app mark tile and
+ the live tab favicon. Never add a palette argument to the icon build.
+14. **One plan file (D11).** `docs/PLAN.md` is the single living plan and
+ milestone file; update it in place. Never create versioned plan file names
+ (no `PLAN-v4.md`); history belongs in its change log.
 
 ---
 
@@ -138,11 +146,11 @@ src/lib/
  palettes.ts five professional palettes + applyPalette()
  content-keys.ts storage key builders + legacy fallbacks
  app-context.tsx tab, typography, audible, palette, focus, print
- brand.mjs brand geometry (icons stay default green)
+ brand.mjs brand geometry + fixed APP_ICON palette (global install icons)
  storage.ts / persian.ts / tex.tsx / keys.ts / ui-bus.ts / use-*.ts
 
 tests/verify-all.cjs dependency-free invariant suite
-docs/PLAN-v3.md architecture plan
+docs/PLAN.md living plan & milestones (single stable file, D11)
 ```
 
 ### Data flow
@@ -206,8 +214,13 @@ Full human guide: `content/README.md`.
 - **Palette:** `pref:palette` ∈ `green|blue|orange|purple|red`.
  `applyPalette()` sets `data-theme` and `--color-accent*` (and aliases
  `--color-pine*` for existing utilities). Ochre (important) and clay (danger)
- stay fixed across themes. BrandMark fill uses `var(--color-accent)`.
- PWA install icons remain default green unless regenerated. The **browser tab favicon** (SVG) updates live with the active palette via `brandSvg()` + a dynamic `link[rel=icon]` in `applyPalette()`. Installed PWA home-screen icons are OS-cached and do not recolor until reinstall.
+ stay fixed across themes. BrandMark tile uses `var(--color-accent)`; the
+ gold shield + cream microphone marks are palette-independent constants
+ (`APP_ICON`). **Installed icons** (all `public/` assets) are always the fixed
+ global mark (deep pine `#163f35` + gold `#c9a14b` + cream `#f4f0e6`) and are
+ never palette-tinted (D10). The **browser tab favicon** (SVG) updates live:
+ only the tile follows the palette via `brandSvg()` + a dynamic
+ `link[rel=icon]` in `applyPalette()`.
 - **Typography:** `readingStyle()` → `%` font-size + `--reading-lh`.
 - **Overlays:** `useModalBehavior`; global shortcuts silent while layers open.
 - **Slide numbering:** positional 1…N in the single full deck.
@@ -298,7 +311,9 @@ All slides print in order; no "optional backup" appendix.
 
 - `vite-plugin-pwa`, `registerType: 'autoUpdate'`, SW only in PROD
 - `theme_color` / meta `theme-color` = `#fcfaf3` (cream, palette-independent)
-- Icons from `npm run icons` / `brand.mjs`
+- Icons from `npm run icons` / `brand.mjs` — fixed global `APP_ICON` design
+ (shield and voice: gold shield + cream mic on deep pine), never palette-tinted
+- After a geometry change: `npm run icons` + bump `?v=` in `index.html`
 - Dev/preview: `0.0.0.0:3000`, allow `.e2b.app`
 - Cloudflare: `wrangler.jsonc` → `./dist`
 

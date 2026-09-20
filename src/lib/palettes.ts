@@ -2,13 +2,15 @@
  * پالت‌های حرفه‌ای رابط: خنثی‌های مشترک (کاغذ کرم) + رنگ تأکید متغیر.
  * ochre (اهمیت) و clay (هشدار) در همه پالت‌ها ثابت می‌مانند.
  *
- * هنگام اعمال پالت، فاوآیکون تب مرورگر هم با brandSvg هم‌رنگ می‌شود.
- * آیکون‌های نصب PWA (PNG/ICO در public/) سبز پیش‌فرض می‌مانند مگر کاربر
- * برنامه را دوباره نصب کند؛ محدودیت پلتفرم است، نه محدودیت رابط.
+ * هنگام اعمال پالت، فاوآیکون تب مرورگر هم با brandSvg هم‌رنگ می‌شود:
+ * فقط رنگ کاشی عوض می‌شود؛ سپر طلایی و میکروفون کرم ثابت می‌مانند.
+ * آیکون‌های نصب PWA (PNG/ICO در public/) همیشه نسخه ثابت و سراسری
+ * APP_ICON (پس‌زمینه سبز تیره + سپر طلایی + میکروفون) هستند و عمداً
+ * با پالت‌ها تغییر نمی‌کنند (تصمیم D10 در docs/PLAN.md).
  */
 
 import type { PaletteId } from '../types';
-import { brandSvg, BRAND_COLORS } from './brand.mjs';
+import { brandSvg } from './brand.mjs';
 
 export interface PaletteDef {
   id: PaletteId;
@@ -84,15 +86,11 @@ export function paletteOf(id: PaletteId): PaletteDef {
   return PALETTES.find((p) => p.id === id) ?? PALETTES[0];
 }
 
-/** به‌روزرسانی فاوآیکون SVG تب مرورگر با رنگ پالت فعال */
+/** به‌روزرسانی فاوآیکون SVG تب مرورگر با رنگ کاشی پالت فعال (سپر و میکروفون ثابت) */
 function applyFavicon(accent: string): void {
   if (typeof document === 'undefined') return;
   try {
-    const svg = brandSvg({
-      tile: accent,
-      stroke: BRAND_COLORS.cream,
-      pivot: BRAND_COLORS.ochre,
-    });
+    const svg = brandSvg({ tile: accent });
     const href = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
     let link = document.querySelector<HTMLLinkElement>('link[data-dynamic-favicon="1"]');
     if (!link) {
