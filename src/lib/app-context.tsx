@@ -1,10 +1,12 @@
 /**
- * بافت سراسری برنامه: تنظیمات تایپوگرافی، حالت تمرکز، وضعیت چاپ و پیمایش.
+ * بافت سراسری برنامه: تنظیمات تایپوگرافی، پالت رنگ، حالت تمرکز، وضعیت چاپ و پیمایش.
  * همه این تنظیمات (جز حالت تمرکز) در localStorage نگهداری می‌شوند.
  */
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useStoredState, writeStore } from './storage';
+import { applyPalette, DEFAULT_PALETTE } from './palettes';
+import type { PaletteId } from '../types';
 
 export type TabId = 'home' | 'practice' | 'cheat' | 'qa' | 'checklist';
 
@@ -28,14 +30,18 @@ interface AppState {
   consumeStart: () => void;
 
   /** تایپوگرافی سراسری خواندن */
-  textScale: number;      // 0.9 تا 1.15
+  textScale: number;
   setTextScale: (v: number) => void;
-  lineHeight: number;     // 1.7 تا 2.2
+  lineHeight: number;
   setLineHeight: (v: number) => void;
 
   /** هشدار شنیداری نرم (اختیاری) */
   audible: boolean;
   setAudible: (v: boolean) => void;
+
+  /** پالت رنگ حرفه‌ای */
+  palette: PaletteId;
+  setPalette: (v: PaletteId) => void;
 
   /** حالت تمرکز */
   focus: boolean;
@@ -66,6 +72,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [lineHeight, setLineHeight] = useStoredState<number>('pref:lineHeight', 1.95);
   const [audible, setAudible] = useStoredState<boolean>('pref:audible', false);
   const [shortcutsOn, setShortcutsOn] = useStoredState<boolean>('pref:shortcuts', true);
+  const [palette, setPaletteState] = useStoredState<PaletteId>('pref:palette', DEFAULT_PALETTE);
   const [focus, setFocusState] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
 
@@ -81,8 +88,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const setFocus = useCallback((v: boolean) => setFocusState(v), []);
 
+  const setPalette = useCallback(
+    (v: PaletteId) => {
+      setPaletteState(v);
+      applyPalette(v);
+    },
+    [setPaletteState],
+  );
+
   const openPrint = useCallback((scope: PrintScope = 'cheat') => setPrintScope(scope), []);
   const closePrint = useCallback(() => setPrintScope(null), []);
+
+  // اعمال پالت هنگام بارگذاری و تغییر
+  useEffect(() => {
+    applyPalette(palette);
+  }, [palette]);
 
   const state = useMemo<AppState>(
     () => ({
@@ -96,6 +116,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setLineHeight,
       audible,
       setAudible,
+      palette,
+      setPalette,
       focus,
       setFocus,
       shortcutsOn,
@@ -117,6 +139,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setLineHeight,
       audible,
       setAudible,
+      palette,
+      setPalette,
       focus,
       setFocus,
       shortcutsOn,
@@ -146,7 +170,7 @@ export function useApp(): AppState {
 
 /** ذخیره آخرین جایگاه تمرین برای «ادامه از همان‌جا» */
 export interface SessionMarker {
-  slide: number;       // ایندکس صفر-پایه
+  slide: number; // ایندکس صفر-پایه
   totalSeconds: number;
   slideSeconds: number;
   running: boolean;
@@ -159,9 +183,6 @@ export function rememberSession(marker: SessionMarker): void {
 
 /**
  * اعمال مقیاس قلم و فاصله سطر روی یک ناحیه.
- * اندازه با درصد روی ظرف تنظیم می‌شود تا فرزندانِ `em` از آن پیروی کنند و
- * فاصله سطر هم به‌صورت متغیر `--reading-lh` و هم به‌صورت lineHeight ارثی اعمال
- * می‌شود تا متن‌هایی که leading اختصاصی ندارند هم از آن بهره ببرند.
  */
 export function readingStyle(scale: number, lineHeight: number): React.CSSProperties {
   return {

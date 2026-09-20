@@ -1,6 +1,7 @@
 /**
  * انواع داده بستار دفاع
- * هر اسلاید دقیقاً منطبق بر سناریوی نهایی است (ساختار و ترتیب همان سند).
+ * محتوا از فایل‌های بیرونی content/ می‌آید و هنگام ساخت به
+ * src/content.generated.ts تبدیل می‌شود؛ این فایل فقط قراردادها را نگه می‌دارد.
  */
 
 /** بخش‌های رسمی ارائه (فهرست هشت‌بخشی) */
@@ -12,7 +13,7 @@ export interface Chapter {
   title: string;
   /** توضیح کوتاه محتوایی */
   summary: string;
-  /** ایندکس‌های اسلایدهای این بخش در آرایه slides (شامل اختیاری‌ها نیست) */
+  /** ایندکس‌های اسلایدهای این بخش در آرایه slides */
   slideRange: [number, number];
   /** هدف کلیدی بخش */
   goal?: string;
@@ -25,14 +26,18 @@ export interface SlideFormula {
 }
 
 export interface DeckSlide {
-  /** شماره اسلاید در چیدمان استاندارد (فشرده) */
+  /** شناسه پایدار محتوایی (برای کلیدهای localStorage) */
+  id: string;
+  /** شماره اسلاید در ترتیب ارائه (۱-پایه، موقعیتی) */
   num: number;
   /** عنوان فارسی روی اسلاید */
   title: string;
   /** شناسه بخش (فهرست هشت‌بخشی) */
   chapterId: string;
-  /** مدت زمان استاندارد به ثانیه */
+  /** مدت زمان استاندارد به ثانیه (از durationSec فایل اسلاید) */
   duration: number;
+  /** برچسب انگلیسی مدت برای نویسندگان محتوا (مثلاً "1 min 40 sec") */
+  estimatedTime?: string;
   /** هدف اسلاید از سناریو */
   goal?: string;
   /** محتوای پیشنهادی روی اسلاید: فهرست کوتاه */
@@ -47,10 +52,6 @@ export interface DeckSlide {
   notes: string[];
   /** جمله انتقال به اسلاید بعد */
   transition?: string;
-  /** اسلاید اختیاری (پشتیبان) است */
-  optional?: boolean;
-  /** شماره اسلاید پشتیبان در سناریو، اگر وجود دارد */
-  backupRef?: string;
 }
 
 export interface QaItem {
@@ -133,4 +134,14 @@ export interface ChecklistGroup {
 export interface DoDont {
   bad: string;
   good: string;
+}
+
+/** پالت‌های حرفه‌ای رابط */
+export type PaletteId = 'green' | 'blue' | 'orange' | 'purple' | 'red';
+
+/** یادداشت شخصی با پرچم اهمیت و خطوط کلیدی */
+export interface PersonalNote {
+  text: string;
+  important: boolean;
+  extras: Array<{ id: string; text: string; important: boolean }>;
 }

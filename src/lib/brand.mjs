@@ -1,5 +1,5 @@
 /**
- * نشان برند «بستار دفاع ارشد BCOA» — تنها منبع حقیقت.
+ * نشان برند «بستار دفاع ارشد BCOA» - تنها منبع حقیقت.
  *
  * این فایل عمداً JavaScript ساده (بدون TypeScript) است تا هم برنامه
  * بتواند آن را وارد کند (src/components/BrandMark.tsx) و هم اسکریپت ساخت
@@ -8,10 +8,10 @@
  * و هرگز از هم جدا نمی‌افتند.
  *
  * مفهوم نشان: «سپر زمان».
- *   سپر   -> نماد دفاع (جلسه دفاع پایان‌نامه) و اطمینان
- *   عقربه -> تمرین زمان‌دار؛ دو عقربه از یک محور، یکی به سمت دوازده و دیگری
- *            به سمت چهار که در اندازه‌های کوچک به شکل تیک آماده‌بودن خوانده می‌شود
- *   نقطه  -> محور تایمر، با رنگ طلایی «نکته مهم» در پالت برنامه
+ * سپر -> نماد دفاع (جلسه دفاع پایان‌نامه) و اطمینان
+ * عقربه -> تمرین زمان‌دار؛ دو عقربه از یک محور، یکی به سمت دوازده و دیگری
+ * به سمت چهار که در اندازه‌های کوچک به شکل تیک آماده‌بودن خوانده می‌شود
+ * نقطه -> محور تایمر، با رنگ طلایی «نکته مهم» در پالت برنامه
  *
  * اندازه نوری (optical size): در اندازه‌های خیلی کوچک (۱۶ و ۳۲ پیکسل)
  * ضخامت خط‌ها کمی بیشتر می‌شود تا نشان در تب مرورگر محو نشود؛ شکل هندسی
@@ -20,49 +20,49 @@
 
 /** پالت نشان؛ دقیقاً همان توکن‌های رنگ سیستم طراحی در src/index.css */
 export const BRAND_COLORS = {
-  pine: '#1e5a49',   // سبز کاج: پس‌زمینه نشان
-  cream: '#f4f0e6',  // کرم: خطوط نشان (رنگ کاغذ برنامه)
-  ochre: '#c9a14b',  // طلایی ملایم: محور تایمر
+  pine: '#1e5a49', // سبز کاج: پس‌زمینه نشان (پیش‌فرض)
+  cream: '#f4f0e6', // کرم: خطوط نشان (رنگ کاغذ برنامه)
+  ochre: '#c9a14b', // طلایی ملایم: محور تایمر
 };
 
 /** نام‌های نمایشی (برای manifest و متادیتا) */
 export const BRAND_NAME = {
-  full: 'بستار دفاع ارشد BCOA',
-  short: 'بستار دفاع',
+ full: 'بستار دفاع ارشد BCOA',
+ short: 'بستار دفاع',
 };
 
 /**
  * هندسه نشان در دستگاه مختصات ۵۱۲×۵۱۲.
  * @typedef {{
- *   tile: number,
- *   radius: number,
- *   shield: string,
- *   shieldWidth: number,
- *   hands: string,
- *   handsWidth: number,
- *   pivot: { cx: number, cy: number, r: number } | null,
+ * tile: number,
+ * radius: number,
+ * shield: string,
+ * shieldWidth: number,
+ * hands: string,
+ * handsWidth: number,
+ * pivot: { cx: number, cy: number, r: number } | null,
  * }} BrandGeometry
  */
 
 /** هندسه پایه (اندازه‌های بزرگ: ۴۸ پیکسل به بالا و نسخه برداری) */
 const BASE = {
-  tile: 512,
-  radius: 120,
+ tile: 512,
+ radius: 120,
 
-  /* سپر: دو گوشه گرد در بالا، دو بازوی straight و انحنای همگرا به سمت نقطه پایین */
-  shield:
-    'M 162 108 H 350 A 26 26 0 0 1 376 134 V 250 ' +
-    'C 376 322 324 372 256 404 ' +
-    'C 188 372 136 322 136 250 V 134 ' +
-    'A 26 26 0 0 1 162 108 Z',
-  shieldWidth: 32,
+ /* سپر: دو گوشه گرد در بالا، دو بازوی straight و انحنای همگرا به سمت نقطه پایین */
+ shield:
+ 'M 162 108 H 350 A 26 26 0 0 1 376 134 V 250 ' +
+ 'C 376 322 324 372 256 404 ' +
+ 'C 188 372 136 322 136 250 V 134 ' +
+ 'A 26 26 0 0 1 162 108 Z',
+ shieldWidth: 32,
 
-  /* دو عقربه از یک محور: عمودی به بالا و مورب به پایین‌راست */
-  hands: 'M 256 250 V 176 M 256 250 L 316 302',
-  handsWidth: 30,
+ /* دو عقربه از یک محور: عمودی به بالا و مورب به پایین‌راست */
+ hands: 'M 256 250 V 176 M 256 250 L 316 302',
+ handsWidth: 30,
 
-  /* محور تایمر */
-  pivot: { cx: 256, cy: 250, r: 19 },
+ /* محور تایمر */
+ pivot: { cx: 256, cy: 250, r: 19 },
 };
 
 /**
@@ -70,10 +70,10 @@ const BASE = {
  * نقطه محور (که در این اندازه به عقربه‌ها می‌چسبد و لکه می‌شود).
  */
 const COMPACT = {
-  ...BASE,
-  shieldWidth: 46,
-  handsWidth: 42,
-  pivot: null,
+ ...BASE,
+ shieldWidth: 46,
+ handsWidth: 42,
+ pivot: null,
 };
 
 /**
@@ -82,10 +82,35 @@ const COMPACT = {
  * @returns {BrandGeometry}
  */
 export function brandGeometry(size) {
-  return size <= 32 ? COMPACT : BASE;
+ return size <= 32 ? COMPACT : BASE;
 }
 
 /** ضریب کوچک‌کردن نشان برای آیکون maskable (منطقه امن ۸۰٪) */
 export const MASKABLE_SCALE = 0.78;
 
-export default { BRAND_COLORS, BRAND_NAME, brandGeometry, MASKABLE_SCALE };
+/**
+ * SVG نشان با رنگ پس‌زمینه قابل تنظیم (برای فاوآیکون پویا و پیش‌نمایش).
+ * @param {{ tile?: string, stroke?: string, pivot?: string, size?: number }} [opts]
+ * @returns {string}
+ */
+export function brandSvg(opts = {}) {
+  const size = opts.size ?? 512;
+  const g = brandGeometry(size);
+  const tile = opts.tile ?? BRAND_COLORS.pine;
+  const stroke = opts.stroke ?? BRAND_COLORS.cream;
+  const pivot = opts.pivot ?? BRAND_COLORS.ochre;
+  const pivotEl = g.pivot
+    ? `<circle cx="${g.pivot.cx}" cy="${g.pivot.cy}" r="${g.pivot.r}" fill="${pivot}"/>`
+    : '';
+  return (
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="bcoa-title">` +
+    `<title id="bcoa-title">${BRAND_NAME.full}</title>` +
+    `<rect width="512" height="512" rx="${g.radius}" fill="${tile}"/>` +
+    `<path d="${g.shield}" fill="none" stroke="${stroke}" stroke-width="${g.shieldWidth}" stroke-linejoin="round"/>` +
+    `<path d="${g.hands}" fill="none" stroke="${stroke}" stroke-width="${g.handsWidth}" stroke-linecap="round"/>` +
+    pivotEl +
+    `</svg>`
+  );
+}
+
+export default { BRAND_COLORS, BRAND_NAME, brandGeometry, MASKABLE_SCALE, brandSvg };

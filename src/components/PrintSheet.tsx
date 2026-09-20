@@ -5,13 +5,13 @@
  * دامنه خروجی با PrintScope مشخص می‌شود:
  *   'all'       کل وب‌سایت (همه بخش‌ها پشت سر هم با شکست صفحه تمیز)
  *   'roadmap'   نقشه راه دفاع
- *   'deck'      متن کامل نوزده اسلاید و اسلاید پشتیبان
+ *   'deck'      متن کامل همه اسلایدهای ارائه
  *   'cheat'     برگه تقلب و فرمول‌ها
  *   'qa'        بانک پرسش داور
  *   'checklist' چک‌لیست‌های روز دفاع
  */
 
-import { chapters, SAFETY_BUFFER, slides } from '../data/deck';
+import { chapters, SAFETY_BUFFER, meta } from '../data/deck';
 import {
   coreEquations,
   conceptCards,
@@ -60,7 +60,7 @@ export default function PrintSheet({ scope = 'cheat' }: { scope?: PrintScope }) 
           <div>
             <h2>بستار دفاع ارشد BCOA · {subtitle}</h2>
             <p className="ps-sub">
-              سناریوی نهایی · گفتار {clockOf(planSlides(false).at(-1)?.end ?? 0)} + حاشیه امن{' '}
+              سناریوی نهایی · {toPersianDigits(meta.slideCount)} اسلاید · گفتار {clockOf(meta.talkTotalSec)} + حاشیه امن{' '}
               {clockOf(SAFETY_BUFFER)} · هدف پایان {practiceTarget()}
             </p>
           </div>
@@ -86,7 +86,7 @@ export default function PrintSheet({ scope = 'cheat' }: { scope?: PrintScope }) 
 /* ------------------------------------------------------------------ */
 
 function RoadmapPrint() {
-  const plan = planSlides(false);
+  const plan = planSlides();
 
   return (
     <>
@@ -136,14 +136,24 @@ function RoadmapPrint() {
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>شروع جلسه</td>
-              <td>۱ تا ۲</td>
-              <td>{clockOf(55)}</td>
-              <td>عنوان و فهرست هشت‌بخشی</td>
-            </tr>
+            {(() => {
+              const startItems = plan.filter((p) => p.chapterId === 'start');
+              if (!startItems.length) return null;
+              const dur = startItems.reduce((s, p) => s + p.duration, 0);
+              return (
+                <tr>
+                  <td>شروع جلسه</td>
+                  <td>
+                    {toPersianDigits(startItems[0].num)} تا {toPersianDigits(startItems[startItems.length - 1].num)}
+                  </td>
+                  <td>{clockOf(dur)}</td>
+                  <td>عنوان و فهرست هشت‌بخشی</td>
+                </tr>
+              );
+            })()}
             {chapters.map((ch) => {
               const items = plan.filter((p) => p.chapterId === ch.id);
+              if (!items.length) return null;
               const dur = items.reduce((s, p) => s + p.duration, 0);
               return (
                 <tr key={ch.id}>
@@ -215,12 +225,11 @@ function RoadmapPrint() {
 }
 
 /* ------------------------------------------------------------------ */
-/* متن کامل ارائه (نوزده اسلاید + اسلاید پشتیبان)                        */
+/* متن کامل ارائه (همه اسلایدها)                                         */
 /* ------------------------------------------------------------------ */
 
 function DeckPrint({ pageBreak }: { pageBreak: boolean }) {
-  const plan = planSlides(false);
-  const optional = slides.filter((s) => s.optional);
+  const plan = planSlides();
   const chapterOf = (id: string) => chapters.find((c) => c.id === id);
 
   return (
@@ -229,17 +238,18 @@ function DeckPrint({ pageBreak }: { pageBreak: boolean }) {
         <h3>متن کامل ارائه، اسلاید به اسلاید</h3>
         <p className="ps-sub">
           هر اسلاید شامل پنجره زمانی، هدف، محتوای دیداری، متن گفتار و نکات اجرایی است. متن را حفظ نکن؛
-          داستان را حفظ کن.
+          داستان را حفظ کن. مجموع گفتار {clockOf(meta.talkTotalSec)} ({toPersianDigits(meta.slideCount)} اسلاید).
         </p>
       </section>
 
       {plan.map((s) => (
-        <section key={s.num} className="ps-block ps-slide">
+        <section key={s.id} className="ps-block ps-slide">
           <h4 className="ps-slide-title">
             اسلاید {toPersianDigits(s.num)} · {s.title}
             <span className="ps-slide-meta">
               {chapterOf(s.chapterId) ? `بخش ${chapterOf(s.chapterId)!.num}` : 'شروع جلسه'} · پنجره{' '}
               {clockOf(s.start)} تا {clockOf(s.end)} · مدت {clockOf(s.duration)}
+              {s.estimatedTime ? ` · ${s.estimatedTime}` : ''}
             </span>
           </h4>
           {s.goal && (
@@ -299,31 +309,6 @@ function DeckPrint({ pageBreak }: { pageBreak: boolean }) {
           )}
         </section>
       ))}
-
-      {optional.length > 0 && (
-        <section className="ps-block">
-          <h3>اسلایدهای اختیاری و پشتیبان</h3>
-          {optional.map((s) => (
-            <div key={s.title} className="ps-slide">
-              <h4 className="ps-slide-title">
-                {s.title}
-                {s.backupRef && <span className="ps-slide-meta">{s.backupRef}</span>}
-              </h4>
-              {s.goal && (
-                <p>
-                  <b>هدف: </b>
-                  {s.goal}
-                </p>
-              )}
-              {s.speech.map((p) => (
-                <p key={p} className="ps-speech">
-                  {p}
-                </p>
-              ))}
-            </div>
-          ))}
-        </section>
-      )}
     </>
   );
 }

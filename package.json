@@ -5,10 +5,14 @@
   "type": "module",
   "description": "تمرین گام‌به‌گام و کاملاً آفلاین جلسه دفاع پایان‌نامه کارشناسی ارشد (BCOA)",
   "scripts": {
+    "content": "node scripts/compile-content.mjs",
+    "predev": "node scripts/compile-content.mjs",
+    "prebuild": "node scripts/compile-content.mjs",
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
     "preview": "vite preview --host=0.0.0.0",
     "lint": "tsc --noEmit",
+    "preverify": "node scripts/compile-content.mjs",
     "verify": "node tests/verify-all.cjs",
     "icons": "node scripts/build-brand.mjs"
   },

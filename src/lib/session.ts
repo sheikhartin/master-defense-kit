@@ -1,13 +1,11 @@
 /**
  * محاسبه زمان‌بندی جلسه از روی مدت‌های اسلایدها.
- * پنجره هر اسلاید همیشه به‌صورت تجمعی از شروع محاسبه می‌شود تا
- * هنگام افزودن اسلاید اختیاری «وراثت و رقابت»، همه زمان‌ها خودکار و
- * بدون تناقض جابه‌جا شوند. چیدمان فشرده (بدون اسلاید اختیاری) گفتاری
- * به مدت ۱۸:۳۰ دارد و چیدمان گسترده با افزودن ۴۵ ثانیه به ۱۹:۱۵
- * می‌رسد؛ در هر دو حالت ۱:۰۰ حاشیه امن به انتها افزوده می‌شود.
+ * پنجره هر اسلاید همیشه به‌صورت تجمعی از شروع محاسبه می‌شود.
+ * همه اسلایدهای بسته محتوایی در ارائه حضور دارند (اسلاید اختیاری وجود ندارد).
+ * مدت گفتار و هدف پایان از meta تولیدشده (جمع durationSec فایل‌های اسلاید) خوانده می‌شود.
  */
 
-import { SAFETY_BUFFER, slides } from '../data/deck';
+import { SAFETY_BUFFER, slides, meta } from '../data/deck';
 import type { DeckSlide } from '../types';
 import { clockOf } from './persian';
 
@@ -17,42 +15,37 @@ export interface PlannedSlide extends DeckSlide {
   end: number;
 }
 
-/** فهرست اسلایدهای برنامه‌ریزی‌شده (اختیاری: گنجاندن اسلایدهای optional) */
-export function planSlides(includeOptional = false): PlannedSlide[] {
+/** فهرست اسلایدهای برنامه‌ریزی‌شده (همه اسلایدها، بدون فیلتر اختیاری) */
+export function planSlides(): PlannedSlide[] {
   let cursor = 0;
-  return slides
-    .filter((s) => includeOptional || !s.optional)
-    .map((s, index) => {
-      const item: PlannedSlide = { ...s, index, start: cursor, end: cursor + s.duration };
-      cursor += s.duration;
-      return item;
-    });
+  return slides.map((s, index) => {
+    const item: PlannedSlide = { ...s, index, start: cursor, end: cursor + s.duration };
+    cursor += s.duration;
+    return item;
+  });
 }
 
 /** مدت کل گفتار به ثانیه (بدون حاشیه امن) */
-export function totalTalk(includeOptional = false): number {
-  const plan = planSlides(includeOptional);
-  return plan.length ? plan[plan.length - 1].end : 0;
+export function totalTalk(): number {
+  return meta.talkTotalSec;
 }
 
 /** مدت کل جلسه شامل حاشیه امن */
-export function totalSession(includeOptional = false): number {
-  return totalTalk(includeOptional) + SAFETY_BUFFER;
+export function totalSession(): number {
+  return meta.sessionTotalSec;
 }
 
 /**
- * هدف تمرین: پایان ارائه ۱۵ تا ۳۰ ثانیه پس از پایان متن گفتارِ همان چیدمان
- * (فشرده: پایان گفتار ۱۸:۳۰ و بازه هدف ۱۸:۴۵ تا ۱۹:۰۰؛ گسترده: پایان گفتار
- * ۱۹:۱۵ و بازه هدف ۱۹:۳۰ تا ۱۹:۴۵).
+ * هدف تمرین: پایان ارائه ۱۵ تا ۳۰ ثانیه پس از پایان متن گفتار
+ * (پیش‌فرض بسته BCOA: پایان گفتار ۱۹:۱۵ و بازه هدف ۱۹:۳۰ تا ۱۹:۴۵).
  */
-export function practiceWindow(includeOptional = false): { from: number; to: number } {
-  const end = totalTalk(includeOptional);
-  return { from: end + 15, to: end + 30 };
+export function practiceWindow(): { from: number; to: number } {
+  return { from: meta.finishFromSec, to: meta.finishToSec };
 }
 
 /** نمایش متنی هدف پایان (برای متن‌های ساده و چاپ) */
-export function practiceTarget(includeOptional = false): string {
-  const w = practiceWindow(includeOptional);
+export function practiceTarget(): string {
+  const w = practiceWindow();
   return `${clockOf(w.from)} تا ${clockOf(w.to)}`;
 }
 
@@ -65,3 +58,6 @@ export function slideWindow(item: PlannedSlide): string {
 export function chapterOfIndex(chapterSlideIndexes: number[], index: number): number {
   return chapterSlideIndexes.indexOf(index);
 }
+
+/** حاشیه امن (ثانیه) از meta */
+export { SAFETY_BUFFER };

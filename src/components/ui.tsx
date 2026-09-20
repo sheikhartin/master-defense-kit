@@ -3,9 +3,12 @@
  * دکمه هایلایت نرم و برچسب‌ها.
  */
 
-import { NotebookPen, Star } from 'lucide-react';
-import { useStoredFlag, useStoredNote } from '../lib/storage';
+import { useCallback, useEffect, useState } from 'react';
+import { NotebookPen, Plus, Star, Trash2 } from 'lucide-react';
+import { readStore, useStoredFlag, writeStore } from '../lib/storage';
 import { clockOf, toPersianDigits } from '../lib/persian';
+import { emptyPersonalNote, parsePersonalNote, slideNoteKey } from '../lib/content-keys';
+import type { PersonalNote } from '../types';
 import type { ReactNode } from 'react';
 
 /** سربرگ یک بخش با شماره فارسی */
@@ -33,23 +36,135 @@ export function SectionHead({
   );
 }
 
-/** جعبه یادداشت شخصی که در localStorage ذخیره می‌شود */
-export function NoteBox({ storageKey, compact = false }: { storageKey: string; compact?: boolean }) {
-  const [text, setText] = useStoredNote(storageKey);
+/** جعبه یادداشت شخصی با پرچم اهمیت و خطوط کلیدی ستاره‌پذیر */
+export function NoteBox({
+  storageKey,
+  legacyKeys = [],
+  compact = false,
+}: {
+  storageKey: string;
+  /** کلیدهای قدیمی برای مهاجرت */
+  legacyKeys?: string[];
+  compact?: boolean;
+}) {
+  const [note, setNote] = useState<PersonalNote>(() => {
+    const primary = readStore<unknown>(storageKey, null);
+    if (primary !== null) return parsePersonalNote(primary);
+    for (const k of legacyKeys) {
+      const leg = readStore<unknown>(k, null);
+      if (leg !== null) {
+        const parsed = parsePersonalNote(leg);
+        writeStore(storageKey, parsed);
+        return parsed;
+      }
+    }
+    return emptyPersonalNote();
+  });
+
+  const persist = useCallback(
+    (next: PersonalNote) => {
+      setNote(next);
+      writeStore(storageKey, next);
+    },
+    [storageKey],
+  );
+
+  const setText = (text: string) => persist({ ...note, text });
+  const toggleImportant = () => persist({ ...note, important: !note.important });
+
+  const addExtra = () => {
+    const id = `e${Date.now().toString(36)}`;
+    persist({
+      ...note,
+      extras: [...note.extras, { id, text: '', important: false }],
+    });
+  };
+
+  const updateExtra = (id: string, patch: Partial<PersonalNote['extras'][number]>) => {
+    persist({
+      ...note,
+      extras: note.extras.map((e) => (e.id === id ? { ...e, ...patch } : e)),
+    });
+  };
+
+  const removeExtra = (id: string) => {
+    persist({ ...note, extras: note.extras.filter((e) => e.id !== id) });
+  };
+
   return (
-    <div className={`rounded-xl border border-line bg-surface-2/60 ${compact ? 'p-2' : 'p-3'}`}>
-      <label className="mb-1.5 flex items-center gap-1.5 text-xs font-bold text-muted">
-        <NotebookPen className="h-3.5 w-3.5" />
-        یادداشت شخصی
-        {text && <span className="text-pine">ذخیره شد</span>}
-      </label>
+    <div
+      className={`rounded-xl border bg-surface-2/60 ${
+        note.important ? 'border-ochre/50 bg-ochre-soft/40' : 'border-line'
+      } ${compact ? 'p-2' : 'p-3'}`}
+    >
+      <div className="mb-1.5 flex items-center justify-between gap-2">
+        <label className="flex items-center gap-1.5 text-xs font-bold text-muted">
+          <NotebookPen className="h-3.5 w-3.5" />
+          یادداشت شخصی
+          {(note.text || note.extras.some((e) => e.text)) && (
+            <span className="text-pine">ذخیره شد</span>
+          )}
+        </label>
+        <button
+          type="button"
+          className={`note-marker ${note.important ? 'text-ochre' : ''}`}
+          aria-pressed={note.important}
+          title={note.important ? 'حذف علامت مهم' : 'علامت مهم برای کل یادداشت'}
+          onClick={toggleImportant}
+        >
+          <Star className={`h-4 w-4 ${note.important ? 'fill-ochre' : ''}`} />
+        </button>
+      </div>
       <textarea
-        value={text}
+        value={note.text}
         onChange={(e) => setText(e.target.value)}
         rows={compact ? 1 : 3}
         placeholder="یادداشت کوتاه خودت را این‌جا بنویس؛ فقط روی همین دستگاه ذخیره می‌شود."
         className="w-full resize-y rounded-lg border border-line bg-surface px-3 py-2 text-sm leading-7 text-ink placeholder:text-muted/70 focus:border-pine/50 focus:outline-none"
       />
+
+      <div className="mt-3 space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[0.72rem] font-bold text-muted">یادداشت‌های کلیدی</p>
+          <button type="button" className="btn btn-quiet btn-sm" onClick={addExtra}>
+            <Plus className="h-3.5 w-3.5" />
+            افزودن
+          </button>
+        </div>
+        {note.extras.map((ex) => (
+          <div
+            key={ex.id}
+            className={`flex items-start gap-2 rounded-xl px-2.5 py-2 ${
+              ex.important ? 'hl-block' : 'border border-line bg-surface'
+            }`}
+          >
+            <button
+              type="button"
+              className={`note-marker mt-1.5 shrink-0 ${ex.important ? 'text-ochre' : ''}`}
+              aria-pressed={ex.important}
+              title={ex.important ? 'حذف علامت مهم' : 'علامت مهم'}
+              onClick={() => updateExtra(ex.id, { important: !ex.important })}
+            >
+              <Star className={`h-3.5 w-3.5 ${ex.important ? 'fill-ochre' : ''}`} />
+            </button>
+            <input
+              type="text"
+              value={ex.text}
+              onChange={(e) => updateExtra(ex.id, { text: e.target.value })}
+              placeholder="نکته کوتاه…"
+              className="min-w-0 flex-1 rounded-md border border-transparent bg-transparent px-1 py-0.5 text-sm text-ink focus:border-line focus:outline-none"
+            />
+            <button
+              type="button"
+              className="note-marker mt-1.5 shrink-0"
+              title="حذف"
+              onClick={() => removeExtra(ex.id)}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -98,8 +213,6 @@ export function Tag({ tone, children }: { tone: 'pine' | 'ochre' | 'clay' | 'mut
 
 /**
  * بازه زمانی فارسی مثل «۰۹:۳۰ تا ۱۰:۱۵».
- * هر زمان به‌صورت یک بلوک جداگانه چپ‌به‌راست (ایزوله) رندر می‌شود و واژه «تا»
- * بیرون از بلوک و در جریان طبیعی راست‌به‌چپ می‌ماند تا ترتیب خوانش همیشه درست باشد.
  */
 export function TimeRange({ from, to, className = '' }: { from: number; to: number; className?: string }) {
   return (
@@ -109,4 +222,30 @@ export function TimeRange({ from, to, className = '' }: { from: number; to: numb
       <span className="timer-num">{clockOf(to)}</span>
     </span>
   );
+}
+
+/** سازنده کلید یادداشت اسلاید (کمک به مصرف‌کنندگان) */
+export { slideNoteKey };
+
+/** هوک ساده برای همگام‌سازی کلید storage هنگام تعویض اسلاید */
+export function usePersonalNote(storageKey: string, legacyKeys: string[] = []) {
+  const [note, setNote] = useState<PersonalNote>(() => emptyPersonalNote());
+  useEffect(() => {
+    const primary = readStore<unknown>(storageKey, null);
+    if (primary !== null) {
+      setNote(parsePersonalNote(primary));
+      return;
+    }
+    for (const k of legacyKeys) {
+      const leg = readStore<unknown>(k, null);
+      if (leg !== null) {
+        const parsed = parsePersonalNote(leg);
+        writeStore(storageKey, parsed);
+        setNote(parsed);
+        return;
+      }
+    }
+    setNote(emptyPersonalNote());
+  }, [storageKey, legacyKeys.join('|')]);
+  return [note, setNote] as const;
 }

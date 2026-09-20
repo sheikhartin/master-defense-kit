@@ -11,19 +11,25 @@ import { toPersianDigits } from '../lib/persian';
 
 export default function ChecklistLab() {
   return (
-    <div className="stagger space-y-12">
-      <section className="card p-7 md:p-9">
-        <span className="eyebrow">
-          <Check className="h-3.5 w-3.5" />
-          روز دفاع
-        </span>
-        <h2 className="mt-3 text-2xl font-black leading-10 text-ink md:text-3xl">
-          چک‌لیست‌ها و عبارت‌های درست
-        </h2>
-        <p className="mt-2 max-w-2xl text-[1rem] leading-8 text-ink-soft">
-          تیک‌ها همین‌جا در دستگاه شما ذخیره می‌شوند؛ یک روز مانده به دفاع همه را مرور کن
-          و شب دفاع فقط به همان چیزهایی که تیک زده‌ای نگاه کن.
-        </p>
+    <div className="stagger space-y-10 md:space-y-12">
+      <section className="card relative overflow-hidden p-7 md:p-9">
+        <div
+          className="pointer-events-none absolute -left-16 -top-16 h-56 w-56 rounded-full bg-pine-soft/50 blur-3xl"
+          aria-hidden="true"
+        />
+        <div className="relative">
+          <span className="eyebrow">
+            <Check className="h-3.5 w-3.5" />
+            روز دفاع
+          </span>
+          <h2 className="mt-3 text-2xl font-black leading-10 text-ink md:text-3xl">
+            چک‌لیست‌ها و عبارت‌های درست
+          </h2>
+          <p className="mt-2 max-w-2xl text-[1rem] leading-[var(--reading-lh)] text-ink-soft">
+            تیک‌ها همین‌جا در دستگاه شما ذخیره می‌شوند؛ یک روز مانده به دفاع همه را مرور کن
+            و شب دفاع فقط به همان چیزهایی که تیک زده‌ای نگاه کن.
+          </p>
+        </div>
       </section>
 
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
