@@ -18,7 +18,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { BRAND_COLORS, BRAND_NAME, MASKABLE_SCALE, brandGeometry } from '../src/lib/brand.mjs';
+import { BRAND_COLORS, BRAND_NAME, MASKABLE_SCALE, brandGeometry, brandSvg } from '../src/lib/brand.mjs';
 import { encodeICO, encodePNG, parsePath, rasterize } from './lib/raster.mjs';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -60,20 +60,12 @@ function pngFor(size, opts = {}) {
 /* ------------------------------------------------------------------ */
 
 function buildSvg() {
-  const g = brandGeometry(512);
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="bcoa-title">
-  <title id="bcoa-title">${BRAND_NAME.full}</title>
-  <!-- این فایل با «npm run icons» از src/lib/brand.mjs ساخته می‌شود؛ دستی ویرایش نشود -->
-  <rect width="512" height="512" rx="${g.radius}" fill="${BRAND_COLORS.pine}"/>
-  <path d="${g.shield}" fill="none" stroke="${BRAND_COLORS.cream}" stroke-width="${g.shieldWidth}" stroke-linejoin="round"/>
-  <path d="${g.hands}" fill="none" stroke="${BRAND_COLORS.cream}" stroke-width="${g.handsWidth}" stroke-linecap="round"/>
-  ${
-    g.pivot
-      ? `<circle cx="${g.pivot.cx}" cy="${g.pivot.cy}" r="${g.pivot.r}" fill="${BRAND_COLORS.ochre}"/>`
-      : ''
-  }
-</svg>
-`;
+  /* نسخه نصب‌شده همیشه سبز پیش‌فرض است؛ رنگ پویای تب از brandSvg در زمان اجرا می‌آید */
+  return (
+    `<!-- این فایل با «npm run icons» از src/lib/brand.mjs ساخته می‌شود؛ دستی ویرایش نشود -->\n` +
+    brandSvg({ tile: BRAND_COLORS.pine }) +
+    '\n'
+  );
 }
 
 /* ------------------------------------------------------------------ */

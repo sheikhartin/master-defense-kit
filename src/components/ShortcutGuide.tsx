@@ -31,7 +31,6 @@ const PRACTICE_ROWS: Row[] = [
   { action: 'پرش به اسلاید ۱ تا ۱۰', keys: ['۱ تا ۹', '۰'] },
   { action: 'پرش به اسلایدهای ۱۱ به بعد', keys: ['Shift', 'عدد'] },
   { action: 'اولین و آخرین اسلاید', keys: ['Home', 'End'] },
-  { action: 'چیدمان گسترده با اسلاید اختیاری', keys: ['O'] },
 ];
 
 const QA_ROWS: Row[] = [

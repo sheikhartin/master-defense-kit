@@ -7,7 +7,7 @@
    ========================================================================== */
 
 @theme {
-  /* پالت گرم و آرام */
+  /* پالت گرم و آرام: خنثی‌ها ثابت؛ تأکید (pine) در زمان اجرا با data-theme عوض می‌شود */
   --color-paper: #f4f0e6;        /* پس‌زمینه اصلی: کرم ملایم */
   --color-paper-deep: #ece6d6;   /* پس‌زمینه تیره‌تر */
   --color-surface: #fcfaf3;      /* سطح کارت */
@@ -17,13 +17,13 @@
   --color-muted: #7d7563;        /* برچسب‌های کم‌رنگ */
   --color-line: #e2dac8;         /* خطوط جداکننده */
   --color-line-strong: #cfc5ab;
-  --color-pine: #1e5a49;         /* سبز کاج: رنگ اصلی و آرام */
+  --color-pine: #1e5a49;         /* رنگ تأکید (پیش‌فرض سبز کاج؛ با پالت عوض می‌شود) */
   --color-pine-deep: #163f35;
   --color-pine-soft: #e6efe8;
   --color-pine-wash: #eef4ed;
-  --color-ochre: #9a7126;        /* طلایی ملایم برای برجسته‌سازی */
+  --color-ochre: #9a7126;        /* طلایی ملایم برای برجسته‌سازی (ثابت در همه پالت‌ها) */
   --color-ochre-soft: #f2e7cc;
-  --color-clay: #a04a2c;         /* قرمز خاکی برای هشدارهای نرم */
+  --color-clay: #a04a2c;         /* قرمز خاکی برای هشدارهای نرم (ثابت) */
   --color-clay-soft: #f6e3d9;
   --color-slate-warm: #ece7db;
 
@@ -38,7 +38,7 @@
     0 14px 40px -12px rgba(30, 90, 73, 0.28);
 }
 
-/* ---------- توکن‌های حرکت: نرم، کوتاه و آرام ---------- */
+/* ---------- توکن‌های حرکت و پالت زمان‌اجرا ---------- */
 
 :root {
   --ease-soft: cubic-bezier(0.25, 0.62, 0.22, 1);
@@ -46,6 +46,50 @@
   --t-fast: 200ms;
   --t-med: 320ms;
   --t-slow: 560ms;
+
+  /* accent aliases (هم‌تراز با pine؛ از applyPalette به‌روز می‌شوند) */
+  --color-accent: #1e5a49;
+  --color-accent-deep: #163f35;
+  --color-accent-soft: #e6efe8;
+  --color-accent-wash: #eef4ed;
+  --accent-rgb: 30, 90, 73;
+}
+
+/* پنج پالت حرفه‌ای: فقط تأکید عوض می‌شود؛ کاغذ/مرکب/ochre/clay ثابت می‌مانند */
+[data-theme="green"] {
+  --color-accent: #1e5a49;
+  --color-accent-deep: #163f35;
+  --color-accent-soft: #e6efe8;
+  --color-accent-wash: #eef4ed;
+  --accent-rgb: 30, 90, 73;
+}
+[data-theme="blue"] {
+  --color-accent: #1e4f7a;
+  --color-accent-deep: #153a5c;
+  --color-accent-soft: #e4eef6;
+  --color-accent-wash: #eef4f9;
+  --accent-rgb: 30, 79, 122;
+}
+[data-theme="orange"] {
+  --color-accent: #a85a1f;
+  --color-accent-deep: #7a4014;
+  --color-accent-soft: #f6e8d8;
+  --color-accent-wash: #faf1e6;
+  --accent-rgb: 168, 90, 31;
+}
+[data-theme="purple"] {
+  --color-accent: #5b4578;
+  --color-accent-deep: #3f2f56;
+  --color-accent-soft: #eee8f4;
+  --color-accent-wash: #f4f0f8;
+  --accent-rgb: 91, 69, 120;
+}
+[data-theme="red"] {
+  --color-accent: #8b3a32;
+  --color-accent-deep: #642923;
+  --color-accent-soft: #f3e4e2;
+  --color-accent-wash: #f8efed;
+  --accent-rgb: 139, 58, 50;
 }
 
 /* ---------- پایه ---------- */
@@ -92,9 +136,22 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid rgba(30, 90, 73, 0.55);
+  outline: 2px solid rgba(var(--accent-rgb), 0.55);
   outline-offset: 2px;
-  border-radius: 6px;
+  border-radius: 8px;
+}
+
+/* پس‌زمینه کاغذی خیلی ملایم برای عمق بدون شلوغی */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    radial-gradient(1200px 600px at 100% -10%, rgba(var(--accent-rgb), 0.06), transparent 55%),
+    radial-gradient(900px 500px at -10% 110%, rgba(154, 113, 38, 0.05), transparent 50%),
+    var(--color-paper);
 }
 
 button {
@@ -147,6 +204,9 @@ main {
   border: 1px solid var(--color-line);
   border-radius: 20px;
   box-shadow: var(--shadow-soft);
+  transition:
+    box-shadow var(--t-med) var(--ease-soft),
+    border-color var(--t-med) var(--ease-soft);
 }
 
 /* سطح درون‌کارتی */
@@ -161,6 +221,26 @@ main {
   overflow-x: clip;
 }
 
+/* سربرگ چسبان: خط تأکید باریک زیر ناوبری */
+.site-header {
+  box-shadow: 0 1px 0 rgba(43, 37, 28, 0.04);
+}
+
+.site-header::after {
+  content: "";
+  display: block;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(var(--accent-rgb), 0.35) 20%,
+    rgba(var(--accent-rgb), 0.55) 50%,
+    rgba(var(--accent-rgb), 0.35) 80%,
+    transparent 100%
+  );
+  opacity: 0.85;
+}
+
 .eyebrow {
   display: inline-flex;
   align-items: center;
@@ -170,10 +250,91 @@ main {
   letter-spacing: 0.01em;
   color: var(--color-pine);
   background: var(--color-pine-wash);
-  border: 1px solid rgba(30, 90, 73, 0.18);
+  border: 1px solid rgba(var(--accent-rgb), 0.18);
   border-radius: 999px;
   padding: 0.3rem 0.85rem;
   line-height: 1.7;
+}
+
+/* ناوبری تب‌ها: قرص فعال واضح، هاور آرام */
+.tab-nav {
+  display: flex;
+  gap: 0.25rem;
+  overflow-x: auto;
+  max-width: 100%;
+  padding-bottom: 0.15rem;
+  scrollbar-width: none;
+}
+.tab-nav::-webkit-scrollbar { display: none; }
+
+.tab-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  padding: 0.45rem 0.95rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.6;
+  color: var(--color-ink-soft);
+  background: transparent;
+  border: 1px solid transparent;
+  transition:
+    background-color var(--t-med) var(--ease-soft),
+    color var(--t-med) var(--ease-soft),
+    border-color var(--t-med) var(--ease-soft),
+    box-shadow var(--t-med) var(--ease-soft);
+}
+.tab-pill:hover {
+  background: var(--color-surface-2);
+  color: var(--color-ink);
+}
+.tab-pill[aria-current="page"] {
+  background: var(--color-pine);
+  color: #fdfbf4;
+  box-shadow: 0 1px 2px rgba(var(--accent-rgb), 0.22), 0 6px 16px rgba(var(--accent-rgb), 0.16);
+}
+.tab-pill[aria-current="page"] .tab-pill-icon {
+  color: rgba(253, 251, 244, 0.92);
+}
+
+/* ورود نرم صفحه هنگام تعویض تب */
+.lab-pane {
+  animation: lab-in 420ms var(--ease-out) both;
+}
+@keyframes lab-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* نوار آمار فشرده روی نقشه راه */
+.stat-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+@media (min-width: 640px) {
+  .stat-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+.stat-cell {
+  border-radius: 14px;
+  border: 1px solid var(--color-line);
+  background: var(--color-surface-2);
+  padding: 0.75rem 0.9rem;
+  min-width: 0;
+}
+.stat-cell .stat-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--color-muted);
+}
+.stat-cell .stat-value {
+  margin-top: 0.2rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--color-ink);
+  letter-spacing: -0.01em;
 }
 
 /* چپ‌به‌راست‌شده‌های امن برای متن فنی */
@@ -303,7 +464,7 @@ main {
 .btn-primary {
   background: var(--color-pine);
   color: #fdfbf4;
-  box-shadow: 0 1px 2px rgba(22, 63, 53, 0.25), 0 6px 16px rgba(30, 90, 73, 0.18);
+  box-shadow: 0 1px 2px rgba(var(--accent-rgb), 0.25), 0 6px 16px rgba(var(--accent-rgb), 0.18);
 }
 .btn-primary:hover {
   background: var(--color-pine-deep);
@@ -313,11 +474,11 @@ main {
 .btn-soft {
   background: var(--color-pine-soft);
   color: var(--color-pine-deep);
-  border-color: rgba(30, 90, 73, 0.2);
+  border-color: rgba(var(--accent-rgb), 0.2);
 }
 .btn-soft:hover {
   background: var(--color-pine-wash);
-  border-color: rgba(30, 90, 73, 0.34);
+  border-color: rgba(var(--accent-rgb), 0.34);
 }
 
 .btn-ghost {
@@ -409,16 +570,17 @@ main {
 }
 
 .stagger > * {
-  animation: rise-in 680ms var(--ease-out) both;
+  animation: rise-in 560ms var(--ease-out) both;
 }
-.stagger > *:nth-child(1) { animation-delay: 40ms; }
-.stagger > *:nth-child(2) { animation-delay: 110ms; }
-.stagger > *:nth-child(3) { animation-delay: 180ms; }
-.stagger > *:nth-child(4) { animation-delay: 250ms; }
-.stagger > *:nth-child(5) { animation-delay: 320ms; }
-.stagger > *:nth-child(6) { animation-delay: 390ms; }
-.stagger > *:nth-child(7) { animation-delay: 460ms; }
-.stagger > *:nth-child(8) { animation-delay: 530ms; }
+.stagger > *:nth-child(1) { animation-delay: 30ms; }
+.stagger > *:nth-child(2) { animation-delay: 80ms; }
+.stagger > *:nth-child(3) { animation-delay: 130ms; }
+.stagger > *:nth-child(4) { animation-delay: 180ms; }
+.stagger > *:nth-child(5) { animation-delay: 230ms; }
+.stagger > *:nth-child(6) { animation-delay: 280ms; }
+.stagger > *:nth-child(7) { animation-delay: 330ms; }
+.stagger > *:nth-child(8) { animation-delay: 380ms; }
+.stagger > *:nth-child(n + 9) { animation-delay: 420ms; }
 
 /* پنل و پنجره: محو همراه با بزرگ‌شدن نرم */
 @keyframes pop-in {
@@ -478,7 +640,8 @@ main {
   .pop-in,
   .overlay,
   .slide-enter,
-  .swap-fade {
+  .swap-fade,
+  .lab-pane {
     animation: none;
     animation-delay: 0s;
   }
@@ -511,15 +674,26 @@ main {
   box-shadow: var(--shadow-glow-sm);
 }
 
-.chip-pine { background: var(--color-pine-wash); color: var(--color-pine-deep); border-color: rgba(30, 90, 73, 0.16); }
+.chip-pine { background: var(--color-pine-wash); color: var(--color-pine-deep); border-color: rgba(var(--accent-rgb), 0.16); }
 .chip-ochre { background: var(--color-ochre-soft); color: #6f5117; border-color: rgba(154, 113, 38, 0.25); }
 .chip-clay { background: var(--color-clay-soft); color: var(--color-clay); border-color: rgba(160, 74, 44, 0.2); }
 .chip-mute { background: var(--color-surface-2); color: var(--color-muted); border-color: var(--color-line); }
 
-/* برجسته‌سازی نرم نکته‌های مهم */
+/* برجسته‌سازی نرم نکته‌های مهم (سازگاری عقب‌رو) */
 .hl-mark {
   background: linear-gradient(180deg, transparent 8%, rgba(220, 183, 94, 0.34) 8%, rgba(220, 183, 94, 0.34) 88%, transparent 88%);
   border-radius: 3px 0 0 3px;
+}
+
+/* هایلایت بلوکی پاراگراف / یادداشت مهم: پدینگ + گوشه کمی گرد */
+.hl-block {
+  background: rgba(220, 183, 94, 0.26);
+  border: 1px solid rgba(154, 113, 38, 0.26);
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 1px rgba(252, 250, 243, 0.4);
+  transition:
+    background-color var(--t-med) var(--ease-soft),
+    border-color var(--t-med) var(--ease-soft);
 }
 
 /* هایلایت نرم نکته‌ها */
@@ -534,15 +708,15 @@ main {
 
 /* ---------- نوار پیشرفت ---------- */
 .progress-track {
-  height: 6px;
+  height: 7px;
   border-radius: 999px;
-  background: rgba(30, 90, 73, 0.12);
+  background: rgba(var(--accent-rgb), 0.12);
   overflow: hidden;
 }
 .progress-fill {
   height: 100%;
   border-radius: 999px;
-  background: var(--color-pine);
+  background: linear-gradient(90deg, var(--color-pine), var(--color-pine-deep));
   transition: width 600ms var(--ease-out);
 }
 
@@ -645,7 +819,7 @@ main {
     align-items: baseline;
     justify-content: space-between;
     gap: 6mm;
-    border-bottom: 2px solid #1e5a49;
+    border-bottom: 2px solid var(--color-accent, #1e5a49);
     padding-bottom: 3mm;
     margin-bottom: 3mm;
   }
@@ -655,13 +829,13 @@ main {
     margin: 0 0 2mm;
     padding-bottom: 1mm;
     border-bottom: 1px solid #d8d0bd;
-    color: #163f35;
+    color: var(--color-accent-deep, #163f35);
     break-after: avoid;
   }
   .print-sheet h4 {
     font-size: 11px;
     margin: 3mm 0 1mm;
-    color: #1e5a49;
+    color: var(--color-accent, #1e5a49);
     break-after: avoid;
   }
   .print-sheet p { margin: 0.8mm 0; orphans: 2; widows: 2; }
@@ -752,7 +926,7 @@ main {
     padding: 1mm 2mm;
     background: #f3efe3;
     border-radius: 1.2mm;
-    border-right: 1mm solid #1e5a49;
+    border-right: 1mm solid var(--color-accent, #1e5a49);
   }
   .print-sheet .ps-slide-meta { font-size: 8.5px; font-weight: 400; color: #5a5342; white-space: nowrap; }
   .print-sheet .ps-label {
@@ -850,13 +1024,11 @@ kbd {
   border-color: var(--color-pine);
   color: #fdfbf4;
   transform: none;
-}
-.slide-dot.optional {
-  border-style: dashed;
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.16);
 }
 .slide-dot.done {
   background: var(--color-pine-soft);
-  border-color: rgba(30, 90, 73, 0.25);
+  border-color: rgba(var(--accent-rgb), 0.25);
   color: var(--color-pine-deep);
 }
 
@@ -879,7 +1051,14 @@ kbd {
   width: 0.42em;
   height: 0.42em;
   border-radius: 50%;
-  background: rgba(30, 90, 73, 0.45);
+  background: rgba(var(--accent-rgb), 0.45);
+}
+
+/* نشان برند: گوشه گرد + سایه نرم */
+.brand-mark {
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
 }
 
 /* ---------- جدول ساده ----------

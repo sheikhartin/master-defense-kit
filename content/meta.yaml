@@ -1,0 +1,10 @@
+id: "bcoa-master-defense"
+title: "بستار دفاع ارشد BCOA"
+locale: "fa"
+dir: "rtl"
+safetyBufferSec: 60
+persona: "آرام، دقیق، مسلط، قابل نقد"
+finishTarget:
+  fromOffsetSec: 15
+  toOffsetSec: 30
+description: "تمرین گام‌به‌گام و کاملاً آفلاین جلسه دفاع پایان‌نامه کارشناسی ارشد (BCOA)"

@@ -1,9 +1,6 @@
 /**
- * نشان برند داخل برنامه (سربرگ و حالت تمرکز).
- *
- * این مؤلفه دقیقاً همان هندسه و پالت «src/lib/brand.mjs» را رندر می‌کند که
- * اسکریپت ساخت آیکون هم از آن استفاده می‌کند؛ بنابراین فاوآیکون، آیکون نصب و
- * نشان سربرگ همگی یک نشانه بصری واحد هستند و هیچ‌گاه از هم جدا نمی‌افتند.
+ * نشان برند داخل برنامه (سربرگ و پابرگ).
+ * هندسه از brand.mjs؛ رنگ پس‌زمینه از پالت فعال (CSS --color-accent).
  */
 
 import { BRAND_COLORS, BRAND_NAME, brandGeometry } from '../lib/brand.mjs';
@@ -11,8 +8,14 @@ import { BRAND_COLORS, BRAND_NAME, brandGeometry } from '../lib/brand.mjs';
 export default function BrandMark({ className = 'h-6 w-6' }: { className?: string }) {
   const g = brandGeometry(512);
   return (
-    <svg viewBox="0 0 512 512" className={className} fill="none" aria-hidden="true">
-      <rect width="512" height="512" rx={g.radius} fill={BRAND_COLORS.pine} />
+    <svg
+      viewBox="0 0 512 512"
+      className={`brand-mark ${className}`}
+      fill="none"
+      aria-hidden="true"
+      role="img"
+    >
+      <rect width="512" height="512" rx={g.radius} fill="var(--color-accent, #1e5a49)" />
       <path
         d={g.shield}
         stroke={BRAND_COLORS.cream}

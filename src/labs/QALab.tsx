@@ -26,9 +26,14 @@ export default function QALab() {
   );
 
   return (
-    <div className="stagger space-y-12">
+    <div className="stagger space-y-10 md:space-y-12">
       {/* سربرگ */}
-      <section className="card p-7 md:p-9">
+      <section className="card relative overflow-hidden p-7 md:p-9">
+        <div
+          className="pointer-events-none absolute -left-16 -top-16 h-56 w-56 rounded-full bg-pine-soft/55 blur-3xl"
+          aria-hidden="true"
+        />
+        <div className="relative">
         <span className="eyebrow">
           <MessageCircleQuestion className="h-3.5 w-3.5" />
           بانک پرسش‌های داور
@@ -61,6 +66,7 @@ export default function QALab() {
               ))}
             </ul>
           </div>
+        </div>
         </div>
       </section>
 
@@ -143,7 +149,7 @@ function QaCard({ item }: { item: QaItem }) {
               {item.answer}
             </p>
             {item.keySentence && (
-              <p className="hl-mark rounded-xl px-4 py-2.5 text-sm font-extrabold leading-7 text-ink">
+              <p className="hl-block px-4 py-2.5 text-sm font-extrabold leading-7 text-ink">
                 جمله کلیدی: {item.keySentence}
               </p>
             )}

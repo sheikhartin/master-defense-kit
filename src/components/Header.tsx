@@ -23,6 +23,9 @@ import {
 import { useApp, type PrintScope, type TabId } from '../lib/app-context';
 import { useModalBehavior } from '../lib/use-modal';
 import { toPersianDigits } from '../lib/persian';
+import { ensureAudio, playTestCue } from '../lib/audio';
+import { PALETTES } from '../lib/palettes';
+import type { PaletteId } from '../types';
 import BrandMark from './BrandMark';
 
 const TABS: Array<{ id: TabId; label: string; hint: string; Icon: typeof Compass }> = [
@@ -37,7 +40,7 @@ const TABS: Array<{ id: TabId; label: string; hint: string; Icon: typeof Compass
 const PDF_OPTIONS: Array<{ scope: PrintScope; label: string; hint: string; Icon: typeof Compass }> = [
   { scope: 'all', label: 'کل وب‌سایت', hint: 'همه بخش‌ها در یک سند تمیز', Icon: BookOpenText },
   { scope: 'roadmap', label: 'نقشه راه دفاع', hint: 'ساختار، زمان‌بندی و مرزهای ادعا', Icon: Compass },
-  { scope: 'deck', label: 'متن کامل ارائه', hint: 'نوزده اسلاید + پشتیبان اختیاری', Icon: GraduationCap },
+  { scope: 'deck', label: 'متن کامل ارائه', hint: 'همه اسلایدها به ترتیب گفتار', Icon: GraduationCap },
   { scope: 'cheat', label: 'برگه تقلب', hint: 'فرمول‌ها، ارقام و جدول‌ها', Icon: ScrollText },
   { scope: 'qa', label: 'بانک پرسش داور', hint: 'همه پرسش‌ها و پاسخ‌ها', Icon: MessageCircleQuestion },
   { scope: 'checklist', label: 'چک‌لیست روز دفاع', hint: 'همه چک‌لیست‌ها و نگو/بگو', Icon: ListChecks },
@@ -70,21 +73,26 @@ export default function Header() {
   };
 
   return (
-    <header className="site-header sticky top-0 z-50 border-b border-line bg-surface/90 backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 pb-2 pt-3 md:px-6">
+    <header className="site-header sticky top-0 z-50 border-b border-line bg-surface/92 backdrop-blur-md">
+      <div className="mx-auto flex max-w-6xl flex-col gap-2.5 px-4 pb-2.5 pt-3 md:px-6">
         {/* ردیف بالا */}
         <div className="flex items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-2.5">
-            <BrandMark className="h-10 w-10 shrink-0 shadow-soft" />
+          <button
+            type="button"
+            className="flex min-w-0 items-center gap-2.5 rounded-xl text-right transition-opacity hover:opacity-90"
+            onClick={() => app.go('home')}
+            title="بازگشت به نقشه راه"
+          >
+            <BrandMark className="h-10 w-10 shrink-0" />
             <div className="min-w-0">
               <h1 className="truncate text-base font-extrabold leading-6 text-ink md:text-lg">
                 بستار دفاع ارشد BCOA
               </h1>
               <p className="hidden truncate text-xs text-muted sm:block">
-                تمرین گام‌به‌گام جلسه دفاع پایان‌نامه، کاملاً آفلاین و خصوصی
+                تمرین گام‌به‌گام جلسه دفاع، کاملاً آفلاین و خصوصی
               </p>
             </div>
-          </div>
+          </button>
 
           {/* کنترل‌های سراسری: لنگر منوها روی کل گروه است تا در صفحه‌های باریک
               هرگز از لبه دید بیرون نزنند (به‌جای لنگر روی هر دکمه جداگانه) */}
@@ -204,7 +212,11 @@ export default function Header() {
 
                     <button
                       type="button"
-                      onClick={() => app.setAudible(!app.audible)}
+                      onClick={() => {
+                        const next = !app.audible;
+                        if (next) ensureAudio();
+                        app.setAudible(next);
+                      }}
                       className="flex w-full items-center justify-between rounded-xl border border-line bg-surface-2/60 px-3 py-2 text-sm font-bold text-ink-soft"
                     >
                       <span className="flex items-center gap-2">
@@ -220,6 +232,50 @@ export default function Header() {
                         />
                       </span>
                     </button>
+
+                    <button
+                      type="button"
+                      className="btn btn-soft btn-sm w-full"
+                      onClick={() => {
+                        ensureAudio();
+                        if (!app.audible) app.setAudible(true);
+                        playTestCue();
+                      }}
+                    >
+                      <Volume2 className="h-3.5 w-3.5" />
+                      آزمایش صدا
+                    </button>
+
+                    <div>
+                      <div className="mb-1.5 text-xs font-bold text-ink-soft">پالت رنگ</div>
+                      <div className="grid grid-cols-5 gap-1.5" role="group" aria-label="پالت رنگ">
+                        {PALETTES.map((p) => {
+                          const active = app.palette === p.id;
+                          return (
+                            <button
+                              key={p.id}
+                              type="button"
+                              title={`${p.label} (${p.en})`}
+                              aria-label={p.label}
+                              aria-pressed={active}
+                              onClick={() => app.setPalette(p.id as PaletteId)}
+                              className={`flex flex-col items-center gap-1 rounded-xl border px-1 py-1.5 transition-colors ${
+                                active ? 'border-pine bg-pine-wash' : 'border-line bg-surface hover:bg-surface-2'
+                              }`}
+                            >
+                              <span
+                                className="h-5 w-5 rounded-full border border-black/10 shadow-soft"
+                                style={{ background: p.accent }}
+                                aria-hidden="true"
+                              />
+                              <span className="max-w-[3.2rem] truncate text-[0.62rem] font-bold leading-4 text-ink-soft">
+                                {p.label.split(' ')[0]}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
 
                     <button
                       type="button"
@@ -252,7 +308,7 @@ export default function Header() {
         </div>
 
         {/* ناوبری */}
-        <nav aria-label="بخش‌های برنامه" className="no-hbar -mx-1 flex gap-1 overflow-x-auto px-1 pb-0.5">
+        <nav aria-label="بخش‌های برنامه" className="tab-nav -mx-1 px-1">
           {TABS.map(({ id, label, Icon }) => {
             const active = app.tab === id;
             return (
@@ -261,13 +317,9 @@ export default function Header() {
                 type="button"
                 onClick={() => app.go(id)}
                 aria-current={active ? 'page' : undefined}
-                className={`flex shrink-0 items-center gap-1.5 rounded-xl px-3.5 py-2 text-sm font-bold transition-colors ${
-                  active
-                    ? 'bg-pine text-surface shadow-soft'
-                    : 'text-ink-soft hover:bg-surface-2 hover:text-ink'
-                }`}
+                className="tab-pill"
               >
-                <Icon className={`h-4 w-4 ${active ? 'text-surface/90' : 'text-muted'}`} />
+                <Icon className={`tab-pill-icon h-4 w-4 ${active ? '' : 'text-muted'}`} />
                 {label}
               </button>
             );

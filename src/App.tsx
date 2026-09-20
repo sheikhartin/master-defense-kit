@@ -66,18 +66,26 @@ function Shell() {
       <div className="app-shell flex min-h-screen flex-col">
         <Header />
 
-        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-12 pt-6 md:px-6 md:pb-16 md:pt-8">
-          <div key={app.tab} style={readingStyle(app.textScale, app.lineHeight)}>
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 pb-14 pt-6 md:px-6 md:pb-20 md:pt-8">
+          <div
+            key={app.tab}
+            className="lab-pane"
+            style={readingStyle(app.textScale, app.lineHeight)}
+          >
             <Lab />
           </div>
         </main>
 
         {/* پابرگ: نشانه برند و دسترسی سریع به راهنمای کلیدها */}
-        <footer className="site-footer border-t border-line bg-surface/70">
+        <footer className="site-footer border-t border-line bg-surface/80 backdrop-blur-sm">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4 md:px-6">
-            <p className="flex items-center gap-2 text-xs font-bold text-muted">
-              <BrandMark className="h-5 w-5" />
-              بستار دفاع ارشد BCOA · کاملاً آفلاین و خصوصی
+            <p className="flex items-center gap-2.5 text-xs font-bold text-muted">
+              <BrandMark className="brand-mark h-6 w-6" />
+              <span>
+                بستار دفاع ارشد BCOA
+                <span className="mx-1.5 text-line-strong">·</span>
+                کاملاً آفلاین و خصوصی
+              </span>
             </p>
             <button type="button" className="key-hint" onClick={() => app.setGuideOpen(true)}>
               راهنمای کلیدها

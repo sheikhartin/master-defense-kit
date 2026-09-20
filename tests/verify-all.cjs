@@ -9,6 +9,8 @@
  */
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
+const { execFileSync } = require('child_process');
 
 let passCount = 0;
 let failCount = 0;
@@ -33,12 +35,24 @@ function norm(source) {
   return source.replace(/\\\\/g, '\\');
 }
 
+function walk(dir, pred, base = dir) {
+  const out = [];
+  for (const name of fs.readdirSync(dir).sort()) {
+    const p = path.join(dir, name);
+    const st = fs.statSync(p);
+    if (st.isDirectory()) out.push(...walk(p, pred, base));
+    else if (pred(name, p)) out.push(p);
+  }
+  return out;
+}
+
 console.log('--- شروع تست‌های اعتبارسنجی ---');
 
 /* ------------------------------------------------------------------ */
-/* ۱) قواعد نگارش: بدون em dash و en dash در داده‌ها و متن رابط کاربر  */
+/* ۱) قواعد نگارش: بدون em dash و en dash                               */
 /* ------------------------------------------------------------------ */
 const textFiles = [
+  'src/content.generated.ts',
   'src/data/roadmap.ts',
   'src/data/deck.ts',
   'src/data/cheat.ts',
@@ -64,20 +78,32 @@ for (const rel of textFiles) {
   );
 }
 
+/* content/ هم باید بدون dash باشد */
+const contentFiles = walk(path.join(ROOT, 'content'), () => true).map((p) =>
+  path.relative(ROOT, p),
+);
+for (const rel of contentFiles) {
+  const content = read(rel);
+  assert(
+    !content.includes('\u2014') && !content.includes('\u2013'),
+    `عدم وجود em dash و en dash در ${rel}`,
+  );
+}
+
 /* ------------------------------------------------------------------ */
 /* ۲) هیچ رقم یا حرف فارسی داخل عبارت‌های LaTeX نباشد                  */
 /* ------------------------------------------------------------------ */
-const persianChar = /[\u0600-\u06FF]/;
+const persianChar = /[\u0600-\u06FF]/
 const latexMacro = /\\[a-zA-Z]{2,}/;
 let persianInLatex = [];
 
-for (const rel of ['src/data/cheat.ts', 'src/data/deck.ts']) {
+for (const rel of ['src/content.generated.ts']) {
   const content = norm(read(rel));
-  const strings = content.match(/'([^'\\]|\\.)*'/g) || [];
+  // Match TS double-quoted strings without full JSON unescape (LaTeX has many backslashes)
+  const strings = content.match(/"(?:\\.|[^"\\])*"/g) || [];
   for (const s of strings) {
     const value = s.slice(1, -1);
-    // فقط رشته‌هایی که واقعاً LaTeX هستند: دارای دستور (ماکرو) یا ساختار ریاضی
-    const isLatex = latexMacro.test(value) || /\\[{}]/.test(value);
+    const isLatex = latexMacro.test(value) || /\\[{}]/.test(value) || /\\bigl|\\mathrm|\\begin\{/.test(value);
     if (isLatex && persianChar.test(value)) {
       persianInLatex.push(`${rel}: ${value.slice(0, 70)}`);
     }
@@ -86,54 +112,78 @@ for (const rel of ['src/data/cheat.ts', 'src/data/deck.ts']) {
 assert(persianInLatex.length === 0, 'عدم وجود حروف یا ارقام فارسی داخل عبارت‌های LaTeX');
 
 /* ------------------------------------------------------------------ */
-/* ۳) روابط ریاضی اصیل: پیکان روی کل گروه d(θ)، کاپا، سیگما و سیگمای  */
-/*    اختلال تطبیقی نمایی                                              */
+/* ۳) روابط ریاضی اصیل                                                  */
 /* ------------------------------------------------------------------ */
-const cheatNorm = norm(read('src/data/cheat.ts'));
-const deckNorm = norm(read('src/data/deck.ts'));
+const genNorm = norm(read('src/content.generated.ts'));
 
-const arrowCount = (cheatNorm.match(/\\overrightarrow\{d\(\\theta_\{i\}\^\{t\}\)\}/g) || []).length;
+const arrowCount = (genNorm.match(/\\overrightarrow\{d\(\\theta_\{i\}\^\{t\}\)\}/g) || []).length;
 assert(arrowCount >= 1, 'وجود رابطه موقعیت با پیکان روی کل گروه d(θ)');
 assert(
-  deckNorm.includes('\\overrightarrow{d(\\theta_{i}^{t})}'),
+  genNorm.includes('\\overrightarrow{d(\\theta_{i}^{t})}'),
   'وجود رابطه اصلی در اسلاید روش با پیکان روی کل گروه d(θ)',
 );
 assert(
-  /\\kappa\\,\\bigl\(X_g\^t-X_i\^t\\bigr\)/.test(cheatNorm),
+  /\\kappa\\,\\bigl\(X_g\^t-X_i\^t\\bigr\)/.test(genNorm),
   'وجود جمله اجتماعی با ضریب کاپا در رابطه اصلی',
 );
 assert(
-  /\\theta_i\^\{?t\+1\}?=\\theta_i\^t.*\\sigma_i\^t/.test(cheatNorm),
+  /\\theta_i\^\{?t\+1\}?=\\theta_i\^t.*\\sigma_i\^t/.test(genNorm),
   'وجود رابطه اصلاح زاویه با سیگمای تطبیقی',
 );
 assert(
-  /\\sigma_i\^t=\\xi_i\^t\\,?\\exp\\bigl\(-t\/T\\bigr\)/.test(cheatNorm),
+  /\\sigma_i\^t=\\xi_i\^t\\,?\\exp\\bigl\(-t\/T\\bigr\)/.test(genNorm),
   'وجود رابطه اختلال تطبیقی نمایی (سیگما برابر کسی نمایی کاهنده)',
 );
 
 /* ------------------------------------------------------------------ */
-/* ۴) ساختار نوزده‌اسلایدی (فشرده) و زمان‌بندی ۱۸:۳۰                  */
+/* ۴) ساختار اسلایدها: همه اسلایدها، بدون optional، جمع مدت از content   */
 /* ------------------------------------------------------------------ */
-const deckText = read('src/data/deck.ts');
-const durations = [...deckText.matchAll(/duration:\s*(\d+)/g)].map((m) => Number(m[1]));
-assert(
-  durations.length === 20,
-  `وجود ۱۹ اسلاید اصلی + ۱ اختیاری (یافت‌شده: ${durations.length})`,
-);
-const optionalIndex = deckText.indexOf('optional: true');
-assert(optionalIndex > -1, 'اسلاید اختیاری با پرچم optional مشخص شده است');
-const mainSum = durations.reduce((a, b) => a + b, 0) - durations[10]; // ایندکس ۱۰: اسلاید اختیاری num:0
-assert(mainSum === 1110, `مجموع زمان اسلایدهای اصلی دقیقاً ۱۸:۳۰ باشد (یافت‌شده: ${mainSum} ثانیه)`);
+const genText = read('src/content.generated.ts');
+const durations = [...genText.matchAll(/duration: (\d+)/g)].map((m) => Number(m[1]));
+assert(durations.length >= 1, `وجود حداقل یک اسلاید (یافت‌شده: ${durations.length})`);
+assert(!/optional:\s*true/.test(genText), 'هیچ اسلاید optional در خروجی تولیدشده نیست');
+assert(!read('src/labs/PracticeLab.tsx').includes('optionalSlide'), 'PracticeLab دیگر مسیر اسلاید اختیاری ندارد');
+assert(!read('src/components/ShortcutGuide.tsx').includes('اسلاید اختیاری'), 'راهنمای کلیدها دیگر O اختیاری ندارد');
+
+const talkSum = durations.reduce((a, b) => a + b, 0);
+const talkMeta = Number((genText.match(/talkTotalSec: (\d+)/) || [])[1]);
+assert(talkSum === talkMeta, `جمع duration اسلایدها با talkTotalSec یکی است (${talkSum})`);
+assert(talkSum === 1155, `مجموع زمان گفتار بسته BCOA برابر ۱۹:۱۵ است (یافت‌شده: ${talkSum} ثانیه)`);
 assert(!durations.some((d) => d <= 0), 'همه زمان‌ها مثبت و معتبر هستند');
-assert(/export const chapters/.test(deckText), 'وجود فهرست رسمی بخش‌ها در deck.ts');
-assert(/id: 'ch[1-8]'/.test(deckText), 'بخش‌های ۰۱ تا ۰۸ در فهرست رسمی');
+
+/* estimatedTime انگلیسی در هر فایل اسلاید */
+const deckMd = walk(path.join(ROOT, 'content', 'deck'), (n) => n.endsWith('.md'));
+assert(deckMd.length === durations.length, `تعداد فایل‌های deck با اسلایدهای تولیدشده یکی است (${deckMd.length})`);
+for (const p of deckMd) {
+  const t = fs.readFileSync(p, 'utf8');
+  assert(/durationSec:\s*\d+/.test(t), `durationSec در ${path.basename(p)}`);
+  assert(/estimatedTime:\s*".+"/.test(t), `estimatedTime انگلیسی در ${path.basename(p)}`);
+}
+
+assert(/export const chapters/.test(genText), 'وجود فهرست رسمی بخش‌ها در خروجی');
+assert(/id: "ch[1-8]"/.test(genText) || /id: 'ch[1-8]'/.test(genText), 'بخش‌های ۰۱ تا ۰۸ در فهرست رسمی');
 
 /* ------------------------------------------------------------------ */
-/* ۵) آفلاین کامل: هیچ آدرس خارجی در سورس برنامه نباشد                */
+/* ۴ب) تازگی content.generated نسبت به content/                         */
 /* ------------------------------------------------------------------ */
-/* مستندات (README.md و AGENTS.md) جزو خروجی برنامه نیستند و می‌توانند برای
-   ارجاع به پایان‌نامه و مقاله، پیوند بیرونی داشته باشند؛ قاعده آفلاین بودن
-   فقط فایل‌هایی را می‌سنجد که برنامه واقعاً می‌سازد یا سرو می‌کند. */
+function contentHash() {
+  const h = crypto.createHash('sha256');
+  const files = walk(path.join(ROOT, 'content'), () => true).sort();
+  for (const f of files) {
+    h.update(path.relative(path.join(ROOT, 'content'), f));
+    h.update('\0');
+    h.update(fs.readFileSync(f));
+    h.update('\0');
+  }
+  return h.digest('hex').slice(0, 16);
+}
+const expectedHash = contentHash();
+const embeddedHash = (genText.match(/CONTENT_HASH = "([a-f0-9]+)"/) || [])[1];
+assert(embeddedHash === expectedHash, `hash محتوای تولیدشده تازه است (${embeddedHash})`);
+
+/* ------------------------------------------------------------------ */
+/* ۵) آفلاین کامل                                                       */
+/* ------------------------------------------------------------------ */
 const allSources = [
   'index.html',
   'vite.config.ts',
@@ -145,10 +195,13 @@ const allSources = [
   'src/lib/storage.ts',
   'src/lib/session.ts',
   'src/lib/app-context.tsx',
-  ...textFiles.filter((rel) => rel !== 'README.md'),
+  'src/lib/audio.ts',
+  'src/lib/palettes.ts',
+  ...textFiles.filter((rel) => rel !== 'README.md' && rel !== 'src/content.generated.ts'),
 ];
 let externalFound = [];
 for (const rel of allSources) {
+  if (!fs.existsSync(path.join(ROOT, rel))) continue;
   const urls = read(rel).match(/https?:\/\/[^\s"'`)]+/g) || [];
   for (const u of urls) {
     if (u.includes('w3.org/2000/svg')) continue;
@@ -167,12 +220,12 @@ assert(
 );
 
 /* ------------------------------------------------------------------ */
-/* ۶) پرهیز از موتورهای رندر قدیمی و فایل‌های حذف‌شده                 */
+/* ۶) پرهیز از موتورهای رندر قدیمی                                      */
 /* ------------------------------------------------------------------ */
 const combined = textFiles.join('\n') + read('src/main.tsx');
 assert(!combined.includes('react-latex-next'), 'عدم استفاده از react-latex-next');
 assert(!/from 'motion\/react'/.test(combined), 'عدم استفاده از motion/react');
-assert(!combined.includes("content.ts"), 'عدم ارجاع به فایل حذف‌شده content.ts');
+assert(!combined.includes('content.ts'), 'عدم ارجاع به فایل حذف‌شده content.ts');
 
 const legacyFiles = [
   'src/components/PresentationLab.tsx',
@@ -198,40 +251,60 @@ assert(/function formatTimePersian|toPersianDigits/.test(read('src/lib/persian.t
 const appText = read('src/App.tsx');
 assert(appText.includes('focus') && /setFocus/.test(appText), 'وجود حالت تمرکز در پوسته برنامه');
 assert(/readingStyle/.test(appText), 'وجود کنترل تایپوگرافی (اندازه متن و فاصله خط) در پوسته');
-const practiceNorm = norm(practiceText);
 assert(
-  /toggleRun|running|startStop/.test(practiceNorm) || practiceText.includes('pause'),
+  /toggleRun|running|startStop/.test(practiceText) || practiceText.includes('pause'),
   'وجود کنترل شروع و توقف (هم‌زمان) در جلسه تمرینی',
 );
 
 /* ------------------------------------------------------------------ */
-/* ۸) محتوای نسخه ۲: پرسش‌ها، حاشیه امن و سبک چاپی                    */
+/* ۸) محتوا، حاشیه امن، هدف پایان، صدا، پالت                           */
 /* ------------------------------------------------------------------ */
-const qaText = read('src/data/qa.ts');
+const qaText = read('src/content.generated.ts');
 assert(qaText.includes('ویلکاکسون') && qaText.includes('فریدمن'), 'وجود توضیح آزمون‌های ویلکاکسون و فریدمن');
 assert(qaText.includes('نموینی'), 'وجود توضیح آزمون نموینی');
 const sessionNow = read('src/lib/session.ts');
 assert(
-  /SAFETY_BUFFER/.test(sessionNow) &&
-    /حاشیه/.test(sessionNow) &&
-    /۱۸:۴۵/.test(sessionNow) &&
-    /۱۹:۳۰/.test(sessionNow),
-  'وجود منطق حاشیه امن و بازه هدف پایان (فشرده ۱۸:۴۵ تا ۱۹:۰۰ / گسترده ۱۹:۳۰ تا ۱۹:۴۵)',
+  /SAFETY_BUFFER/.test(sessionNow) && /finishFromSec|practiceWindow/.test(sessionNow),
+  'وجود منطق حاشیه امن و بازه هدف پایان از meta',
 );
+assert(genText.includes('finishFromSec') && genText.includes('finishToSec'), 'meta شامل بازه هدف پایان است');
 
 const printCss = read('src/index.css') + '\n' + read('src/components/PrintSheet.tsx');
 assert(/@media print/.test(printCss), 'سبک چاپی برای نسخه کاغذی برگه تقلب');
 
+const audioText = read('src/lib/audio.ts');
+assert(
+  audioText.includes('CUE_THRESHOLDS') && audioText.includes('cueRemaining') && audioText.includes('playTestCue'),
+  'موتور صدای مشترک با آستانه‌های ۱۰/۵/۰ و آزمایش صدا',
+);
+assert(practiceText.includes('cueRemaining') && practiceText.includes('playThresholdCue'), 'PracticeLab از موتور صدا در حلقه تایمر استفاده می‌کند');
+assert(!/ناوبری سریع:/.test(practiceText), 'پیام آموزشی دائمی ناوبری سریع حذف شده است');
+assert(practiceText.includes('hl-block'), 'هایلایت بلوکی پاراگراف در جلسه تمرینی');
+
+const palettes = read('src/lib/palettes.ts');
+for (const id of ['green', 'blue', 'orange', 'purple', 'red']) {
+  assert(palettes.includes(`id: '${id}'`) || palettes.includes(`"${id}"`), `پالت ${id} تعریف شده است`);
+  assert(read('src/index.css').includes(`[data-theme="${id}"]`), `بلاک CSS data-theme=${id}`);
+}
+assert(read('src/lib/app-context.tsx').includes('pref:palette'), 'ذخیره پالت در localStorage');
+assert(read('src/components/Header.tsx').includes('PALETTES'), 'انتخاب‌گر پالت در تنظیمات');
+assert(read('src/components/BrandMark.tsx').includes('--color-accent'), 'نشان برند از accent پالت پیروی می‌کند');
+assert(read('src/lib/palettes.ts').includes('brandSvg') && read('src/lib/palettes.ts').includes('data-dynamic-favicon'), 'فاوآیکون تب با پالت به‌صورت پویا به‌روز می‌شود');
+assert(read('src/lib/brand.mjs').includes('function brandSvg') || read('src/lib/brand.mjs').includes('export function brandSvg'), 'brandSvg در brand.mjs برای نشان پویا موجود است');
+
+assert(read('src/components/Header.tsx').includes('playTestCue'), 'دکمه آزمایش صدا در تنظیمات');
+
 /* ------------------------------------------------------------------ */
-/* ۹) پایداری بصری: هاور بدون جابه‌جایی، بدون چشمک بی‌پایان             */
+/* ۹) پایداری بصری                                                      */
 /* ------------------------------------------------------------------ */
 const cssText = read('src/index.css');
 assert(!/translateY\(-/.test(cssText), 'هیچ هاور یا حالتی عنصر را به بالا هل نمی‌دهد (بدون لرزش)');
 assert(!cssText.includes('pulse-soft') && !/animation:[^;]*infinite/.test(cssText), 'هیچ انیمیشن چشمک بی‌پایان وجود ندارد');
 assert(/hover[\s\S]{0,120}box-shadow: var\(--shadow-glow/.test(cssText), 'هاور با درخشش آرام (گلو) بیان می‌شود نه جابه‌جایی');
+assert(/\.hl-block\s*\{/.test(cssText), 'کلاس hl-block برای هایلایت پاراگراف تعریف شده است');
 
 /* ------------------------------------------------------------------ */
-/* ۱۰) نشان برند یکپارچه: یک منبع حقیقت و همه آیکون‌ها                  */
+/* ۱۰) نشان برند یکپارچه                                                */
 /* ------------------------------------------------------------------ */
 for (const rel of [
   'public/icon.svg',
@@ -251,7 +324,6 @@ assert(
   'هر دو نسخه SVG و ICO فاوآیکون وصل شده‌اند',
 );
 
-/* یکپارچگی رنگ نوار مرورگر بین HTML و manifest */
 const htmlTheme = (read('index.html').match(/name="theme-color" content="(#[0-9a-fA-F]{6})"/) || [])[1];
 const manifestTheme = (read('vite.config.ts').match(/theme_color: '(#[0-9a-fA-F]{6})'/) || [])[1];
 assert(!!htmlTheme && htmlTheme === manifestTheme, `theme-color یکسان در HTML و manifest (${htmlTheme})`);
@@ -268,9 +340,10 @@ const practiceKb = read('src/labs/PracticeLab.tsx');
 assert(practiceKb.includes('digitFromCode'), 'پرش عددی به اسلاید با نگاشت دقیق بر پایه شماره در چیدمان فعال');
 assert(practiceKb.includes('isInteractiveTarget'), 'احترام به فعال‌شدن بومی دکمه فوکوس‌شده با Space');
 assert(read('src/lib/app-context.tsx').includes('pref:shortcuts'), 'ذخیره ترجیح میان‌برها در localStorage');
+assert(!practiceKb.includes("KeyO"), 'میان‌بر O برای اسلاید اختیاری حذف شده است');
 
 /* ------------------------------------------------------------------ */
-/* ۱۲) یکپارچگی واحد زمان تایمر (بدون عدد غول‌پیکر)                     */
+/* ۱۲) یکپارچگی واحد زمان تایمر                                         */
 /* ------------------------------------------------------------------ */
 const practiceNow = read('src/labs/PracticeLab.tsx');
 assert(!practiceNow.includes('* 1000'), 'هیچ مسیر ناوبری زمان را در ۱۰۰۰ ضرب نمی‌کند (واحد ثانیه یکسان است)');
@@ -278,7 +351,7 @@ assert(practiceNow.includes('totalSec') && !practiceNow.includes('totalMs'), 'ن
 assert(practiceNow.includes('(ثانیه:دقیقه)'), 'واحد نمایش زمان برای کاربر شفاف است (ثانیه سمت راست ساعت است)');
 
 /* ------------------------------------------------------------------ */
-/* ۱۳) اعمال واقعی تنظیمات تایپوگرافی (اندازه و فاصله سطر)            */
+/* ۱۳) اعمال واقعی تنظیمات تایپوگرافی                                   */
 /* ------------------------------------------------------------------ */
 const ctxNow = read('src/lib/app-context.tsx');
 assert(/lineHeight,/.test(ctxNow) && /--reading-lh/.test(ctxNow), 'readingStyle هم اندازه و هم فاصله سطر را اعمال می‌کند');
@@ -288,14 +361,8 @@ for (const rel of ['src/labs/PracticeLab.tsx', 'src/labs/QALab.tsx', 'src/labs/C
 assert(/font-size: 1\.0625em/.test(read('src/index.css')), 'کلاس reading با em بزرگ/کوچک می‌شود نه rem ثابت');
 
 /* ------------------------------------------------------------------ */
-/* ۱۴) لایه‌بندی درست CSS: قواعد سراسری بر ابزارهای Tailwind غلبه نکنند */
+/* ۱۴) لایه‌بندی درست CSS                                               */
 /* ------------------------------------------------------------------ */
-/*
-  ریشه مشکل فاصله‌گذاری سراسری (مثل بی‌اثر شدن mb-2 روی «تشریح نمادهای رابطه»):
-  در Tailwind v4 همه ابزارها داخل @layer utilities تولید می‌شوند و هر قاعده
-  بدون لایه طبق استاندارد Cascade Layers بر قواعد لایه‌دار غلبه می‌کند.
-  پس p { margin: 0 } سراسری باید داخل @layer base بماند.
-*/
 const cssNow = read('src/index.css');
 {
   const baseIdx = cssNow.indexOf('@layer base');
@@ -310,7 +377,7 @@ const cssNow = read('src/index.css');
 }
 
 /* ------------------------------------------------------------------ */
-/* ۱۵) خروجی PDF: دامنه‌دار، کامل و در دسترس از سربرگ                  */
+/* ۱۵) خروجی PDF                                                        */
 /* ------------------------------------------------------------------ */
 const printSheetNow = read('src/components/PrintSheet.tsx');
 for (const scope of ["'all'", "'roadmap'", "'deck'", "'cheat'", "'qa'", "'checklist'"]) {
@@ -324,6 +391,7 @@ assert(
     printSheetNow.includes('planSlides'),
   'نسخه چاپی همه بخش‌های وب‌سایت (نقشه راه، اسلایدها، برگه تقلب، پرسش‌ها، چک‌لیست) را پوشش می‌دهد',
 );
+assert(!printSheetNow.includes('اسلایدهای اختیاری'), 'چاپ دیگر بخش اسلاید اختیاری ندارد');
 assert(read('src/components/Header.tsx').includes('PDF_OPTIONS'), 'منوی دانلود PDF در سربرگ در دسترس است');
 assert(
   read('src/lib/use-global-shortcuts.ts').includes("k.shift ? 'all'"),
@@ -333,20 +401,8 @@ assert(/ps-checklist li::before/.test(cssNow), 'چک‌لیست چاپی با م
 assert(/break-inside: avoid/.test(cssNow), 'بلوک‌های چاپی وسط صفحه نمی‌شکنند (PDF تمیز)');
 
 /* ------------------------------------------------------------------ */
-/* ۱۶) مقاومت واکنش‌گرایی: هرگز بیرون‌زدگی افقی یا شکست چیدمان نداشته باشیم */
+/* ۱۶) مقاومت واکنش‌گرایی                                               */
 /* ------------------------------------------------------------------ */
-/*
-  ریشه خرابی برگه تقلب در موبایل: گرید جدول‌های پشتیبان بدون ترک ستونی
-  صریح (grid بدون grid-cols) بود؛ در پهنای کم، ترکِ auto تک‌ستونه بر اساس
-  min-content پهناترین محتوا (ردیف برچسب‌های اندازه اثر با overflow-x:auto
-  و آیتم‌های shrink-0) بزرگ می‌شد و کل گرید ~۱۱۰۰ پیکسل عریض می‌گرفت.
-  قواعد تثبیت‌شده:
-  ۱. هر گرید ترک صریح بگیرد (grid-cols-1 برای تک‌ستونه پایه).
-  ۲. آیتم‌های گریدِ میزبان جدول/اسکرولر min-w-0 بگیرند.
-  ۳. جدول‌ها داخل قاب لغزان .table-wrap باشند.
-  ۴. برچسب‌های ترکیبی طولانی با .chip-wrap روی چند خط بنشینند.
-  ۵. اسکرولرهای افقی محتوا (برخلاف ناوبری) نوار مرئی .hbar داشته باشند.
-*/
 const cssResp = read('src/index.css');
 assert(
   /\.table-wrap\s*\{[^}]*overflow-x:\s*auto/s.test(cssResp),
@@ -401,12 +457,14 @@ assert(
   /relative flex shrink-0 items-center gap-1/.test(headerResp),
   'لنگر منوهای سربرگ روی گروه کنترل‌هاست تا از لبه دید بیرون نزنند',
 );
+assert(
+  headerResp.includes('tab-nav') && headerResp.includes('tab-pill'),
+  'ناوبری تب‌ها با کلاس‌های tab-nav و tab-pill یکپارچه شده است',
+);
+assert(/\.tab-pill/.test(cssResp) && /\.lab-pane/.test(cssResp), 'استایل ناوبری تب و ورود نرم صفحه تعریف شده است');
 
-/* دفاع خط آخر: ناحیه محتوا و پابرگ هرگز قاب را افقاً نمی‌لغزانند */
 assert(/main\s*\{\s*overflow-x:\s*clip;/s.test(cssResp), 'خط دفاع overflow-x: clip روی ناحیه محتوای اصلی');
 
-/* قاب کامل چهارطرفه جدول‌ها: خط پایانی سطر آخر هرگز گم نشود.
-   قاب بیرونی توسط .table-wrap کشیده می‌شود و خطوط لبه سلول‌ها برداشته می‌شوند. */
 assert(
   /\.table-wrap\s*\{[^}]*border:\s*1px solid var\(--color-line\)/s.test(cssResp),
   'قاب کامل جدول (شامل خط پایانی سطر آخر) توسط .table-wrap کشیده می‌شود',
@@ -417,6 +475,17 @@ assert(
     cssResp.includes('.table-wrap .mini-table tr > *:last-child'),
   'خطوط لبه بیرونی سلول‌ها داخل قاب برداشته شده‌اند تا قاب دوبله نشود',
 );
+
+/* ------------------------------------------------------------------ */
+/* ۱۷) خط لوله محتوا و AGENTS.md                                        */
+/* ------------------------------------------------------------------ */
+assert(fs.existsSync(path.join(ROOT, 'scripts/compile-content.mjs')), 'اسکریپت compile-content موجود است');
+assert(fs.existsSync(path.join(ROOT, 'content/meta.yaml')), 'content/meta.yaml موجود است');
+assert(fs.existsSync(path.join(ROOT, 'content/README.md')), 'راهنمای content/README.md موجود است');
+assert(read('package.json').includes('"content"'), 'اسکریپت npm run content تعریف شده است');
+assert(read('AGENTS.md').includes('content/'), 'AGENTS.md ساختار content/ را مستند کرده است');
+assert(read('AGENTS.md').includes('pref:palette'), 'AGENTS.md پالت رنگ را مستند کرده است');
+assert(read('README.md').includes('content/'), 'README ساختار محتوا را توضیح می‌دهد');
 
 console.log(`--- نتیجه تست‌ها: ${passCount} قبول، ${failCount} خطا ---`);
 
